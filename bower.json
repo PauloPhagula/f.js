@@ -1,0 +1,19 @@
+{
+  "name": "pap",
+  "version": "0.0.1",
+  "authors": [
+    "Paulo Phagula paulo@maparato.co.mz"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "crossroads": "~0.12.2",
+    "jquery": "~2.1.4"
+  }
+}

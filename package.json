@@ -1,0 +1,39 @@
+{
+  "private": true,
+  "name": "pap",
+  "description": "PAP Framework",
+  "version": "0.0.1",
+  "help": {
+    "web": ""
+  },
+  "author": "maparato.co.mz <info@maparato.co.mz>",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/dareenzo/pap.git"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "babel-core": "^5.8.24",
+    "babel-loader": "^5.3.2",
+    "babel-runtime": "^5.8.24",
+    "gulp": "^3.9.0",
+    "gulp-babel": "^5.2.1",
+    "gulp-jshint": "^1.11.2",
+    "gulp-plumber": "^1.0.1",
+    "gulp-shell": "^0.4.3",
+    "gulp-traceur": "^0.17.1",
+    "gulp-util": "^3.0.6",
+    "plumber": "^0.4.8",
+    "shelljs": "^0.5.3",
+    "webpack": "^1.12.1"
+  },
+  "bugs": {
+    "url": "https://github.com/dareenzo/pap/issues"
+  },
+  "homepage": "https://github.com/dareenzo/pap#readme",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "license": "MIT"
+}

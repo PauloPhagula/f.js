@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en" data-framework="F">
+	<head>
+		<meta charset="utf-8">
+		<title>Frankenstein • TodoMVC</title>
+		<link rel="stylesheet" href="css/base.css" charset="utf-8">
+		<link rel="stylesheet" href="css/index.css" charset="utf-8">
+	</head>
+	<body>
+		<div data-module="todomvc"></div>
+		<footer class="info">
+			<p>Double-click to edit a todo</p>
+			<!-- Change this out with your name and url ↓ -->
+			<p>Created by <a href="//sk.co.mz">Paulo Phagula</a></p>
+			<p>Part of <a href="http://todomvc.com">TodoMVC</a></p>
+		</footer>
+		<!-- Scripts here. Don't remove -->
+		<script src="js/base.js"></script>
+
+		<!-- Begin Dependencies -->
+		<script src="lib/jquery/jquery.min.js"></script>
+		<script src="lib/lodash.js"></script>
+		<script src="./lib/jquery.uriAnchor/jquery.uriAnchor.js"></script>
+		<script src="./lib/signals/signals.min.js"></script>
+		<script src="./lib/crossroads/crossroads.min.js"></script>
+		<script src="../../bower_components/riot/riot+compiler.js"></script>
+		<!-- End Dependencies -->
+
+		<!-- Begin F.js -->
+		<script src="../../src/f.js"></script>
+		<script src="../../src/ext.util.js"></script>
+		<script src="../../src/core.js"></script>
+		<script src="../../src/dispatcher.js"></script>
+		<script src="../../src/sandbox.js"></script>
+		<script src="../../src/store.js"></script>
+		<script src="../../src/module.js"></script>
+		<script src="../../src/router.js"></script>
+
+		<script src="../../src/ext.http.js"></script>
+		<script src="../../src/ext.dom.js"></script>
+		<script src="../../src/ext.storage.js"></script>
+		<!-- End F.js -->
+
+		<script type="riot/tag" src="./tags/todomvc.html"></script>
+		<script src="js/actionTypes.js"></script>
+		<script src="js/actionCreators.js"></script>
+		<script src="js/todoStore.js"></script>
+		<script src="js/actionTypes.js"></script>
+		<script src="js/app.js"></script>
+	</body>
+</html>
