@@ -28,7 +28,7 @@ var TodoStore = F.compose({}, F.Store, {
 					self.emitChange();
 					break;
 				case ActionTypes.UPDATE_TODO:
-					self.update(payload.data.id, payload.data.updates)
+					self.update(payload.data.id, payload.data.updates);
 					self.emitChange();
 					break;
 				case ActionTypes.DELETE_TODO:
@@ -73,7 +73,7 @@ var TodoStore = F.compose({}, F.Store, {
 
 	update : function(id, updates){
 		if(!this.todos[id]) return;
-		var updatedTodo = $.extend({}, this.todos[id], updates)
+		var updatedTodo = $.extend({}, this.todos[id], updates);
 		this.todos[id] = updatedTodo;
 	},
 

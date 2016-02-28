@@ -31,14 +31,14 @@ F.Core.start('todomvc', document.querySelector('[data-module="todomvc"]'));
 
 F.router.add('/all', function(){
 	console.log('route: /all is hit');
-})
+});
 
 F.router.add('/active', function(){
 	console.log('route: /active is hit');
-})
+});
 
 F.router.add('/completed', function(){
 	console.log('route: /completed is hit');
-})
+});
 
 F.router.start();
