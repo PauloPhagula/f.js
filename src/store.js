@@ -29,7 +29,7 @@
  * - communicate directly with the server
  */
 
-;F.Store = (function(undefined){
+F.Store = (function(undefined){
 	"use strict";
 
 	var CHANGE = 'CHANGE',
@@ -48,7 +48,7 @@
 
 			/**
 			* indicates if this store is updating.
-			* When updating must not accept
+			* When updating must not accept dispatch calls.
 			*/
 			this._isUpdating = false;
 
@@ -77,7 +77,7 @@
 		* Allows views to subscribe to this store's change event
 		* @param {function} callback
 		*/
-		addChangeListener : function(callback) {
+		addChangeListener: function(callback) {
 			// this.on(CHANGE, callback);
 			// Create _callbacks object, unless it already exists
 			var calls = this._callbacks || (this._callbacks = {});
@@ -91,7 +91,7 @@
 		/**
 		* @param {function} callback
 		*/
-		removeChangeListener:function(callback) {
+		removeChangeListener: function(callback) {
 			// Return if there isn't a _callbacks object, or
 			// if it doesn't contain an array for the given event
 			var list, calls, i, l;
@@ -112,7 +112,7 @@
 		* @method
 		* @private
 		*/
-		emitChange:function() {
+		emitChange: function() {
 			// Return if there isn't a _callbacks object, or
 			// if it doesn't contain an array for the given event
 			var list, calls, i, l;
@@ -125,5 +125,5 @@
 				handler.callback.apply();
 			}
 		}
-	}
+	};
 }());

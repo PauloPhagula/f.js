@@ -25,7 +25,7 @@
  * // unsubscribing
  * PubSub.unsubscrube('wem', fn);
  */
-;F.Core.dispatcher = (function(){
+F.Core.dispatcher = (function(){
 	"use strict";
 
 	var _prefix = 'ID_';
@@ -130,14 +130,14 @@
 
 			// Return if there isn't a _callbacks object, or
 			// if it doesn't contain an array for the given event
-			var list, calls, i, l;
-			if (!(calls = this._callbacks)) return;
-			if (!(list = this._callbacks[ev])) return;
+			var list1, calls1, i1, l1;
+			if (!(calls1 = this._callbacks)) return;
+			if (!(list1 = this._callbacks[ev])) return;
 
 			// Invoke the callbacks
-			for (i = 0, l = list.length; i < l; i++) {
-				var handler = list[i];
-				handler.callback.apply(handler.context || null, args);
+			for (i1 = 0, l1 = list1.length; i1 < l1; i1++) {
+				var handler1 = list1[i1];
+				handler1.callback.apply(handler1.context || null, args);
 			}
 
 			return;
@@ -185,6 +185,12 @@
 				throw new Error('dispatcher.waitFor(...): Must be invoked while dispatching');
 			}
 			*/
+			var _handlerFn = function (handler) {
+				if (handler.id === token) {
+					_handler = handler;
+				}
+			};
+				
 			for (var i = 0; i < dispatchTokens.length; i++) {
 				var token = dispatchTokens[i];
 				if (_isPending[token]) {
@@ -195,14 +201,11 @@
 				}
 
 				var _handler = null;
-				this._callbacks[ACTION].forEach(function (handler) {
-					if (handler.id === token) {
-						_handler = handler;
-					}
-				});
+				
+				this._callbacks[ACTION].forEach(_handlerFn(handler));
 
 				if (!_handler) {
-					throw new Error('dispatcher.waitFor(...):' + token + ' does not map to a registered callback.')
+					throw new Error('dispatcher.waitFor(...):' + token + ' does not map to a registered callback.');
 				}
 
 				_isPending[token] = true;
@@ -238,5 +241,5 @@
 			_pendingPayload = null;
 			_isDispatching = false;
 		}
-	}
+	};
 }());

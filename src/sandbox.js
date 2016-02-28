@@ -16,7 +16,7 @@
  * For each module a separate sandbox will be created.
  */
 
-;F.Sandbox = (function(undefined){
+F.Sandbox = (function(undefined){
 	"use strict";
 
 	/**
@@ -105,7 +105,7 @@
 		reportError : function (severity, msg, obj) {
 			return this.core.reportError(severity, msg, obj);
 		}
-	}
+	};
 
 	return Sandbox;
 }());

@@ -8,14 +8,14 @@
  *   - Managing the application state using Anchor Interface Pattern
  *   - Manages application wide features/interfaces such as URL anchor(hash fragment), feature containers, cookies
  *   - Detects, traps and reports errors in the system. Uses available information to determine best course of action
- *   - Allow loose coupling between modules that are related to one another
+ *   - Allows loose coupling between modules that are related to one another
  *   - Error management will also be handled by the application core
  *   - Be extensible
  */
 
 /* global riot */
 
-;F.Core = (function(undefined){
+F.Core = (function(undefined){
 	"use strict";
 
 	var
@@ -40,7 +40,7 @@
 		// Render Main App Component
 		// riot.mount($container, 'app', {});
 		setDomMap();
-	}
+	};
 
 	return {
 		register: function(moduleId, creator, options){
@@ -91,5 +91,5 @@
 		},
 
 		init : initModule
-	}
+	};
 }());

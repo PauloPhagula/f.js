@@ -8,7 +8,7 @@
  */
 
 /* global jQuery */
-;F.$ = (function($, undefined){
+F.$ = (function($, undefined){
 	"use strict";
 
 	return {

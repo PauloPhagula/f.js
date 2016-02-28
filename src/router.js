@@ -9,7 +9,7 @@
 /* global crossroads */
 /* global uriAnchor */
 
-;F.router = (function($, crossroads, undefined){
+F.router = (function($, crossroads, undefined){
 	"use strict";
 
 	var
@@ -35,7 +35,7 @@
 	 */
 	var copyAnchorMap = function(){
 		return $.extend(true, {}, stateMap.anchorMap);
-	}
+	};
 
 	/**
 	 * Handles changes in the hash
@@ -72,7 +72,7 @@
 		}
 		_router.parse(route);
 		return false;
-	}
+	};
 
 	/**
 	 * Handles URL clicks when the router is turned on
@@ -96,7 +96,7 @@
 
 		// Navigate away. If possible, construct an object and use this.go(obj)
 		window.location.hash = href.attr;
-	}
+	};
 
 	// Public API
 	// --------------
@@ -137,7 +137,7 @@
 
 		// delegate URL anchor click
 		$(document).on('click', 'a[href]:not([data-external])', _handleURLClick);
-	}
+	};
 
 	/**
 	 * Stops listening for changes on either hash and URL clicks
@@ -147,7 +147,7 @@
 	var stop = function(){
 		$(window).off('hashchange', _onHashChange);
 		$(document).off('click', _handleURLClick);
-	}
+	};
 
 	/**
 	 * changeAnchorPart
@@ -197,7 +197,7 @@
 		}
 
 		return bool_return;
-	}
+	};
 
 	// Return public methods
 	return {
@@ -205,5 +205,5 @@
 		go		: go,
 		start	: start,
 		stop	: stop
-	}
+	};
 }(jQuery, crossroads));

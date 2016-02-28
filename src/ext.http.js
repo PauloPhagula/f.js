@@ -1,5 +1,5 @@
 /**
- * Ajax / HTTP Extension
+ * AJAX / HTTP Extension
  *
  * - Hide ajax communication details - Modules don't need to know of it
  * - Provide common request interface - Modules use this interfce to specify data to send to the server
@@ -12,7 +12,7 @@
 
 /* global fetch */
 /* global jQuery */
-;F.Core.http = F.http = (function($, undefined){
+F.Core.http = F.http = (function($, undefined){
 	"use strict";
 
 	var defaults = {
@@ -96,5 +96,5 @@
 	// Return public methods
 	return {
 		request: request
-	}
+	};
 }(jQuery));

@@ -10,17 +10,17 @@
 
 /* global $ */
 
-;F.Core.log = F.log = (function(undefined){
+F.Core.log = F.log = (function(undefined){
 	"use strict";
 
-	var ALL 	= "ALL",	// 0
-	 	LOG		= "LOG",	// 1
-	 	DEBUG	= "DEBUG",// 2
-	 	INFO	= "INFO",	// 3
-	 	WARN	= "WARN",	// 4
-	 	ERROR 	= "ERROR",// 5
-	 	FATAL	= "FATAL",// 6
-	 	OFF		= "OFF"		// 7
+	var ALL 	= "ALL",   // 0
+	 	LOG		= "LOG",   // 1
+	 	DEBUG	= "DEBUG", // 2
+	 	INFO	= "INFO",  // 3
+	 	WARN	= "WARN",  // 4
+	 	ERROR 	= "ERROR", // 5
+	 	FATAL	= "FATAL", // 6
+	 	OFF		= "OFF"	   // 7
 	;
 
 	var severities = [ALL, DEBUG, INFO, WARN, ERROR, FATAL, OFF];
@@ -35,9 +35,9 @@
 	 */
 	function _canLog(severity){
 		if (typeof severity === "string") {
-			return severities.indexOf(severity) >= severities.indexOf(this._options.logLevel);
+			return severities.indexOf(severity) >= severities.indexOf(_options.logLevel);
 		} else if(typeof severity === "number") {
-			return severity >= severities.indexOf(this._options.logLevel);
+			return severity >= severities.indexOf(_options.logLevel);
 		} else {
 			throw new Error("Invalid Severity Level");
 		}
@@ -54,11 +54,11 @@
 	function _formatError(arg) {
 		if (arg instanceof Error) {
 			if (arg.stack) {
-			arg = (arg.message && arg.stack.indexOf(arg.message) === -1)
-				? 'Error: ' + arg.message + '\n' + arg.stack
-				: arg.stack;
+				arg = (arg.message && arg.stack.indexOf(arg.message) === -1) ? 
+					'Error: ' + arg.message + '\n' + arg.stack : 
+					arg.stack;
 			} else if (arg.sourceURL) {
-			arg = arg.message + '\n' + arg.sourceURL + ':' + arg.line;
+				arg = arg.message + '\n' + arg.sourceURL + ':' + arg.line;
 			}
 		}
 		return arg;
@@ -82,8 +82,8 @@
 		if (_options.env === 'production') {
 			if (!_options.errorLoggingEndpoint){
 				throw new Error("No error logging endpoint specified for production environment");
-				return;
 			}
+
 			var img = new Image();
 			img.src = _options.errorLoggingEndpoint + '?sev=' +
 				encodeURIComponent(severity) +
@@ -105,17 +105,19 @@
 		} catch (e) {}
 
 		if (hasApply) {
-			var args = [];
-			for(var arg of arguments) {
-				args.push(this._formatError(arg));
-			};
-			return logFn.apply(console, [msg, obj]);
+            var args = [];
+            for(var i = 0, l = arguments.length; i < l; i++) {
+                if (arguments[i])
+                    args.push(_formatError(arguments[i]));
+            }
+
+            return logFn.apply(console, args);
 		}
 
 		// we are IE which either doesn't have window.console => this is noop and we do nothing,
 		// or we are IE where console.log doesn't have apply so we log at least first 2 args
 		return function(arg1, arg2) {
-			logFn(arg1, arg2 == null ? '' : arg2);
+			logFn(arg1, arg2 === null ? '' : arg2);
 		};
 	}
 
@@ -129,10 +131,10 @@
 			logLevel : ALL,
 			env	: 'development',
 			errorLoggingEndpoint: null
-		}
+		};
 
 		_options = $.extend( {}, defaults, options );
-	}
+	};
 
 
 	Logger.prototype = {
@@ -151,7 +153,6 @@
 		* @setter
 		*/
 		setLogLevel : function (level) {
-			"use strict";
 			var severities = [ALL, DEBUG, INFO, WARN, ERROR, FATAL, OFF];
 
 			if(typeof level !== "string" || severities.indexOf(level) === -1){
@@ -256,7 +257,7 @@
 		* @param {Object} obj - accompanying object
 		*/
 		fatal: function(msg, obj) { _log(FATAL, msg, obj); }
-	}
+	};
 
 	return new Logger();
 }());

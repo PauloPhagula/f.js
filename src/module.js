@@ -35,7 +35,7 @@ It's called mod to avoid colisions with requirejs
 */
 
 /* global riot, $ */
-;F.Module = (function(undefined){
+F.Module = (function(undefined){
 	"use strict";
 
 	var module_selector = '[data-module]';
@@ -53,8 +53,8 @@ It's called mod to avoid colisions with requirejs
 		this._options = $.extend( {}, this._defaults, options );
 		
 		// Access to jQuery and DOM versions of element
-		this.$el;
-		this.el;
+		this.$el = null;
+		this.el  = null;
 	}
 
 	F.compose(Module.prototype, {
