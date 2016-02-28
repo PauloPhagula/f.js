@@ -1,19 +1,20 @@
 {
   "name": "F",
+  "description": "F - a JavaScript framework for modular and scalable SPAs",
   "version": "0.0.1",
   "authors": [
-    "Paulo Phagula paulo@maparato.co.mz"
+    "Paulo Phagula <pphagula@gmail.com>"
   ],
   "license": "MIT",
   "ignore": [
     "**/.*",
     "node_modules",
     "bower_components",
-    "test",
     "tests"
   ],
   "dependencies": {
     "crossroads": "~0.12.2",
-    "jquery": "~2.1.4"
+    "jquery": "~2.1.4",
+    "riot": "~2.2.4"
   }
 }
