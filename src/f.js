@@ -1,19 +1,5 @@
 /*!
  * F - a JavaScript framework for modular and scalable SPAs
- *
- * Version: 0.0.1
- * Started: 12-09-2015
- * Updated: 13-09-2015
- * Url    : http://github.com/dareenzo/F
- * Author : @dareenzo
- * Review : @bonejp
- *
- * Copyright (c) 2015 maparato.co.mz
- * All rights reserved.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
  */
 
 /*jslint         browser : true, continue : true,
@@ -27,7 +13,7 @@
 /* global global */
 /* global jQuery, _ */
 
-;var F = (function(){
+var F = (function(){
     "use strict";
 
     // Initial Setup
@@ -39,7 +25,7 @@
     var previousF = F;
 
     // Current version of the library. Keep in sync with `package.json`.
-    F.VERSION = '0.0.1';
+    F.VERSION = '0.0.2';
 
     // Set framework to debug mode. Disabled by default
     F.DEBUG = false;
