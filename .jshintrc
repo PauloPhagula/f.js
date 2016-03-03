@@ -1,0 +1,12 @@
+{
+    "browser" : true, 
+    "devel" : true, 
+    "indent" : 4,    
+    "maxerr" : 50,
+    "newcap" : true,
+    "nomen" : true,
+    "plusplus" : false,
+    "regexp" : true,
+    "white" : true,
+    "strict" : true
+}

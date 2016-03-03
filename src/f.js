@@ -2,13 +2,6 @@
  * F - a JavaScript framework for modular and scalable SPAs
  */
 
-/*jslint         browser : true, continue : true,
-  devel  : true, indent  : 4,    maxerr   : 50,
-  newcap : true, nomen   : true, plusplus : true,
-  regexp : true, sloppy  : true, vars     : false,
-  white  : true
-*/
-
 /* global define */
 /* global global */
 /* global jQuery, _ */
@@ -24,7 +17,7 @@ var F = (function(){
     var F = {};
     var previousF = F;
 
-    // Current version of the library. Keep in sync with `package.json`.
+    // Current version of the library. Keep in sync with `package.json` and `bower.json`.
     F.VERSION = '0.0.2';
 
     // Set framework to debug mode. Disabled by default
@@ -61,7 +54,5 @@ var F = (function(){
     F.ready = Util.ready;
     F.extend = Util.extend;
     */
-   
-    
     return F;
 }());
