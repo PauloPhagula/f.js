@@ -8,5 +8,12 @@
     "plusplus" : false,
     "regexp" : true,
     "white" : true,
-    "strict" : true
+    "strict" : true,
+    "globals": {
+        "console": true,
+        "require": true,
+        "define": true,
+        "_": true,
+        "$": true
+    }
 }
