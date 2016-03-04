@@ -1,25 +1,10 @@
-/* global F */
+/* global F, ActionTypes */
 
-var TodoStore = F.compose({}, F.Store, {
-
-	init : function(dispatcher, name){
-		this._dispatcher = dispatcher;
-		this._name = name;
-
-		/**
-		* indicates if this store is updating.
-		* When updating must not accept
-		*/
-		this._isUpdating = false;
-
-		this._data = [];
-		this.actions = {};
-			
+var TodoStore = F.Store.extend({
+	init : function() {
 		this.todos = {};
 		this._lastID = 1;
-	},
 
-	setup : function(){
 		var self = this;
 		this.dispatchToken = this._dispatcher.subscribe(ActionTypes.ACTION, function(payload){
 			switch (payload.type) {
