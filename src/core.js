@@ -1,95 +1,212 @@
 /**
- * Core aka Shell aka Application Wide Controller aka Mediator
- * Contains the main application object that is the heart of the JavaScript architecture
- * Responsabilities:
- *   - Manages the lifecyle of modules (registers, starts, renders and stops modules)
- *   - Manages communication between modules
- *   - Coordinates feature modules, dispatching feature specific tasks
- *   - Managing the application state using Anchor Interface Pattern
- *   - Manages application wide features/interfaces such as URL anchor(hash fragment), feature containers, cookies
- *   - Detects, traps and reports errors in the system. Uses available information to determine best course of action
- *   - Allows loose coupling between modules that are related to one another
- *   - Error management will also be handled by the application core
- *   - Be extensible
+ * Core
+ *
+ * The `Core` contains the main application object that is the heart of the 
+ * application architecture.
  */
 
-/* global riot */
+/* global injector */
 
-F.Core = (function(undefined){
+F.Core = (function(injector, dispatcher, undefined) {
 	"use strict";
 
-	var
-		_modules = {}, // Inited Modules data
+	var _extensions = {},
+        _modules    = {},
+        _stores	    = {}
+    ;
 
-		// Cache DOM node and collections
-		domMap = {},
+    function Core() {}
 
-		setDomMap,  initModule
-	;
+    F.compose(Core.prototype, {
 
+    	dispatcher: dispatcher,
 
-	setDomMap = function(){
-		//var $container = stateMap.$container;
-		// domMap = { $container : $container };
-	};
+		/**
+		 * Method used to add extensions on the core.
+		 * @param  {string}  extensionName  unique extension name. This name will be used when injecting the extension
+		 * @param  {array}   dependencies   list of dependencies this extension relies on. Generally these are other extensions
+		 * @param  {functon} factory        the extension factory function
+		 * @param  {object}  options        options for the extension initialization
+		 * @return {void}
+		 *
+		 * @example
+		 * var core = new F.Core();
+		 *
+		 * var loggerExtFactory = function(){
+		 *	    var Logger = F.Extension.extend({
+		 *	        init: function(options) {},
+		 *	        log: function(obj) { console.log(obj);}
+		 *	    });
+		 *
+		 *	    return new Logger();
+		 * };
+		 * 
+		 * core.registerExtension("logger", [], loggerExtFactory, {});
+		 *
+		 * var calculatorExtFactory = function(logger) {
+		 * 		var Calculator = F.Extension.extend({
+		 * 			init: function(options) {},
+		 * 			add: function(a,b) {return a+b;},
+		 * 			subsctract: function(a,b) {return a-b;}
+		 * 		});
+		 *
+		 * 		return new Calculator();
+		 * }
+		 *
+		 * core.registerExtension("calculator", ["logger"], calculatorExtFactory, {})
+		 */
+		registerExtension : function(extensionName, dependencies, factory, options) {
+			if (_extensions.hasOwnProperty(extensionName))
+				throw new Error("An extension with the given name has already been registered. Ext name: " + extensionName);
 
-	initModule = function($container){
-		// load HTML and map jQuery collections
-		// stateMap.$container = $container;
+			dependencies = dependencies || [];
+			options = options || {};
 
-		// Render Main App Component
-		// riot.mount($container, 'app', {});
-		setDomMap();
-	};
+			var injectionSpec = dependencies;
+		    injectionSpec.push(factory);
 
-	return {
-		register: function(moduleId, creator, options){
-			_modules[moduleId] = {
-				creator: creator,
-				options: options,
-				instance: null
+		    var extension = F.injector.resolve(injectionSpec);
+		    extension.init(options);
+		    _extensions[extensionName] = extension;
+
+		    F.injector.register(extensionName, extension);
+		},
+		
+		/**
+		 * Registers a store on the core
+		 * @param  {string} name      unique store identifier
+		 * @param  {Store}  instance  the store instance
+		 * @return {void}
+		 */
+		registerStore : function(name, instance) {
+    		_stores[name] = instance;
+    	},
+
+		/**
+		 * Method used to register modules on the core.
+		 * @param  {string}   moduleName  unique module identifier
+		 * @param  {array}    extensions  List of extensions this module relies on. 
+		 *                                These are the only extensions the module will be allowed to use.
+		 * @param  {function} factory     the module factory function
+		 * @param  {object}   options     options for the module initialization
+		 * @return {void}
+		 */
+		registerModule: function(moduleName, extensions, stores, factory, options) {
+			if (_extensions.hasOwnProperty(moduleName))
+				throw new Error("Module with given name has already been registered. Mod name: " + moduleName);
+
+			_modules[moduleName] = {
+				factory    : factory,
+				extensions : extensions,
+				stores 	   : stores,
+				options    : options,
+				instance   : null
 			};
 		},
 
-		start: function(moduleId, element){
-			var module = _modules[moduleId];
-			module.instance = new module.creator(new F.Sandbox(this, moduleId, element), moduleId, module.options);
-			module.instance.start();
+		/**
+		 * Starts a given module on a DOM element.
+		 * @param  {string} moduleName unique module identifier
+		 * @param  {string} element    the DOM element to which the module will be tied
+		 * @return {void}
+		 */
+		start: function(moduleName, element) {
+			if (!_modules.hasOwnProperty(moduleName))
+				throw new Error("Trying to start non-registered module: " + moduleName);
+
+			var module = _modules[moduleName];
+			var sandbox = new F.Sandbox(this, moduleName, element);
+			module.instance = new module.factory(sandbox, moduleName, module.options);
+
+			var extensions = {};
+			var stores     = {};
+			
+			for (var i = 0; i < module.extensions.length; i++) {
+				var extName = module.extensions[i];
+
+				if (_extensions.hasOwnProperty(extName))
+					extensions[extName] = _extensions[extName];
+				else
+					throw new Error("Module requires an unregistered extensions: " + extName);
+			}
+
+			for (var i = 0; i < module.stores.length; i++ ) {
+				var storeName = module.stores[i];
+
+				if (_stores.hasOwnProperty(storeName))
+					stores[storeName] = _stores[storeName];
+				else
+					throw new Error("Module requires an unregistered store: " + storeName);
+			}
+
+			module.instance.start(element, extensions, stores);
 		},
 
-		stop: function(moduleId){
-			var data = _modules[moduleId];
+		/**
+		 * Stops a given module.
+		 * @param  {string} moduleName unique module identifier
+		 * @return {void}
+		 */
+		stop: function(moduleName) {
+			var data = _modules[moduleName];
 			if(data.instance){
 				data.instance.stop();
 				data.instance = null;
 			}
 		},
 
-		restart: function(moduleId){
-			this.stop(moduleId);
-			this.start(moduleId);
+		/**
+		 * Restarts the given module.
+		 * @param  {string} moduleName unique module identifier
+		 * @return {void}
+		 */
+		restart: function(moduleName) {
+			this.stop(moduleName);
+			this.start(moduleName);
 		},
 
-		startAll: function(){
-			for (var moduleId in _modules){
-				if(_modules.hasOwnProperty(moduleId)){
-					this.start(moduleId);
+		/**
+		 * Starts all registered modules.
+		 * @return {void}
+		 */
+		startAll: function() {
+			for (var moduleName in _modules){
+				if(_modules.hasOwnProperty(moduleName)){
+					this.start(moduleName);
 				}
 			}
 		},
 
-		stopAll: function(){
-			for (var moduleId in _modules){
-				if(_modules.hasOwnProperty(moduleId)){
-					this.stop(moduleId);
+		/**
+		 * Stops all registered modules.
+		 * @return {void}
+		 */
+		stopAll: function() {
+			for (var moduleName in _modules){
+				if(_modules.hasOwnProperty(moduleName)){
+					this.stop(moduleName);
 				}
 			}
 		},
 
-		reportError: function(severity, msg, obj){
+		/**
+		 * Reports errors in the system.
+		 * @param  {int}    severity severity level
+		 * @param  {string} msg      message
+		 * @param  {object} obj      object to complemenet the message
+		 * @return {void}
+		 */
+		reportError: function(severity, msg, obj) {
 			this.log(severity, msg, obj);
 		},
 
-		init : initModule
-	};
-}());
+		/**
+		 * Initialize is an empty function by default. Override it with your own logic.
+		 * @return {void}
+		 */
+		init: function() {}
+	});
+
+    Core.extend = F.extend;
+	return Core;
+}(F.injector, F.dispatcher));
