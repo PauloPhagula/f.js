@@ -25,7 +25,7 @@
  * // unsubscribing
  * PubSub.unsubscrube('wem', fn);
  */
-F.Core.dispatcher = (function(){
+F.dispatcher = (function(){
 	"use strict";
 
 	var _prefix = 'ID_';
@@ -151,7 +151,7 @@ F.Core.dispatcher = (function(){
 		*   data : {}
 		* }
 		*/
-		publishAction: function (payload) {
+		dispatch: function (payload) {
 			this.publish(ACTION, payload);
 		},
 
