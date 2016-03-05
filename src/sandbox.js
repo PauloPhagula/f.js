@@ -1,19 +1,7 @@
 /**
- * Sandbox - The facade into the core
+ * Sandbox
  *
- * - Acts as a security guard for the modules, meaning it knows what a module can access
- *   and what cannot. It determines which parts of the framework the modules can access
- * - provide a dependable interface for modules
- * - translate module requests into core actions
- * - ensures a consistent interface for the modules - modules can rely on the methods to always be there
- *
- * The main purpose of the sandbox is to use the facade pattern.
- * In that way you can hide the features provided by the core and only show a well
- * defined custom static long term API to your modules. This is actually one of the
- * most important concept for creating mainainable apps. Change plugins, implementations, etc.
- * but keep your API stable for your modules.
- *
- * For each module a separate sandbox will be created.
+ * Abstracton in the `Core` for use by `Module`s.
  */
 
 F.Sandbox = (function(undefined){
@@ -22,24 +10,27 @@ F.Sandbox = (function(undefined){
 	/**
 	 * @constructor
 	 * @param  {Core} core - the application core
-	 * @param  {String} moduleId - the module name
+	 * @param  {String} moduleName - the module name
 	 * @param  {HTMLElement} element - the element underwhich this sandbox has control
 	 * @return {void}
 	 */
-	function Sandbox (core, moduleId, element) {
+	function Sandbox (core, moduleName, element) {
 		this.core 	  = core;
-		this.moduleId = moduleId;
+		this.moduleName = moduleName;
     	this.element  = element;
 	}
 
-	Sandbox.prototype = {
+	// Attach all inheritable methods to the Sanbox prototype.
+	F.compose(Sandbox.prototype, {
 		/**
-		* Checks if a module can publish a certain event. Security check
-		* @param  {String} moduleId - The Id of the module for which we're checking permissions
+		* Checks if a module can publish a certain event.
+		* By default any module can publish. Override with your implementation.
+		* 
+		* @param  {String} moduleName - The Id of the module for which we're checking permissions
 		* @param  {String} channel - The event for we're checking if module has permission to publish to
 		* @return {Boolean} - true if module can publish. false otherwise
 		*/
-		moduleCanPublish : function (moduleId, channel) {
+		moduleCanPublish : function (moduleName, channel) {
 			return true; // no-op
 		},
 
@@ -51,9 +42,31 @@ F.Sandbox = (function(undefined){
 		* @param {Object} context - the context under which the callback will be called
 		*/
 		publish : function (channel, data, callback, context) {
-			if ( this.moduleCanPublish(this.moduleId, channel) ) {
+			if ( this.moduleCanPublish(this.moduleName, channel) ) {
 				this.core.dispatcher.publish.call(channel, data);
 			}
+		},
+
+		/**
+		 * Checks if a module can publish an action
+		 * @param  {string} moduleName unique module identifier
+		 * @param  {string} actionType unique action type identifier
+		 * @return {boolean}
+		 */
+		moduleCanDispatchAction: function(moduleName, actionType) {
+			return true; // no-op
+		},
+
+		/**
+		 * Publishes an action using the internal dispatcher creator.
+		 * This could also be done using an action creator
+		 * @return {void}
+		 */
+		dispatch: function(type, data) {
+			if (! this.moduleCanDispatchAction(this.moduleName, type))
+				throw new Error("module " + this.moduleName + " is not authorized to create action: " + action);
+
+			this.core.dispatcher.dispatch({type: type, data: data});
 		},
 
 		/**
@@ -105,7 +118,8 @@ F.Sandbox = (function(undefined){
 		reportError : function (severity, msg, obj) {
 			return this.core.reportError(severity, msg, obj);
 		}
-	};
+	});
 
+	Sandbox.extend = F.extend;
 	return Sandbox;
 }());
