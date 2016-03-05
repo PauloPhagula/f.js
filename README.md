@@ -27,7 +27,7 @@ Responsabilities:
 
 Extensions are loaded in your application when it starts. They allow you to add features to the application, and are available to the `Modules` through dependency Injection.
 
-The framework provides some extensions on it's own with some basic functionallity but they're not required to be use it.
+The framework provides some extensions on it's own with some basic functionallity but they're not required to use it, in fact they're not part of the build at all. You must get them from the [ext](./ext) folder
 
 ### Sandbox
 
