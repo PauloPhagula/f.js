@@ -2,8 +2,6 @@
  * F - a JavaScript framework for modular and scalable SPAs
  */
 
-/* global define */
-/* global global */
 /* global jQuery, _ */
 
 var F = (function(){
