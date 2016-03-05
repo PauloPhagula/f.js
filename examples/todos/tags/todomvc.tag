@@ -87,7 +87,6 @@
 		}
 
 		function changeListener(){
-
 			getStoreData();
 			self.update();
 		}
