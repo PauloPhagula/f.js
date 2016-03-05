@@ -56,7 +56,7 @@
 
 					textArea.value = "";
 					if(newTodo)
-						opts.actionCreator.createTodo(newTodo);
+						opts.sandbox.dispatch(opts.actionCreator.createTodo(newTodo));
 					break;
 				default:
 					break;
@@ -152,7 +152,7 @@
 
 			textArea.value = "";
 
-			opts.actionCreator.createTodo(newTodo);
+			opts.sandbox.dispatch(opts.actionCreator.createTodo(newTodo));
 		}
 
 		remove(event) {
@@ -161,16 +161,16 @@
 			// index on the collection
     		var index = self.items.indexOf(item);
 
-			opts.actionCreator.deleteTodo(item.id);
+			opts.sandbox.dispatch(opts.actionCreator.deleteTodo(item.id));
 		}
 
 		toggleComplete(event) {
 			var item = event.item;
-			opts.actionCreator.updateTodo(item.id, {completed: !item.completed});
+			opts.sandbox.dispatch(opts.actionCreator.updateTodo(item.id, {completed: !item.completed}));
 		}
 
 		clearCompleted(event) {
-			opts.actionCreator.clearCompletedTodos();
+			opts.sandbox.dispatch(opts.actionCreator.clearCompletedTodos());
 		}
 
 		edit(event) {

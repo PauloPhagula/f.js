@@ -1,93 +1,98 @@
 /* global F, ActionTypes */
 
-var TodoStore = F.Store.extend({
-	init : function() {
-		this.todos = {};
-		this._lastID = 1;
+var TodoStore = (function(){
+	"use strict";
 
-		var self = this;
-		this.dispatchToken = this._dispatcher.subscribe(ActionTypes.ACTION, function(payload){
-			switch (payload.type) {
-				case ActionTypes.CREATE_TODO:
-					self.add(payload.data.text);
-					self.emitChange();
-					break;
-				case ActionTypes.UPDATE_TODO:
-					self.update(payload.data.id, payload.data.updates);
-					self.emitChange();
-					break;
-				case ActionTypes.DELETE_TODO:
-					self.remove(payload.data.id);
-					self.emitChange();
-					break;
-				case ActionTypes.CLEAR_COMPLETED:
-					self.clearCompleted();
-					self.emitChange();
-					break;
-				case ActionTypes.MARK_ALL_COMPLETE:
-					self.markAllComplete();
-					self.emitChange();
-					break;
-				case ActionTypes.MARK_ALL_INCOMPLETE:
-					self.markAllIncomplete();
-					self.emitChange();
-					break;
-				default:
-					break;
-			}
-		});
-	},
+	var todos = {},
+		_lastID = 1;
 
-	add : function(todo){
-		var id = "ID_" + this._lastID++;
-		this.todos[id] = {
+	function add(todo) {
+		var id = "ID_" + _lastID++;
+		todos[id] = {
 			id 			: id,
 			text 		: todo,
 			completed	: false
 		};
 		return id;
-	},
+	}
 
-	getAll : function(){
-		return this.todos;
-	},
+	function update (id, updates) {
+		if(!todos[id]) return;
+		var updatedTodo = $.extend({}, todos[id], updates);
+		todos[id] = updatedTodo;
+	}
 
-	getTodo : function(id){
-		return this.todos[id];
-	},
+	function remove (id) {
+		if(!todos[id]) return;
+		delete todos[id];
+	}
 
-	update : function(id, updates){
-		if(!this.todos[id]) return;
-		var updatedTodo = $.extend({}, this.todos[id], updates);
-		this.todos[id] = updatedTodo;
-	},
-
-	remove : function(id){
-		if(!this.todos[id]) return;
-		delete this.todos[id];
-	},
-
-	clearCompleted : function(){
-		for (var todo in this.todos){
-			if(this.todos[todo].completed === true){
-				delete this.todos[todo];
-			}
-		}
-	},
-
-	markAllComplete : function(){
-		for(var todo in this.todos){
-			if(this.todos[todo].completed === false){
-				this.todos[todo].completed = true;
-			}
-		}
-	},
-
-	markAllIncomplete : function(){
-		for(var todo in this.todos){
-			if(this.todos[todo].completed === true){
-				this.todos[todo].completed = false;
+	function clearCompleted() {
+		for (var todo in todos){
+			if(todos[todo].completed === true){
+				delete todos[todo];
 			}
 		}
 	}
-});
+
+	function markAllComplete() {
+		for(var todo in todos){
+			if(todos[todo].completed === false){
+				todos[todo].completed = true;
+			}
+		}
+	}
+
+	function markAllIncomplete() {
+		for(var todo in todos){
+			if(todos[todo].completed === true){
+				todos[todo].completed = false;
+			}
+		}
+	}
+
+	return F.Store.extend({
+		init : function() {
+
+			var self = this;
+			this.dispatchToken = self._dispatcher.subscribe(ActionTypes.ACTION, function(payload){
+				switch (payload.type) {
+					case ActionTypes.CREATE_TODO:
+						add(payload.data.text);
+						self.emitChange();
+					break;
+					case ActionTypes.UPDATE_TODO:
+						update(payload.data.id, payload.data.updates);
+						self.emitChange();
+					break;
+					case ActionTypes.DELETE_TODO:
+						remove(payload.data.id);
+						self.emitChange();
+					break;
+					case ActionTypes.CLEAR_COMPLETED:
+						clearCompleted();
+						self.emitChange();
+					break;
+					case ActionTypes.MARK_ALL_COMPLETE:
+						markAllComplete();
+						self.emitChange();
+					break;
+					case ActionTypes.MARK_ALL_INCOMPLETE:
+						markAllIncomplete();
+						self.emitChange();
+					break;
+					default:
+					break;
+				}
+			});
+		},
+
+		getAll: function() {
+			return todos;
+		},
+
+		getTodo: function (id) {
+			return todos[id];
+		}
+	});
+}());
