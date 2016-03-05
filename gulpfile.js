@@ -1,3 +1,5 @@
+"use strict";
+
 var gulp = require('gulp'),
   	gutil = require('gulp-util'),
   	plumber = require('gulp-plumber'),
@@ -5,7 +7,8 @@ var gulp = require('gulp'),
     sh = require('shelljs'),
     shell = require('gulp-shell'),
     concat = require('gulp-concat'),
-    uglify  = require('gulp-uglify')
+    uglify  = require('gulp-uglify'),
+    pkg = require('./package.json')
 ;
 
 gulp.task('default', ['lint', 'build']);
@@ -19,10 +22,12 @@ gulp.task('build', function(){
     gulp.src([
         'src/f.js', 
         'src/ext.util.js',
-        'src/core.js',
         'src/dispatcher.js',
+        'src/injector.js',
+        'src/core.js',
         'src/sandbox.js',
         'src/store.js',
+        'src/extension.js',
         'src/module.js',
         'src/router.js',
         'src/ext.http.js',
