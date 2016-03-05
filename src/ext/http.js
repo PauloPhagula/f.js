@@ -2,7 +2,7 @@
  * AJAX / HTTP Extension
  *
  * - Hide ajax communication details - Modules don't need to know of it
- * - Provide common request interface - Modules use this interfce to specify data to send to the server
+ * - Provide common request interface - Modules use this interface to specify data to send to the server
  * - Provide common response interface - Modules use this interface to retrive data from the response
  * - Manage server failures - Modules only care if they got what they wanted or not, don't care why
  *
@@ -12,7 +12,7 @@
 
 /* global fetch */
 /* global jQuery */
-F.Core.http = F.http = (function($, undefined){
+var httpExtFactory = function() {
 	"use strict";
 
 	var defaults = {
@@ -94,7 +94,9 @@ F.Core.http = F.http = (function($, undefined){
 	}
 
 	// Return public methods
-	return {
+	var HTTPExt = F.Extension.extend({
 		request: request
-	};
-}(jQuery));
+	});
+
+	return new HTTPExt();
+};

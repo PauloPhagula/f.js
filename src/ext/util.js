@@ -1,5 +1,5 @@
 /**
- * Utilities Extension for the core
+ * Utilities for the framework
  */
 
 /* global jQuery, _ */
@@ -38,51 +38,8 @@ F.util = (function($, _, undefined){
 	;
 
 	return {
-		each	: $.each,
-
-		// Composes objects by combining them into a new
-		compose	: _.extend,
-
-		/**
-		 * Helper function to correctly set up the prototype chain for subclasses.
-		 * Similar to `goog.inherits`, but uses a hash of prototype properties and
-		 * class properties to be extended.
-		 *
-		 * Taken from Backbone.js of Jeremy Ashkenas
-		 * @see https://github.com/jashkenas/backbone/blob/master/backbone.js#L1839
-		 * 
-		 * @param  {Object} protoProps - the instance properties for the *Class*
-		 * @param  {Object} staticProps - the static properties for the *Class*
-		 * @return {Function} - a new constructor function
-		 */
-		extend : function(protoProps, staticProps) {
-			var parent = this;
-			var child;
-
-			// The constructor function for the new subclass is either defined by you
-			// (the "constructor" property in your `extend` definition), or defaulted
-			// by us to simply call the parent constructor.
-			if (protoProps && _.has(protoProps, 'constructor')) {
-			  child = protoProps.constructor;
-			} else {
-			  child = function(){ return parent.apply(this, arguments); };
-			}
-
-			// Add static properties to the constructor function, if supplied.
-			_.extend(child, parent, staticProps);
-
-			// Set the prototype chain to inherit from `parent`, without calling
-			// `parent`'s constructor function and add the prototype properties.
-			child.prototype = _.create(parent.prototype, protoProps);
-			child.prototype.constructor = child;
-
-			// Set a convenience property in case the parent's prototype is needed
-			// later.
-			child.__super__ = parent.prototype;
-
-			return child;
-		},
-		ready	: $.ready,
+        each    : $.each,
+        ready   : $.ready,
 		escape 	: fnEscape,
 		unescape: fnUnescape,
 		replace : String.prototype.replace,
@@ -108,11 +65,11 @@ F.util = (function($, _, undefined){
 			return uuid;
 		},
 
-		/**
-		* @see https://lodash.com/docs#template		
-		* @see https://engineering.linkedin.com/frontend/client-side-templating-throwdown-mustache-handlebars-dustjs-and-more		
-		*/		
-		template : _.template,
+        /**
+        * @see https://lodash.com/docs#template     
+        * @see https://engineering.linkedin.com/frontend/client-side-templating-throwdown-mustache-handlebars-dustjs-and-more       
+        */      
+        template : _.template,
 
 		/**
 		 * Makes an object production-ready
@@ -243,7 +200,3 @@ F.util = (function($, _, undefined){
         }
 	};
 }(jQuery, _));
-
-F.ready = F.util.ready;
-F.extend = F.util.extend;
-F.compose = F.util.compose;

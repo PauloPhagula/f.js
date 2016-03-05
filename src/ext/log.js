@@ -10,7 +10,7 @@
 
 /* global $ */
 
-F.Core.log = F.log = (function(undefined){
+var loggerExtFactory = function() {
 	"use strict";
 
 	var ALL 	= "ALL",   // 0
@@ -121,23 +121,22 @@ F.Core.log = F.log = (function(undefined){
 		};
 	}
 
-	/**
-	 * @constructor
-	 * @param {Object} options - the options for the new logger
-	 */
-	var Logger = function(options) {
+	var Logger = F.Extension.extend({
 
-		var defaults = {
-			logLevel : ALL,
-			env	: 'development',
-			errorLoggingEndpoint: null
-		};
+		/**
+		 * @constructor
+		 * @param {Object} options - the options for the new logger
+		 */
+		init: function(options) {
+			var defaults = {
+				logLevel : ALL,
+				env	: 'development',
+				errorLoggingEndpoint: null
+			};
 
-		_options = $.extend( {}, defaults, options );
-	};
+			_options = $.extend( {}, defaults, options );
+		},
 
-
-	Logger.prototype = {
 		/**
 		* gets the log level
 		* @getter
@@ -257,7 +256,7 @@ F.Core.log = F.log = (function(undefined){
 		* @param {Object} obj - accompanying object
 		*/
 		fatal: function(msg, obj) { _log(FATAL, msg, obj); }
-	};
+	});
 
 	return new Logger();
-}());
+};
