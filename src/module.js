@@ -1,38 +1,10 @@
-/*
-
-Modules Aka Controller-Views create a meaningful user experience,
-ex: a stocks module tell us all we want to know about the stock market
-
-Controller-Views - views often found at the top of the hierarchy that retrieve data from the stores and pass this data down to their children
-
-Responsabilities
-- Provides a well-scoped capability to the application.
-- Creates and manages its own content (typically HTML and SVG) in a container provided by the sandbox
-- Provides a consistent API to the Shell for configuration, initialization, and use
-- Is kept isolated from other features by using unique and coordinated JavaScript
-and CSS namespaces, and by not allowing any external calls except to shared utilities
-
-Uses the UI Components
-
-- Rules
-- Only call your own methods or those in the sandbox
-- don't access DOM elements outside of your box
-- Don't access non-native global objects
-- Anything else you need ask the sandbox
-- don't create global objects
-- don't directly reference other modules
-- modules only know the sandbox, the rest of the architecture doesn't exist to them
-- Manage data and views
-
-http://foss-haas.github.io/fynx/
-View Components are components that listen to Stores and/or invoke Actions.
-According to the philosophy of React, these should usually be the outer most components in an application.
-They pass (immutable) data from Stores as props to the underlying Pure Components, the regular self-contained React components.
-They may also invoke Actions as the result of user interaction with those components.
-
-
-It's called mod to avoid colisions with requirejs
-*/
+/**
+ * Module
+ *
+ * A `Module` is an independent unit of functionallity that is part of the total 
+ * structure of a web application, which consists of HTML + CSS + JavaScript 
+ * and which should be able to live on it's own.
+ */
 
 /* global riot, $ */
 F.Module = (function(undefined){
@@ -48,8 +20,10 @@ F.Module = (function(undefined){
 	function Module(sandbox, name, options) {
 		this._sandbox = sandbox;
 		this._name = name;
-		this._defaults = { stores: {} };
+		this._defaults = {};
 		this._options  = {};
+		this._extensions = {};
+		this._stores = {};
 		this._options = $.extend( {}, this._defaults, options );
 		
 		// Access to jQuery and DOM versions of element
@@ -57,48 +31,28 @@ F.Module = (function(undefined){
 		this.el  = null;
 	}
 
+	// Attach all inheritable methods to the Module prototype.
 	F.compose(Module.prototype, {
 		/**
-		* initializes the module on the specified element with the given options
+		* Initializes the module on the specified element with the given options
+		*
+		* Start is an empty function by default. Override it with your own implementation;
+		* 
 		* @param {Element} element - DOM element where module will be initialized
+		* @param {Object} extensions - extensions to be used by module
 		* @param {Object} stores - stores to be used by module
 		*/
-		start : function(element, stores) {
-			this.el = element;
-			this.$el = document.querySelector('[data-module="' + this._name + '"]');
-
-
-			// Render the module components
-			// ----------------------------
-			// With React
-			// React.render(<MyComponent/>, this.$el);
-			//
-			// With Backbone
-			// var view = new Backbone.View({
-			//		render: function(){
-			//			this.$el.html('<h1>Hello</h1>')
-			//		}
-			//	});
-			//
-			// With Riot
-			// riot.mount(this.$el, this._name, this._options);
-
-			// register for listening to events
-			// --------------------------------
-			// this._sandbox.subscribe(
-			//		'channel',
-			//		function(payload){
-			//			// handle payload
-			//		},
-			//		this
-			// );
+		start : function(element, extensions, stores) {
+			throw new Error("Module initialization not done. Override this function");
 		},
 
 		/**
 		* Destroys the module by unsubscribing for events and removing it from the DOM
+		*
+		* Destroy is an empty function by default. Override it with your own implementation;
 		*/
 		stop: function() {
-			this.$el.innerHTML = '';
+			throw new Error("Module stopping not done. Override this function");
 		}
 	});
 
