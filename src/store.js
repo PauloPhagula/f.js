@@ -11,7 +11,7 @@ F.Store = (function(undefined){
 	var CHANGE = 'CHANGE',
 		ACTION = 'ACTION';
 
-	var Store = function (dispatcher, name) {
+	function Store (dispatcher, name) {
 		this._dispatcher = dispatcher;
 		this._name = name;
 
@@ -23,7 +23,7 @@ F.Store = (function(undefined){
 		this.actions = {};
 
 		this.init.apply(this, arguments);
-	};
+	}
 
 	// Attach all inheritable methods to the Store prototype.
 	F.compose(Store.prototype, {
@@ -53,13 +53,14 @@ F.Store = (function(undefined){
 		},
 
 		/**
+		 * Allows views to unsubscribe to this store's change event
 		* @param {function} callback
 		*/
 		removeChangeListener: function(callback) {
 			// Return if there isn't a _callbacks object, or
 			// if it doesn't contain an array for the given event
 			var list, calls, i, l;
-			if (!(calls = this._callbacks[CHANGE])) return this;
+			if (!(calls = this._callbacks)) return this;
 			if (!(list  = this._callbacks[CHANGE])) return this;
 
 			// remove callback
