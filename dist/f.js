@@ -2,18 +2,9 @@
  * F - a JavaScript framework for modular and scalable SPAs
  */
 
-/*jslint         browser : true, continue : true,
-  devel  : true, indent  : 4,    maxerr   : 50,
-  newcap : true, nomen   : true, plusplus : true,
-  regexp : true, sloppy  : true, vars     : false,
-  white  : true
-*/
-
-/* global define */
-/* global global */
 /* global jQuery, _ */
 
-var F = (function(){
+var F = (function($, _, undefined){
     "use strict";
 
     // Initial Setup
@@ -24,8 +15,8 @@ var F = (function(){
     var F = {};
     var previousF = F;
 
-    // Current version of the library. Keep in sync with `package.json`.
-    F.VERSION = '0.0.2';
+    // Current version of the library. Keep in sync with `package.json` and `bower.json`.
+    F.VERSION = '0.1.0';
 
     // Set framework to debug mode. Disabled by default
     F.DEBUG = false;
@@ -37,378 +28,54 @@ var F = (function(){
         return this;
     };
 
-    // Extensions Plugging
-    // -------------------
-    /*
-    F.Core = Core;
-    F.Core.dispatcher = Dispatcher; // don't expose the dispatcher. Only core has it
-    F.Core.http = Http;
-    F.Core.log = F.log = new Log();
-    F.Sandbox = Sandbox;
-    F.Store = Store;
-    F.util = Util;
-    F.http = Http;
-    F.$ = DOM;
-    F.Storage = Storage;
-    F.Module = Mod;
+    // Util
+    // ---
 
-    F.router = Router;
-    // We can use backbone views or riot components
-    // F.BackboneView = View;
+    // Composes objects by combining them into a new
+    F.compose = _.extend;
 
-    // Shortcuts
-    // ---------
-    F.ready = Util.ready;
-    F.extend = Util.extend;
-    */
-   
-    
-    return F;
-}());
-/**
- * Utilities Extension for the core
- */
+    /**
+     * Helper function to correctly set up the prototype chain for subclasses.
+     * Similar to `goog.inherits`, but uses a hash of prototype properties and
+     * class properties to be extended.
+     *
+     * Taken from Backbone.js of Jeremy Ashkenas
+     * @see https://github.com/jashkenas/backbone/blob/master/backbone.js#L1839
+     * 
+     * @param  {Object} protoProps - the instance properties for the *Class*
+     * @param  {Object} staticProps - the static properties for the *Class*
+     * @return {Function} - a new constructor function
+     */
+    F.extend = function(protoProps, staticProps) {
+        var parent = this;
+        var child;
 
-/* global jQuery, _ */
-F.util = (function($, _, undefined){
-	"use strict";
-
-	// Thanks to Andrea Giammarchi
-	var
-		reEscape = /[&<>'"]/g,
-		reUnescape = /&(?:amp|#38|lt|#60|gt|#62|apos|#39|quot|#34);/g,
-		oEscape = {
-			'&': '&amp;',
-			'<': '&lt;',
-			'>': '&gt;',
-			"'": '&#39;',
-			'"': '&quot;'
-		},
-		oUnescape = {
-			'&amp;'	: '&',
-			'&#38;'	: '&',
-			'&lt;'	: '<',
-			'&#60;'	: '<',
-			'&gt;'	: '>',
-			'&#62;'	: '>',
-			'&apos;': "'",
-			'&#39;'	: "'",
-			'&quot;': '"',
-			'&#34;'	: '"'
-		},
-		fnEscape = function (m) {
-			return oEscape[m];
-		},
-		fnUnescape = function (m) {
-			return oUnescape[m];
-		}
-	;
-
-	return {
-		each	: $.each,
-
-		// Composes objects by combining them into a new
-		compose	: _.extend,
-
-		/**
-		 * Helper function to correctly set up the prototype chain for subclasses.
-		 * Similar to `goog.inherits`, but uses a hash of prototype properties and
-		 * class properties to be extended.
-		 *
-		 * Taken from Backbone.js of Jeremy Ashkenas
-		 * @see https://github.com/jashkenas/backbone/blob/master/backbone.js#L1839
-		 * 
-		 * @param  {Object} protoProps - the instance properties for the *Class*
-		 * @param  {Object} staticProps - the static properties for the *Class*
-		 * @return {Function} - a new constructor function
-		 */
-		extend : function(protoProps, staticProps) {
-			var parent = this;
-			var child;
-
-			// The constructor function for the new subclass is either defined by you
-			// (the "constructor" property in your `extend` definition), or defaulted
-			// by us to simply call the parent constructor.
-			if (protoProps && _.has(protoProps, 'constructor')) {
-			  child = protoProps.constructor;
-			} else {
-			  child = function(){ return parent.apply(this, arguments); };
-			}
-
-			// Add static properties to the constructor function, if supplied.
-			_.extend(child, parent, staticProps);
-
-			// Set the prototype chain to inherit from `parent`, without calling
-			// `parent`'s constructor function and add the prototype properties.
-			child.prototype = _.create(parent.prototype, protoProps);
-			child.prototype.constructor = child;
-
-			// Set a convenience property in case the parent's prototype is needed
-			// later.
-			child.__super__ = parent.prototype;
-
-			return child;
-		},
-		ready	: $.ready,
-		escape 	: fnEscape,
-		unescape: fnUnescape,
-		replace : String.prototype.replace,
-
-		/**
-		 * Generetes a almost Global Unique Identifier (GUID)
-		 * @return {[type]} [description]
-		 */
-		uuid	: function () {
-			/*jshint bitwise:false */
-			var i, random;
-			var uuid = '';
-
-			for (i = 0; i < 32; i++) {
-				random = Math.random() * 16 | 0;
-				if (i === 8 || i === 12 || i === 16 || i === 20) {
-					uuid += '-';
-				}
-				uuid += (i === 12 ? 4 : (i === 16 ? (random & 3 | 8) : random))
-					.toString(16);
-			}
-
-			return uuid;
-		},
-
-		/**
-		* @see https://lodash.com/docs#template		
-		* @see https://engineering.linkedin.com/frontend/client-side-templating-throwdown-mustache-handlebars-dustjs-and-more		
-		*/		
-		template : _.template,
-
-		/**
-		 * Makes an object production-ready
-		 * TO-DO: update method to use ES6 Proxies
-		 * @see https://www.nczonline.net/blog/2009/04/28/javascript-error-handling-anti-pattern/
-		 * @example
-		 * var system = {
-		 *		fail: function(){
-		 *			throw new Error("Oops!");
-		 *		}
-		 *	};
-		 *
-		 *	function log(severity, message){
-		 *		alert(severity + ":" + message);
-		 *	}
-		 *
-		 *	if (!debugMode){
-		 *		productionize(system);
-		 *	}
-		 *
-		 *	system.fail();   //error is trapped!
-		 */
-		productionize: function(object){
-			var name,
-        		method;
-
-			for (name in object){
-				method = object[name];
-				if (typeof method === "function"){
-					object[name] = function(name, method){
-						return function(){
-							try {
-								return method.apply(this, arguments);
-							} catch (ex) {
-								// this should use our logger from the core
-								console.log(1, name + "(): " + ex.message);
-							}
-						};
-					}(name, method);
-				}
-			}
-		},
-
-		/*
-		* memoize.js
-		* by @philogb and @addyosmani
-		* with further optimizations by @mathias
-		* and @DmitryBaranovsk
-		* perf tests: http://bit.ly/q3zpG3
-		* Released under an MIT license.
-		*/
-		memoize: function(fn) {
-			return function () {
-				var args = Array.prototype.slice.call(arguments),
-					hash = "",
-					i = args.length,
-					currentArg = null;
-				while (i--) {
-					currentArg = args[i];
-					hash += (currentArg === Object(currentArg)) ? 
-                        JSON.stringify(currentArg) : 
-                        currentArg;
-					fn.memoize || (fn.memoize = {});
-				}
-				return (hash in fn.memoize) ? fn.memoize[hash] :
-				fn.memoize[hash] = fn.apply(this, args);
-			};
-		},
-
-		/**
-         * Sets a name/value pair which is stored in the browser and sent to the server
-         * with every request. This is also known as a cookie. Be careful setting
-         * cookies, because they can take up a lot of bandwidth, especially for Ajax
-         * applications.
-         *
-         * @param {String}  name     cookie name
-         * @param {String}  value    cookie value
-         * @param {Date}    expire   expire date representing the number of milliseconds
-         *                           since 1 January 1970 00:00:00 UTC.
-         * @param {String}  path     path name
-         * @param {String}  domain   domain name
-         * @param {Boolean} secure   cookie may benefit all the documents and CGI programs
-         *                           meet the requirements as to the path and domain
-         *                           compatibility
-         *     Possible values:
-         *     true   may benefit
-         *     false  can not benefit
-         *
-         * @return {String} Returns a cookie name.
-         */
-        setcookie: function(name, value, expire, path, domain, secure) {
-            var ck = name + "=" + escape(value) + ";";
-            if (expire) ck += "expires=" + new Date(expire +
-                new Date().getTimezoneOffset() * 60).toGMTString() + ";";
-            if (path)   ck += "path=" + path + ";";
-            if (domain) ck += "domain=" + domain + ";";
-            if (secure) ck += "secure";
-
-            document.cookie = ck;
-            return value;
-        },
-
-        /**
-         * Gets the value of a stored name/value pair called a cookie.
-         *
-         * @param {String} name the name of the stored cookie.
-         * @return {String} Returns a value of the cookie or the empty string if it isn't found
-         */
-        getcookie: function(name) {
-          var aCookie = document.cookie.split("; ");
-          for (var i = 0; i < aCookie.length; i++) {
-              var aCrumb = aCookie[i].split("=");
-              if (name == aCrumb[0])
-                  return unescape(aCrumb[1]);
-          }
-
-          return "";
-        },
-
-        /**
-         * Deletes a stored name/value pair called a cookie.
-         *
-         * @param {String} name     the name of the stored cookie
-         * @param {String} domain   the name of the domain of stored cookie
-         */
-        delcookie: function (name, domain){
-            document.cookie = name + "=blah; expires=Fri, 31 Dec 1999 23:59:59 GMT;" + (domain ? 'domain='+domain : '');
+        // The constructor function for the new subclass is either defined by you
+        // (the "constructor" property in your `extend` definition), or defaulted
+        // by us to simply call the parent constructor.
+        if (protoProps && _.has(protoProps, 'constructor')) {
+            child = protoProps.constructor;
+        } else {
+            child = function(){ return parent.apply(this, arguments); };
         }
-	};
+
+        // Add static properties to the constructor function, if supplied.
+        _.extend(child, parent, staticProps);
+
+        // Set the prototype chain to inherit from `parent`, without calling
+        // `parent`'s constructor function and add the prototype properties.
+        child.prototype = _.create(parent.prototype, protoProps);
+        child.prototype.constructor = child;
+
+        // Set a convenience property in case the parent's prototype is needed
+        // later.
+        child.__super__ = parent.prototype;
+
+        return child;
+    };
+
+    return F;
 }(jQuery, _));
-
-F.ready = F.util.ready;
-F.extend = F.util.extend;
-F.compose = F.util.compose;
-/**
- * Core aka Shell aka Application Wide Controller aka Mediator
- * Contains the main application object that is the heart of the JavaScript architecture
- * Responsabilities:
- *   - Manages the lifecyle of modules (registers, starts, renders and stops modules)
- *   - Manages communication between modules
- *   - Coordinates feature modules, dispatching feature specific tasks
- *   - Managing the application state using Anchor Interface Pattern
- *   - Manages application wide features/interfaces such as URL anchor(hash fragment), feature containers, cookies
- *   - Detects, traps and reports errors in the system. Uses available information to determine best course of action
- *   - Allows loose coupling between modules that are related to one another
- *   - Error management will also be handled by the application core
- *   - Be extensible
- */
-
-/* global riot */
-
-F.Core = (function(undefined){
-	"use strict";
-
-	var
-		_modules = {}, // Inited Modules data
-
-		// Cache DOM node and collections
-		domMap = {},
-
-		setDomMap,  initModule
-	;
-
-
-	setDomMap = function(){
-		//var $container = stateMap.$container;
-		// domMap = { $container : $container };
-	};
-
-	initModule = function($container){
-		// load HTML and map jQuery collections
-		// stateMap.$container = $container;
-
-		// Render Main App Component
-		// riot.mount($container, 'app', {});
-		setDomMap();
-	};
-
-	return {
-		register: function(moduleId, creator, options){
-			_modules[moduleId] = {
-				creator: creator,
-				options: options,
-				instance: null
-			};
-		},
-
-		start: function(moduleId, element){
-			var module = _modules[moduleId];
-			module.instance = new module.creator(new F.Sandbox(this, moduleId, element), moduleId, module.options);
-			module.instance.start();
-		},
-
-		stop: function(moduleId){
-			var data = _modules[moduleId];
-			if(data.instance){
-				data.instance.stop();
-				data.instance = null;
-			}
-		},
-
-		restart: function(moduleId){
-			this.stop(moduleId);
-			this.start(moduleId);
-		},
-
-		startAll: function(){
-			for (var moduleId in _modules){
-				if(_modules.hasOwnProperty(moduleId)){
-					this.start(moduleId);
-				}
-			}
-		},
-
-		stopAll: function(){
-			for (var moduleId in _modules){
-				if(_modules.hasOwnProperty(moduleId)){
-					this.stop(moduleId);
-				}
-			}
-		},
-
-		reportError: function(severity, msg, obj){
-			this.log(severity, msg, obj);
-		},
-
-		init : initModule
-	};
-}());
 /**
  * Dispatcher - the communication / app nexus / pub-sub extension
  *
@@ -436,7 +103,7 @@ F.Core = (function(undefined){
  * // unsubscribing
  * PubSub.unsubscrube('wem', fn);
  */
-F.Core.dispatcher = (function(){
+F.dispatcher = (function(){
 	"use strict";
 
 	var _prefix = 'ID_';
@@ -562,7 +229,7 @@ F.Core.dispatcher = (function(){
 		*   data : {}
 		* }
 		*/
-		publishAction: function (payload) {
+		dispatch: function (payload) {
 			this.publish(ACTION, payload);
 		},
 
@@ -654,22 +321,441 @@ F.Core.dispatcher = (function(){
 		}
 	};
 }());
+/*
+
+Dependency Injector
+
+All code is a mixture of the content from the following sources:
+    Krasimir Sonev      - http://krasimirtsonev.com/blog/article/Dependency-injection-in-JavaScript
+    Tero Parviainen     - http://teropa.info/blog/2014/06/04/angularjs-dependency-injection-from-the-inside-out.html
+    Merrick Christensen - http://merrickchristensen.com/articles/javascript-dependency-injection.html
+    Yusufaytas          - http://stackoverflow.com/a/20058395
+    Alex Rothenberg     - http://www.alexrothenberg.com/2013/02/11/the-magic-behind-angularjs-dependency-injection.html
+
+Usage:
+    var Service = function() {
+        return { name: 'Service' };
+    }
+    var Router = function() {
+        return { name: 'Router' };
+    }
+
+    injector.register('service', Service);
+    injector.register('router', Router);
+
+    // when specifying the names of the dependencies, the parameter names in the function can be anything
+    var doSomething = injector.resolve(['service', 'router', function(q, s) {
+        console.log(q().name === 'Service');
+        console.log(s().name === 'Router');
+    }]);
+
+    doSomething();
+
+    // When not specifying the dependency names, the parameter names in the function must have the same name as the dependencies
+    var doSomething = injector.resolve(function(service, router){
+        console.log(q().name === 'Service');
+        console.log(s().name === 'Router');
+    });
+
+    doSomething();
+ */
+
+/** global F */
+
+F.injector = (function(undefined){
+    "use strict";
+
+    var dependencies  = {};
+    
+    var ARROW_ARG = /^([^\(]+?)=>/;
+    var FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
+    var FN_ARG_SPLIT = /,/;
+    var FN_ARG = /^\s*(_?)(\S+?)\1\s*$/;
+    var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
+
+    // Impl
+    // ---
+    function annotate(fn) {
+        var $inject,
+            fnText,
+            argDecl,
+            last;
+
+        if (typeof fn === 'function') {
+            if (!($inject = fn.$inject)) {
+                $inject = [];
+                if (fn.length) {
+                    fnText = fn.toString().replace(STRIP_COMMENTS, '');
+                    argDecl = fnText.match(FN_ARGS);
+                    argDecl[1].split(FN_ARG_SPLIT).forEach(function(arg){
+                        arg.replace(FN_ARG, function(all, underscore, name){
+                            $inject.push(name);
+                        });
+                    });
+                }
+                fn.$inject = $inject;
+            }
+        } else if (isArray(fn)) {
+            last = fn.length - 1;
+            assertArgFn(fn[last], 'fn');
+            $inject = fn.slice(0, last);
+        } else {
+            assertArgFn(fn, 'fn', true);
+        }
+        return $inject;
+    }
+
+    function register (key, value) {
+        dependencies[key] = value;
+    }
+
+    function resolve(fn, self, locals) {
+        var args = [],
+            $inject = annotate(fn),
+            length, i,
+            key;
+
+        for (i = 0, length = $inject.length; i < length; i++) {
+            key = $inject[i];
+            if (typeof key !== 'string') {
+                throw new Error('Incorrect injection token! Expected service name as string, got: ' + key);
+            }
+            args.push(
+            locals && locals.hasOwnProperty(key) ? 
+                locals[key] : 
+                dependencies[key]
+            );
+        }
+        if (isArray(fn)) {
+            fn = fn[length];
+        }
+
+        // http://jsperf.com/angularjs-invoke-apply-vs-switch
+        // #5388
+        return fn.apply(self || {}, args);
+    }
+
+    // Util
+    // ---
+    function isArray(input) {
+        return Object.prototype.toString.call(input) === '[object Array]';
+    }
+
+    /**
+     * @ngdoc function
+     * @name angular.isFunction
+     * @module ng
+     * @kind function
+     *
+     * @description
+     * Determines if a reference is a `Function`.
+     *
+     * @param {*} value Reference to check.
+     * @returns {boolean} True if `value` is a `Function`.
+     */
+    function isFunction(value){return typeof value === 'function';}
+
+    function minErr(module) {
+        return function () {
+            var code = arguments[0],
+            prefix = '[' + (module ? module + ':' : '') + code + '] ',
+            template = arguments[1],
+            templateArgs = arguments,
+            stringify = function (obj) {
+            if (typeof obj === 'function') {
+                return obj.toString().replace(/ \{[\s\S]*$/, '');
+            } else if (typeof obj === 'undefined') {
+                return 'undefined';
+            } else if (typeof obj !== 'string') {
+                return JSON.stringify(obj);
+            }
+                return obj;
+            },
+            message, i;
+
+            message = prefix + template.replace(/\{\d+\}/g, function (match) {
+                var index = +match.slice(1, -1), arg;
+
+                if (index + 2 < templateArgs.length) {
+                    arg = templateArgs[index + 2];
+                    if (typeof arg === 'function') {
+                        return arg.toString().replace(/ ?\{[\s\S]*$/, '');
+                    } else if (typeof arg === 'undefined') {
+                        return 'undefined';
+                    } else if (typeof arg !== 'string') {
+                        return toJson(arg);
+                    }
+                    return arg;
+                }
+                return match;
+            });
+
+            message = message + '\nhttp://errors.angularjs.org/1.2.27/' +
+            (module ? module + '/' : '') + code;
+            for (i = 2; i < arguments.length; i++) {
+                message = message + (i == 2 ? '?' : '&') + 'p' + (i-2) + '=' +
+                encodeURIComponent(stringify(arguments[i]));
+            }
+
+            return new Error(message);
+        };
+    }
+
+    var ngMinErr = minErr('ng');
+    /**
+     * throw error if the name given is hasOwnProperty
+     * @param  {String} name    the name to test
+     * @param  {String} context the context in which the name is used, such as module or directive
+     */
+    function assertNotHasOwnProperty(name, context) {
+        if (name === 'hasOwnProperty') {
+            throw ngMinErr('badname', "hasOwnProperty is not a valid {0} name", context);
+        }
+    }
+
+    /**
+     * throw error if the argument is falsy.
+     */
+    function assertArg(arg, name, reason) {
+        if (!arg) {
+            throw ngMinErr('areq', "Argument '{0}' is {1}", (name || '?'), (reason || "required"));
+        }
+        return arg;
+    }
+
+    function assertArgFn(arg, name, acceptArrayAnnotation) {
+        if (acceptArrayAnnotation && isArray(arg)) {
+            arg = arg[arg.length - 1];
+        }
+
+        assertArg(isFunction(arg), name, 'not a function, got ' +
+            (arg && typeof arg === 'object' ? arg.constructor.name || 'Object' : typeof arg));
+        return arg;
+    }
+
+    // Public API
+    // ---
+    return {
+        register : register,
+        resolve  : resolve
+    };
+}());
 /**
- * Sandbox - The facade into the core
+ * Core
  *
- * - Acts as a security guard for the modules, meaning it knows what a module can access
- *   and what cannot. It determines which parts of the framework the modules can access
- * - provide a dependable interface for modules
- * - translate module requests into core actions
- * - ensures a consistent interface for the modules - modules can rely on the methods to always be there
+ * The `Core` contains the main application object that is the heart of the 
+ * application architecture.
+ */
+
+/* global injector */
+
+F.Core = (function(injector, dispatcher, undefined) {
+	"use strict";
+
+	var _extensions = {},
+        _modules    = {},
+        _stores	    = {}
+    ;
+
+    function Core() {}
+
+    F.compose(Core.prototype, {
+
+    	dispatcher: dispatcher,
+
+		/**
+		 * Method used to add extensions on the core.
+		 * @param  {string}  extensionName  unique extension name. This name will be used when injecting the extension
+		 * @param  {array}   dependencies   list of dependencies this extension relies on. Generally these are other extensions
+		 * @param  {functon} factory        the extension factory function
+		 * @param  {object}  options        options for the extension initialization
+		 * @return {void}
+		 *
+		 * @example
+		 * var core = new F.Core();
+		 *
+		 * var loggerExtFactory = function(){
+		 *	    var Logger = F.Extension.extend({
+		 *	        init: function(options) {},
+		 *	        log: function(obj) { console.log(obj);}
+		 *	    });
+		 *
+		 *	    return new Logger();
+		 * };
+		 * 
+		 * core.registerExtension("logger", [], loggerExtFactory, {});
+		 *
+		 * var calculatorExtFactory = function(logger) {
+		 * 		var Calculator = F.Extension.extend({
+		 * 			init: function(options) {},
+		 * 			add: function(a,b) {return a+b;},
+		 * 			subsctract: function(a,b) {return a-b;}
+		 * 		});
+		 *
+		 * 		return new Calculator();
+		 * }
+		 *
+		 * core.registerExtension("calculator", ["logger"], calculatorExtFactory, {})
+		 */
+		registerExtension : function(extensionName, dependencies, factory, options) {
+			if (_extensions.hasOwnProperty(extensionName))
+				throw new Error("An extension with the given name has already been registered. Ext name: " + extensionName);
+
+			dependencies = dependencies || [];
+			options = options || {};
+
+			var injectionSpec = dependencies;
+		    injectionSpec.push(factory);
+
+		    var extension = F.injector.resolve(injectionSpec);
+		    extension.init(options);
+		    _extensions[extensionName] = extension;
+
+		    F.injector.register(extensionName, extension);
+		},
+		
+		/**
+		 * Registers a store on the core
+		 * @param  {string} name      unique store identifier
+		 * @param  {Store}  instance  the store instance
+		 * @return {void}
+		 */
+		registerStore : function(name, instance) {
+    		_stores[name] = instance;
+    	},
+
+		/**
+		 * Method used to register modules on the core.
+		 * @param  {string}   moduleName  unique module identifier
+		 * @param  {array}    extensions  List of extensions this module relies on. 
+		 *                                These are the only extensions the module will be allowed to use.
+		 * @param  {function} factory     the module factory function
+		 * @param  {object}   options     options for the module initialization
+		 * @return {void}
+		 */
+		registerModule: function(moduleName, extensions, stores, factory, options) {
+			if (_extensions.hasOwnProperty(moduleName))
+				throw new Error("Module with given name has already been registered. Mod name: " + moduleName);
+
+			_modules[moduleName] = {
+				factory    : factory,
+				extensions : extensions,
+				stores 	   : stores,
+				options    : options,
+				instance   : null
+			};
+		},
+
+		/**
+		 * Starts a given module on a DOM element.
+		 * @param  {string} moduleName unique module identifier
+		 * @param  {string} element    the DOM element to which the module will be tied
+		 * @return {void}
+		 */
+		start: function(moduleName, element) {
+			if (!_modules.hasOwnProperty(moduleName))
+				throw new Error("Trying to start non-registered module: " + moduleName);
+
+			var module = _modules[moduleName];
+			var sandbox = new F.Sandbox(this, moduleName, element);
+			module.instance = new module.factory(sandbox, moduleName, module.options);
+
+			var extensions = {};
+			var stores     = {};
+			
+			for (var i = 0; i < module.extensions.length; i++) {
+				var extName = module.extensions[i];
+
+				if (_extensions.hasOwnProperty(extName))
+					extensions[extName] = _extensions[extName];
+				else
+					throw new Error("Module requires an unregistered extensions: " + extName);
+			}
+
+			for (var i = 0; i < module.stores.length; i++ ) {
+				var storeName = module.stores[i];
+
+				if (_stores.hasOwnProperty(storeName))
+					stores[storeName] = _stores[storeName];
+				else
+					throw new Error("Module requires an unregistered store: " + storeName);
+			}
+
+			module.instance.start(element, extensions, stores);
+		},
+
+		/**
+		 * Stops a given module.
+		 * @param  {string} moduleName unique module identifier
+		 * @return {void}
+		 */
+		stop: function(moduleName) {
+			var data = _modules[moduleName];
+			if(data.instance){
+				data.instance.stop();
+				data.instance = null;
+			}
+		},
+
+		/**
+		 * Restarts the given module.
+		 * @param  {string} moduleName unique module identifier
+		 * @return {void}
+		 */
+		restart: function(moduleName) {
+			this.stop(moduleName);
+			this.start(moduleName);
+		},
+
+		/**
+		 * Starts all registered modules.
+		 * @return {void}
+		 */
+		startAll: function() {
+			for (var moduleName in _modules){
+				if(_modules.hasOwnProperty(moduleName)){
+					this.start(moduleName);
+				}
+			}
+		},
+
+		/**
+		 * Stops all registered modules.
+		 * @return {void}
+		 */
+		stopAll: function() {
+			for (var moduleName in _modules){
+				if(_modules.hasOwnProperty(moduleName)){
+					this.stop(moduleName);
+				}
+			}
+		},
+
+		/**
+		 * Reports errors in the system.
+		 * @param  {int}    severity severity level
+		 * @param  {string} msg      message
+		 * @param  {object} obj      object to complemenet the message
+		 * @return {void}
+		 */
+		reportError: function(severity, msg, obj) {
+			this.log(severity, msg, obj);
+		},
+
+		/**
+		 * Initialize is an empty function by default. Override it with your own logic.
+		 * @return {void}
+		 */
+		init: function() {}
+	});
+
+    Core.extend = F.extend;
+	return Core;
+}(F.injector, F.dispatcher));
+/**
+ * Sandbox
  *
- * The main purpose of the sandbox is to use the facade pattern.
- * In that way you can hide the features provided by the core and only show a well
- * defined custom static long term API to your modules. This is actually one of the
- * most important concept for creating mainainable apps. Change plugins, implementations, etc.
- * but keep your API stable for your modules.
- *
- * For each module a separate sandbox will be created.
+ * Abstracton in the `Core` for use by `Module`s.
  */
 
 F.Sandbox = (function(undefined){
@@ -678,24 +764,27 @@ F.Sandbox = (function(undefined){
 	/**
 	 * @constructor
 	 * @param  {Core} core - the application core
-	 * @param  {String} moduleId - the module name
+	 * @param  {String} moduleName - the module name
 	 * @param  {HTMLElement} element - the element underwhich this sandbox has control
 	 * @return {void}
 	 */
-	function Sandbox (core, moduleId, element) {
+	function Sandbox (core, moduleName, element) {
 		this.core 	  = core;
-		this.moduleId = moduleId;
+		this.moduleName = moduleName;
     	this.element  = element;
 	}
 
-	Sandbox.prototype = {
+	// Attach all inheritable methods to the Sanbox prototype.
+	F.compose(Sandbox.prototype, {
 		/**
-		* Checks if a module can publish a certain event. Security check
-		* @param  {String} moduleId - The Id of the module for which we're checking permissions
+		* Checks if a module can publish a certain event.
+		* By default any module can publish. Override with your implementation.
+		* 
+		* @param  {String} moduleName - The Id of the module for which we're checking permissions
 		* @param  {String} channel - The event for we're checking if module has permission to publish to
 		* @return {Boolean} - true if module can publish. false otherwise
 		*/
-		moduleCanPublish : function (moduleId, channel) {
+		moduleCanPublish : function (moduleName, channel) {
 			return true; // no-op
 		},
 
@@ -707,9 +796,31 @@ F.Sandbox = (function(undefined){
 		* @param {Object} context - the context under which the callback will be called
 		*/
 		publish : function (channel, data, callback, context) {
-			if ( this.moduleCanPublish(this.moduleId, channel) ) {
+			if ( this.moduleCanPublish(this.moduleName, channel) ) {
 				this.core.dispatcher.publish.call(channel, data);
 			}
+		},
+
+		/**
+		 * Checks if a module can publish an action
+		 * @param  {string} moduleName unique module identifier
+		 * @param  {string} actionType unique action type identifier
+		 * @return {boolean}
+		 */
+		moduleCanDispatchAction: function(moduleName, actionType) {
+			return true; // no-op
+		},
+
+		/**
+		 * Publishes an action using the internal dispatcher creator.
+		 * This could also be done using an action creator
+		 * @return {void}
+		 */
+		dispatch: function(type, data) {
+			if (! this.moduleCanDispatchAction(this.moduleName, type))
+				throw new Error("module " + this.moduleName + " is not authorized to create action: " + action);
+
+			this.core.dispatcher.dispatch({type: type, data: data});
 		},
 
 		/**
@@ -761,39 +872,16 @@ F.Sandbox = (function(undefined){
 		reportError : function (severity, msg, obj) {
 			return this.core.reportError(severity, msg, obj);
 		}
-	};
+	});
 
+	Sandbox.extend = F.extend;
 	return Sandbox;
 }());
 /**
- * Flux Store Implementation
- * -------------------------
+ * Flux Store
  *
- * Their role is somewhat similar to a model in a traditional MVC,
- * but they manage the state of many objects — they are not instances of one object(not a model).
- * Nor are they the same as Backbone's collections.
- * More than simply managing a collection of ORM-style * * objects,
- * stores manage the application state for a particular domain within the application.
- *
- * - Data and application for a logical domain
- * - Setup: Register with the dispatcher
- * - Dispatcher calls registered callback
- * - Emits a change event
- * - Public interface: getters, no setters
- *
- * - Setters are forbidden here
- * - Application state is maintained only in the stores
- * - Stores contain the application state and logic.
- *
- * DOES / IS / HAS
- * - is where the Shell and all of our feature modules access data and business logic in our SPA.
- * - any data or logic, that we want to share between feature modules, or is central to the application.
- * - breakeable into more manageable parts.
- *
- * DOESN'T / ISN'T
- * - require a browser.
- * - provide general purpose utilities
- * - communicate directly with the server
+ * Is where the `Core` and all of our feature `Modules` access data and business
+ * logic in our SPA.
  */
 
 F.Store = (function(undefined){
@@ -802,42 +890,32 @@ F.Store = (function(undefined){
 	var CHANGE = 'CHANGE',
 		ACTION = 'ACTION';
 
-	return {
+	function Store (dispatcher, name) {
+		this._dispatcher = dispatcher;
+		this._name = name;
+
+		// Indicates if this store is updating.
+		// When updating must not accept dispatch calls.
+		this._isUpdating = false;
+
+		this._data = [];
+		this.actions = {};
+
+		this.init.apply(this, arguments);
+	}
+
+	// Attach all inheritable methods to the Store prototype.
+	F.compose(Store.prototype, {
 
 		/**
-		* @constructor
+		* Initialize is an empty function by default. Override it with your own
+		* initialization logic.
+		* 
 		* @param {PubSub} dispatcher - the dispatcher
 		* @param {String} name - the name of this store
 		*/
-		init : function(dispatcher, name) {
-			this._dispatcher = dispatcher;
-			this._name = name;
-
-			/**
-			* indicates if this store is updating.
-			* When updating must not accept dispatch calls.
-			*/
-			this._isUpdating = false;
-
-			this._data = [];
-			this.actions = {};
-		},
-
-		/**
-		* Subscribes to interesting events in the dispatcher
-		*/
-		setup: function() {
-			// subscribe for events
-			this.dispatchToken = this._dispatcher.subscribe(ACTION, function(payload){
-				switch(payload.type) {
-					case '':
-						// some logic here
-						this.emitChange();
-						break;
-					default:
-						// no-op
-				}
-			});
+		init : function() {
+			throw new Error("Store initialization not done. Override this function");
 		},
 
 		/**
@@ -845,24 +923,23 @@ F.Store = (function(undefined){
 		* @param {function} callback
 		*/
 		addChangeListener: function(callback) {
-			// this.on(CHANGE, callback);
 			// Create _callbacks object, unless it already exists
 			var calls = this._callbacks || (this._callbacks = {});
 
 			// Create an array for the given event key, unless it exists, then
 			// append the callback to the array
 			(this._callbacks[CHANGE] || (this._callbacks[CHANGE] = [])).push({ callback : callback });
-			// return this;
 		},
 
 		/**
+		 * Allows views to unsubscribe to this store's change event
 		* @param {function} callback
 		*/
 		removeChangeListener: function(callback) {
 			// Return if there isn't a _callbacks object, or
 			// if it doesn't contain an array for the given event
 			var list, calls, i, l;
-			if (!(calls = this._callbacks[CHANGE])) return this;
+			if (!(calls = this._callbacks)) return this;
 			if (!(list  = this._callbacks[CHANGE])) return this;
 
 			// remove callback
@@ -892,43 +969,46 @@ F.Store = (function(undefined){
 				handler.callback.apply();
 			}
 		}
-	};
+	});
+
+	Store.extend = F.extend;
+	return Store;
 }());
-/*
+/**
+ * Extension
+ *
+ * `Extension`s augment the capabilities of the `Core`.
+ */
 
-Modules Aka Controller-Views create a meaningful user experience,
-ex: a stocks module tell us all we want to know about the stock market
+F.Extension = (function(undefined){
+    "use strict";
 
-Controller-Views - views often found at the top of the hierarchy that retrieve data from the stores and pass this data down to their children
+    function Extension () {}
 
-Responsabilities
-- Provides a well-scoped capability to the application.
-- Creates and manages its own content (typically HTML and SVG) in a container provided by the sandbox
-- Provides a consistent API to the Shell for configuration, initialization, and use
-- Is kept isolated from other features by using unique and coordinated JavaScript
-and CSS namespaces, and by not allowing any external calls except to shared utilities
+    // Attach all inheritable methods to the Extension prototype.
+    F.compose(Extension.prototype, {
 
-Uses the UI Components
+        /**
+         * Init is an empty function by default. Override with your own logic.
+         * @return {void}
+         */
+        init: function(options) {
+            this._defaults = {};
+            this._options = $.extend( {}, this._defaults, options );
+        }
+    });
 
-- Rules
-- Only call your own methods or those in the sandbox
-- don't access DOM elements outside of your box
-- Don't access non-native global objects
-- Anything else you need ask the sandbox
-- don't create global objects
-- don't directly reference other modules
-- modules only know the sandbox, the rest of the architecture doesn't exist to them
-- Manage data and views
+    Extension.extend = F.extend;
+    return Extension;
+}());
 
-http://foss-haas.github.io/fynx/
-View Components are components that listen to Stores and/or invoke Actions.
-According to the philosophy of React, these should usually be the outer most components in an application.
-They pass (immutable) data from Stores as props to the underlying Pure Components, the regular self-contained React components.
-They may also invoke Actions as the result of user interaction with those components.
-
-
-It's called mod to avoid colisions with requirejs
-*/
+/**
+ * Module
+ *
+ * A `Module` is an independent unit of functionallity that is part of the total 
+ * structure of a web application, which consists of HTML + CSS + JavaScript 
+ * and which should be able to live on it's own.
+ */
 
 /* global riot, $ */
 F.Module = (function(undefined){
@@ -944,8 +1024,10 @@ F.Module = (function(undefined){
 	function Module(sandbox, name, options) {
 		this._sandbox = sandbox;
 		this._name = name;
-		this._defaults = { stores: {} };
+		this._defaults = {};
 		this._options  = {};
+		this._extensions = {};
+		this._stores = {};
 		this._options = $.extend( {}, this._defaults, options );
 		
 		// Access to jQuery and DOM versions of element
@@ -953,48 +1035,28 @@ F.Module = (function(undefined){
 		this.el  = null;
 	}
 
+	// Attach all inheritable methods to the Module prototype.
 	F.compose(Module.prototype, {
 		/**
-		* initializes the module on the specified element with the given options
+		* Initializes the module on the specified element with the given options
+		*
+		* Start is an empty function by default. Override it with your own implementation;
+		* 
 		* @param {Element} element - DOM element where module will be initialized
+		* @param {Object} extensions - extensions to be used by module
 		* @param {Object} stores - stores to be used by module
 		*/
-		start : function(element, stores) {
-			this.el = element;
-			this.$el = document.querySelector('[data-module="' + this._name + '"]');
-
-
-			// Render the module components
-			// ----------------------------
-			// With React
-			// React.render(<MyComponent/>, this.$el);
-			//
-			// With Backbone
-			// var view = new Backbone.View({
-			//		render: function(){
-			//			this.$el.html('<h1>Hello</h1>')
-			//		}
-			//	});
-			//
-			// With Riot
-			// riot.mount(this.$el, this._name, this._options);
-
-			// register for listening to events
-			// --------------------------------
-			// this._sandbox.subscribe(
-			//		'channel',
-			//		function(payload){
-			//			// handle payload
-			//		},
-			//		this
-			// );
+		start : function(element, extensions, stores) {
+			throw new Error("Module initialization not done. Override this function");
 		},
 
 		/**
 		* Destroys the module by unsubscribing for events and removing it from the DOM
+		*
+		* Destroy is an empty function by default. Override it with your own implementation;
 		*/
 		stop: function() {
-			this.$el.innerHTML = '';
+			throw new Error("Module stopping not done. Override this function");
 		}
 	});
 
@@ -1210,270 +1272,3 @@ F.router = (function($, crossroads, undefined){
 		stop	: stop
 	};
 }(jQuery, crossroads));
-/**
- * AJAX / HTTP Extension
- *
- * - Hide ajax communication details - Modules don't need to know of it
- * - Provide common request interface - Modules use this interfce to specify data to send to the server
- * - Provide common response interface - Modules use this interface to retrive data from the response
- * - Manage server failures - Modules only care if they got what they wanted or not, don't care why
- *
- * @see http://davidwalsh.name/fetch
- * @see https://github.com/github/fetch
- */
-
-/* global fetch */
-/* global jQuery */
-F.Core.http = F.http = (function($, undefined){
-	"use strict";
-
-	var defaults = {
-		headers: {
-			'Accept'		: 'application/json',
-			'Content-Type'	: 'application/json',
-		},
-		mode		: 'cors',
-		cache		: 'default',
-		credentials	: 'same-origin' // include cookies
-	};
-
-	/**
-	 * Checks if a {Response} to a {Request} is non-error
-	 * @param {Response} the response to be checked
-	 */
-	function _checkStatus(response) {
-		if (response.status >= 200 && response.status < 300) {
-			return response;
-		} else {
-			var error = new Error(response.statusText);
-			error.response = response;
-			throw error;
-		}
-	}
-
-	/**
-	 * Converts a response into JSON
-	 * @param {Response} the response to be converted
-	 * @return {Promise} a promise that resolves to the JSON data after the request
-	 */
-	function _parseJson(response) {
-		return response.json();
-	}
-
-	/**
-	 * fetches something in the path using HTML5 fetch API
-	 * @param {String} path - the path to the resource you want to fetch
-	 * @param {Object} options - the options to be used when making the request
-	 * @return {Promise} a promise that resolves to the Response of the Request
-	 */
-	function _fetch(path, options){
-
-		if(options){
-			// merge it with the defaults
-			options = $.extend( {}, defaults, options );
-		}
-		return fetch(path, options)
-				.then(_checkStatus)
-				.then(_parseJson)
-				.catch(function(error){
-					// notify caller of error
-					throw new Error("There's been a problwm with your operation", error);
-				});
-	}
-
-	/**
-	 * Makes an XHR request
-	 * @param {Object} the request configuration object
-	 */
-	function _xhr(path, options){
-		return $.ajax(path, options);
-	}
-
-	// Public API
-	// ----------
-
-	/**
-	 * Common interface. It will use fetch for new browsers and $.ajax for older implementation internally
-	 * @param {String} path - the path to the resource you want to fetch
-	 * @param {Object} options - the options to be used when making the request
-	 */
-	function request(path, options){
-		if(window.fetch && typeof window.fetch === 'function'){
-			return _fetch(path, options);
-		} else {
-			return _xhr(path, options);
-		}
-	}
-
-	// Return public methods
-	return {
-		request: request
-	};
-}(jQuery));
-/**
- * DOM Extension for the core.
- * It exposes the same interface always but allows choosing the implementation from a available list of implementations
- *
- * Maybe instead of trying to wrap jQuery just return an instance of it.
- * - Pro argument: Save LOC
- * - Con argument: If we, decide to switch from jQuery, we must keep the same interface, so we don't affect the rest of the app
- */
-
-/* global jQuery */
-F.$ = (function($, undefined){
-	"use strict";
-
-	return {
-
-		/**
-		 * Returns the first element that is a descendant of the element
-		 * on which it is invoked that matches the specified group of selectors.
-		 * @param {HTMLElement} root parent element to query off of
-		 * @param {string} selector query string to match on
-		 *
-		 * @returns {HTMLElement} first element found matching query
-		 */
-		query: function(root, selector) {
-			// Aligning with native which returns null if not found
-			return $(root || 'html').find(selector)[0] || null;
-		},
-
-		/**
-		 * Returns a non-live NodeList of all elements descended from the
-		 * element on which it is invoked that match the specified group of CSS selectors.
-		 * @param {HTMLElement} root parent element to query off of
-		 * @param {string} selector query string to match on
-		 *
-		 * @returns {Array} elements found matching query
-		 */
-		queryAll: function(root, selector) {
-			return $.makeArray($(root).find(selector));
-		},
-
-		/**
-		 * Adds event listener to element via jquery
-		 * @param {HTMLElement} element Target to attach listener to
-		 * @param {string} type Name of the action to listen for
-		 * @param {function} listener Function to be executed on action
-		 *
-		 * @returns {void}
-		 */
-		on: function(element, type, listener) {
-			$(element).on(type, listener);
-		},
-
-		/**
-		 * Removes event listener to element via jquery
-		 * @param {HTMLElement} element Target to remove listener from
-		 * @param {string} type Name of the action remove listener from
-		 * @param {function} listener Function to be removed from action
-		 *
-		 * @returns {void}
-		 */
-		off: function(element, type, listener) {
-			$(element).off(type, listener);
-		},
-
-		/**
-		 * Changes or get an HTMLElement Css properties
-		 * @param  {HTMLElement} element Target to get or change css properties
-		 * @param  {PlainObject} props   Object with css properties to be set on element
-		 *
-		 * @see http://api.jquery.com/css/
-		 *
-		 * @return {void}
-		 */
-		css: function(element, props) {
-			$(element).css(props);
-		}
-	};
-}(jQuery));
-/**
- * Storage extension for the core.
- * Initial code taken from CacheProvider of Dustin Diaz (@ded)
- * http://www.dustindiaz.com/javascript-cache-provider/
- *
- * Taken from Cache provider from paramana of Gia (@bonejp).
- */
-
-F.storage = (function(undefined){
-"use strict";
-
-// values will be stored here
-    var CacheProvider = {},
-        _cache        = {};
-
-    CacheProvider = {
-        /**
-         * {String} k - the key
-         * {Boolean} local - get this from local storage?
-         * {Boolean} o - is the value you put in local storage an object?
-         */
-        get: function(k, local, o) {
-            if (local && CacheProvider.hasLocalStorage) {
-                var action = o ? 'getObject' : 'getItem';
-                return localStorage[action](k) || undefined;
-            }
-            else {
-                return _cache[k] || undefined;
-            }
-        },
-        /**
-         * {String} k - the key
-         * {Object} v - any kind of value you want to store
-         * however only objects and strings are allowed in local storage
-         * {Boolean} local - put this in local storage
-         */
-        set: function(k, v, local) {
-            if (local && CacheProvider.hasLocalStorage) {
-                try {
-                    localStorage.setItem(k, v);
-                }
-                catch (ex) {
-                    if (ex.name == 'QUOTA_EXCEEDED_ERR') {
-                        // developer needs to figure out what to start invalidating
-                        throw v;
-                    }
-                }
-            }
-            else {
-                // put in our local object
-                _cache[k] = v;
-            }
-            // return our newly cached item
-            return v;
-        },
-        /**
-         * {String} k - the key
-         * {Boolean} local - put this in local storage
-         */
-        clear: function(k, local) {
-            if (local && CacheProvider.hasLocalStorage) {
-                localStorage.removeItem(k);
-            }
-            // delete in both caches - doesn't hurt.
-            delete _cache[k];
-        },
-        /**
-         * Empty the cache
-         *
-         * {Boolean} all - if true clears everything and the varibles cache
-         */
-        empty: function(all) {
-            if (CacheProvider.hasLocalStorage)
-                localStorage.clear();
-
-            if (all)
-                _cache = {};
-        }
-    };
-
-    try {
-        CacheProvider.hasLocalStorage = ('localStorage' in window) && window.localStorage !== null;
-    }
-    catch (ex) {
-        CacheProvider.hasLocalStorage = false;
-    }
-
-    return CacheProvider;
-}());

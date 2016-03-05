@@ -1,7 +1,7 @@
 {
   "name": "F",
   "description": "F - a JavaScript framework for modular and scalable SPAs",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/dareenzo/F-ES.git"

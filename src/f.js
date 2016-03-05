@@ -16,7 +16,7 @@ var F = (function($, _, undefined){
     var previousF = F;
 
     // Current version of the library. Keep in sync with `package.json` and `bower.json`.
-    F.VERSION = '0.0.2';
+    F.VERSION = '0.1.0';
 
     // Set framework to debug mode. Disabled by default
     F.DEBUG = false;
