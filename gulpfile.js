@@ -21,18 +21,14 @@ var onError = function(error){
 gulp.task('build', function(){
     gulp.src([
         'src/f.js', 
-        'src/ext.util.js',
-        'src/dispatcher.js',
-        'src/injector.js',
+        'src/lib/dispatcher.js',
+        'src/lib/injector.js',
         'src/core.js',
         'src/sandbox.js',
         'src/store.js',
         'src/extension.js',
         'src/module.js',
-        'src/router.js',
-        'src/ext.http.js',
-        'src/ext.dom.js',
-        'src/ext.storage.js',
+        'src/router.js'
     ])
     .pipe(concat('f.js'))
     .pipe(gulp.dest('dist/'));
@@ -41,16 +37,14 @@ gulp.task('build', function(){
 gulp.task('build-min', function(){
     gulp.src([
         'src/f.js', 
-        'src/ext.util.js',
-        'src/core.js',
         'src/dispatcher.js',
+        'src/injector.js',
+        'src/core.js',
         'src/sandbox.js',
         'src/store.js',
+        'src/extension.js',
         'src/module.js',
-        'src/router.js',
-        'src/ext.http.js',
-        'src/ext.dom.js',
-        'src/ext.storage.js',
+        'src/router.js'
     ])
     .pipe(uglify({preserveComments: 'some'}))
     .pipe(concat('f.min.js'))
