@@ -4,7 +4,7 @@
 
 /* global jQuery, _ */
 
-var F = (function(){
+var F = (function($, _, undefined){
     "use strict";
 
     // Initial Setup
@@ -28,29 +28,51 @@ var F = (function(){
         return this;
     };
 
-    // Extensions Plugging
-    // -------------------
-    /*
-    F.Core = Core;
-    F.Core.dispatcher = Dispatcher; // don't expose the dispatcher. Only core has it
-    F.Core.http = Http;
-    F.Core.log = F.log = new Log();
-    F.Sandbox = Sandbox;
-    F.Store = Store;
-    F.util = Util;
-    F.http = Http;
-    F.$ = DOM;
-    F.Storage = Storage;
-    F.Module = Mod;
+    // Util
+    // ---
 
-    F.router = Router;
-    // We can use backbone views or riot components
-    // F.BackboneView = View;
+    // Composes objects by combining them into a new
+    F.compose = _.extend;
 
-    // Shortcuts
-    // ---------
-    F.ready = Util.ready;
-    F.extend = Util.extend;
-    */
+    /**
+     * Helper function to correctly set up the prototype chain for subclasses.
+     * Similar to `goog.inherits`, but uses a hash of prototype properties and
+     * class properties to be extended.
+     *
+     * Taken from Backbone.js of Jeremy Ashkenas
+     * @see https://github.com/jashkenas/backbone/blob/master/backbone.js#L1839
+     * 
+     * @param  {Object} protoProps - the instance properties for the *Class*
+     * @param  {Object} staticProps - the static properties for the *Class*
+     * @return {Function} - a new constructor function
+     */
+    F.extend = function(protoProps, staticProps) {
+        var parent = this;
+        var child;
+
+        // The constructor function for the new subclass is either defined by you
+        // (the "constructor" property in your `extend` definition), or defaulted
+        // by us to simply call the parent constructor.
+        if (protoProps && _.has(protoProps, 'constructor')) {
+            child = protoProps.constructor;
+        } else {
+            child = function(){ return parent.apply(this, arguments); };
+        }
+
+        // Add static properties to the constructor function, if supplied.
+        _.extend(child, parent, staticProps);
+
+        // Set the prototype chain to inherit from `parent`, without calling
+        // `parent`'s constructor function and add the prototype properties.
+        child.prototype = _.create(parent.prototype, protoProps);
+        child.prototype.constructor = child;
+
+        // Set a convenience property in case the parent's prototype is needed
+        // later.
+        child.__super__ = parent.prototype;
+
+        return child;
+    };
+
     return F;
-}());
+}(jQuery, _));
