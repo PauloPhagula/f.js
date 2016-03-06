@@ -1,7 +1,7 @@
 /**
  * Sandbox
  *
- * Abstracton in the `Core` for use by `Module`s.
+ * Abstracton into the `Core` for use by `Module`s to interact with the environment.
  */
 
 F.Sandbox = (function(undefined){
@@ -89,34 +89,24 @@ F.Sandbox = (function(undefined){
 		},
 
 		/**
-		* AJAX abstracion
-		* @param {String} path - the path to the resource you want to fetch
-		* @param {Object} options - the options to be used when making the request
-		*/
-		request : function (path, options) {
-			return this.core.http.request(path, options);
-		},
-
-		/**
-		* Returns any configuration information that was output into the page
+		* Returns global configuration data
 		* for this instance of the module.
 		* @param {String} name - Specific config parameter
 		* @returns {*} config value or the entire configuration JSON object
 		*                if no name is specified (null if either not found)
 		*/
 		getConfig : function (name) {
-			return this.core.getModuleConfig(this.element, name);
+			return this.core.getConfig(this.element, name);
 		},
 
 		/**
-		* Passthrough method that signals that an error has occurred.
-		*
-		* @param {Number} severity - the severity number
-		* @param {String} msg - the log message
-		* @param {Object} obj - an object following the message. Usualy an error
+		* Passthrough method that signals that an error has occurred. If in development mode, an error
+		* is thrown. If in production mode, an event is fired.
+		* @param {Error} exception - the exception object to use
+		* @returns {void}
 		*/
-		reportError : function (severity, msg, obj) {
-			return this.core.reportError(severity, msg, obj);
+		reportError : function (exception) {
+			return this.core.reportError(exception);
 		}
 	});
 

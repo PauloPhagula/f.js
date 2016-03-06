@@ -13,6 +13,14 @@ var app = (function() {
 	// Start by creating the core
 	var core = new F.Core();
 
+	// Setting configuration for the app
+	core.setConfig({false: true});
+
+	// Register global error handler
+	core.dispatcher.subscribe('error', function(error){
+		console.log('error' + error.exception); // Could be send via email
+	});
+
 	// Logger Extension
 	var loggerExtFactory = function(){
 
@@ -97,12 +105,12 @@ var app = (function() {
 	var store = new TodoStore(core.dispatcher, 'todoStore');
 	core.registerStore('todoStore', store);
 
-
 	// Todo Module depending on logger extension and todoStore which will be injected on startup by the core
 	var TodoMVC = F.Module.extend({
 		start : function(element, extensions, stores){
 			
 			this._sandbox.dispatch({type: "da", data: null});
+			this._sandbox.reportError(new Error('Test error'));
 
 			var logger = extensions["logger"];
 			
@@ -132,32 +140,29 @@ var app = (function() {
 
 
 	// Router registrations
-	F.router.add('/all', function(){
+	core.router.add('/all', function(){
 		console.log('route: /all is hit');
 	});
 
-	F.router.add('/active', function(){
+	core.router.add('/active', function(){
 		console.log('route: /active is hit');
 	});
 
-	F.router.add('/completed', function(){
+	core.router.add('/completed', function(){
 		console.log('route: /completed is hit');
 	});
-
 
 	// Application initialization
 	// ---
 
-	var init = function() {
+	var boot = function() {
 		core.init();
-		core.start('todomvc', document.querySelector('[data-module="todomvc"]'));
-		F.router.start();
 	};
 
 	return {
-		init: init
+		boot: boot
 	};
 
 }());
 
-app.init();
+app.boot();

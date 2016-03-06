@@ -71,48 +71,6 @@ F.util = (function($, _, undefined){
         */      
         template : _.template,
 
-		/**
-		 * Makes an object production-ready
-		 * TO-DO: update method to use ES6 Proxies
-		 * @see https://www.nczonline.net/blog/2009/04/28/javascript-error-handling-anti-pattern/
-		 * @example
-		 * var system = {
-		 *		fail: function(){
-		 *			throw new Error("Oops!");
-		 *		}
-		 *	};
-		 *
-		 *	function log(severity, message){
-		 *		alert(severity + ":" + message);
-		 *	}
-		 *
-		 *	if (!debugMode){
-		 *		productionize(system);
-		 *	}
-		 *
-		 *	system.fail();   //error is trapped!
-		 */
-		productionize: function(object){
-			var name,
-        		method;
-
-			for (name in object){
-				method = object[name];
-				if (typeof method === "function"){
-					object[name] = function(name, method){
-						return function(){
-							try {
-								return method.apply(this, arguments);
-							} catch (ex) {
-								// this should use our logger from the core
-								console.log(1, name + "(): " + ex.message);
-							}
-						};
-					}(name, method);
-				}
-			}
-		},
-
 		/*
 		* memoize.js
 		* by @philogb and @addyosmani

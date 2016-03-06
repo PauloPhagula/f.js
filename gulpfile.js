@@ -23,12 +23,12 @@ gulp.task('build', function(){
         'src/f.js', 
         'src/lib/dispatcher.js',
         'src/lib/injector.js',
+        'src/lib/router.js',
         'src/core.js',
         'src/sandbox.js',
         'src/store.js',
         'src/extension.js',
-        'src/module.js',
-        'src/router.js'
+        'src/module.js'
     ])
     .pipe(concat('f.js'))
     .pipe(gulp.dest('dist/'));
@@ -37,14 +37,14 @@ gulp.task('build', function(){
 gulp.task('build-min', function(){
     gulp.src([
         'src/f.js', 
-        'src/dispatcher.js',
-        'src/injector.js',
+        'src/lib/dispatcher.js',
+        'src/lib/injector.js',
+        'src/lib/router.js',
         'src/core.js',
         'src/sandbox.js',
         'src/store.js',
         'src/extension.js',
-        'src/module.js',
-        'src/router.js'
+        'src/module.js'
     ])
     .pipe(uglify({preserveComments: 'some'}))
     .pipe(concat('f.min.js'))
