@@ -16,7 +16,7 @@ var F = (function($, _, undefined){
     var previousF = F;
 
     // Current version of the library. Keep in sync with `package.json` and `bower.json`.
-    F.VERSION = '0.1.0';
+    F.VERSION = '0.1.1';
 
     // Set framework to debug mode. Disabled by default
     F.DEBUG = false;
@@ -541,529 +541,6 @@ F.injector = (function(undefined){
     };
 }());
 /**
- * Core
- *
- * The `Core` contains the main application object that is the heart of the 
- * application architecture.
- */
-
-/* global injector */
-
-F.Core = (function(injector, dispatcher, undefined) {
-	"use strict";
-
-	var _extensions = {},
-        _modules    = {},
-        _stores	    = {}
-    ;
-
-    function Core() {}
-
-    F.compose(Core.prototype, {
-
-    	dispatcher: dispatcher,
-
-		/**
-		 * Method used to add extensions on the core.
-		 * @param  {string}  extensionName  unique extension name. This name will be used when injecting the extension
-		 * @param  {array}   dependencies   list of dependencies this extension relies on. Generally these are other extensions
-		 * @param  {functon} factory        the extension factory function
-		 * @param  {object}  options        options for the extension initialization
-		 * @return {void}
-		 *
-		 * @example
-		 * var core = new F.Core();
-		 *
-		 * var loggerExtFactory = function(){
-		 *	    var Logger = F.Extension.extend({
-		 *	        init: function(options) {},
-		 *	        log: function(obj) { console.log(obj);}
-		 *	    });
-		 *
-		 *	    return new Logger();
-		 * };
-		 * 
-		 * core.registerExtension("logger", [], loggerExtFactory, {});
-		 *
-		 * var calculatorExtFactory = function(logger) {
-		 * 		var Calculator = F.Extension.extend({
-		 * 			init: function(options) {},
-		 * 			add: function(a,b) {return a+b;},
-		 * 			subsctract: function(a,b) {return a-b;}
-		 * 		});
-		 *
-		 * 		return new Calculator();
-		 * }
-		 *
-		 * core.registerExtension("calculator", ["logger"], calculatorExtFactory, {})
-		 */
-		registerExtension : function(extensionName, dependencies, factory, options) {
-			if (_extensions.hasOwnProperty(extensionName))
-				throw new Error("An extension with the given name has already been registered. Ext name: " + extensionName);
-
-			dependencies = dependencies || [];
-			options = options || {};
-
-			var injectionSpec = dependencies;
-		    injectionSpec.push(factory);
-
-		    var extension = F.injector.resolve(injectionSpec);
-		    extension.init(options);
-		    _extensions[extensionName] = extension;
-
-		    F.injector.register(extensionName, extension);
-		},
-		
-		/**
-		 * Registers a store on the core
-		 * @param  {string} name      unique store identifier
-		 * @param  {Store}  instance  the store instance
-		 * @return {void}
-		 */
-		registerStore : function(name, instance) {
-    		_stores[name] = instance;
-    	},
-
-		/**
-		 * Method used to register modules on the core.
-		 * @param  {string}   moduleName  unique module identifier
-		 * @param  {array}    extensions  List of extensions this module relies on. 
-		 *                                These are the only extensions the module will be allowed to use.
-		 * @param  {function} factory     the module factory function
-		 * @param  {object}   options     options for the module initialization
-		 * @return {void}
-		 */
-		registerModule: function(moduleName, extensions, stores, factory, options) {
-			if (_extensions.hasOwnProperty(moduleName))
-				throw new Error("Module with given name has already been registered. Mod name: " + moduleName);
-
-			_modules[moduleName] = {
-				factory    : factory,
-				extensions : extensions,
-				stores 	   : stores,
-				options    : options,
-				instance   : null
-			};
-		},
-
-		/**
-		 * Starts a given module on a DOM element.
-		 * @param  {string} moduleName unique module identifier
-		 * @param  {string} element    the DOM element to which the module will be tied
-		 * @return {void}
-		 */
-		start: function(moduleName, element) {
-			if (!_modules.hasOwnProperty(moduleName))
-				throw new Error("Trying to start non-registered module: " + moduleName);
-
-			var module = _modules[moduleName];
-			var sandbox = new F.Sandbox(this, moduleName, element);
-			module.instance = new module.factory(sandbox, moduleName, module.options);
-
-			var extensions = {};
-			var stores     = {};
-			
-			for (var i = 0; i < module.extensions.length; i++) {
-				var extName = module.extensions[i];
-
-				if (_extensions.hasOwnProperty(extName))
-					extensions[extName] = _extensions[extName];
-				else
-					throw new Error("Module requires an unregistered extensions: " + extName);
-			}
-
-			for (var i = 0; i < module.stores.length; i++ ) {
-				var storeName = module.stores[i];
-
-				if (_stores.hasOwnProperty(storeName))
-					stores[storeName] = _stores[storeName];
-				else
-					throw new Error("Module requires an unregistered store: " + storeName);
-			}
-
-			module.instance.start(element, extensions, stores);
-		},
-
-		/**
-		 * Stops a given module.
-		 * @param  {string} moduleName unique module identifier
-		 * @return {void}
-		 */
-		stop: function(moduleName) {
-			var data = _modules[moduleName];
-			if(data.instance){
-				data.instance.stop();
-				data.instance = null;
-			}
-		},
-
-		/**
-		 * Restarts the given module.
-		 * @param  {string} moduleName unique module identifier
-		 * @return {void}
-		 */
-		restart: function(moduleName) {
-			this.stop(moduleName);
-			this.start(moduleName);
-		},
-
-		/**
-		 * Starts all registered modules.
-		 * @return {void}
-		 */
-		startAll: function() {
-			for (var moduleName in _modules){
-				if(_modules.hasOwnProperty(moduleName)){
-					this.start(moduleName);
-				}
-			}
-		},
-
-		/**
-		 * Stops all registered modules.
-		 * @return {void}
-		 */
-		stopAll: function() {
-			for (var moduleName in _modules){
-				if(_modules.hasOwnProperty(moduleName)){
-					this.stop(moduleName);
-				}
-			}
-		},
-
-		/**
-		 * Reports errors in the system.
-		 * @param  {int}    severity severity level
-		 * @param  {string} msg      message
-		 * @param  {object} obj      object to complemenet the message
-		 * @return {void}
-		 */
-		reportError: function(severity, msg, obj) {
-			this.log(severity, msg, obj);
-		},
-
-		/**
-		 * Initialize is an empty function by default. Override it with your own logic.
-		 * @return {void}
-		 */
-		init: function() {}
-	});
-
-    Core.extend = F.extend;
-	return Core;
-}(F.injector, F.dispatcher));
-/**
- * Sandbox
- *
- * Abstracton in the `Core` for use by `Module`s.
- */
-
-F.Sandbox = (function(undefined){
-	"use strict";
-
-	/**
-	 * @constructor
-	 * @param  {Core} core - the application core
-	 * @param  {String} moduleName - the module name
-	 * @param  {HTMLElement} element - the element underwhich this sandbox has control
-	 * @return {void}
-	 */
-	function Sandbox (core, moduleName, element) {
-		this.core 	  = core;
-		this.moduleName = moduleName;
-    	this.element  = element;
-	}
-
-	// Attach all inheritable methods to the Sanbox prototype.
-	F.compose(Sandbox.prototype, {
-		/**
-		* Checks if a module can publish a certain event.
-		* By default any module can publish. Override with your implementation.
-		* 
-		* @param  {String} moduleName - The Id of the module for which we're checking permissions
-		* @param  {String} channel - The event for we're checking if module has permission to publish to
-		* @return {Boolean} - true if module can publish. false otherwise
-		*/
-		moduleCanPublish : function (moduleName, channel) {
-			return true; // no-op
-		},
-
-		/**
-		* Publishes data into the core's dispatcher
-		* @param {String} channel - the channel into which the message will be published
-		* @param {Object} data - the data to be published
-		* @param {Function} callback - a callback to be called once publishing is done
-		* @param {Object} context - the context under which the callback will be called
-		*/
-		publish : function (channel, data, callback, context) {
-			if ( this.moduleCanPublish(this.moduleName, channel) ) {
-				this.core.dispatcher.publish.call(channel, data);
-			}
-		},
-
-		/**
-		 * Checks if a module can publish an action
-		 * @param  {string} moduleName unique module identifier
-		 * @param  {string} actionType unique action type identifier
-		 * @return {boolean}
-		 */
-		moduleCanDispatchAction: function(moduleName, actionType) {
-			return true; // no-op
-		},
-
-		/**
-		 * Publishes an action using the internal dispatcher creator.
-		 * This could also be done using an action creator
-		 * @return {void}
-		 */
-		dispatch: function(type, data) {
-			if (! this.moduleCanDispatchAction(this.moduleName, type))
-				throw new Error("module " + this.moduleName + " is not authorized to create action: " + action);
-
-			this.core.dispatcher.dispatch({type: type, data: data});
-		},
-
-		/**
-		* Subscribes to a channel of the core's dispatcher
-		* @param {String} channel - the channel to which messages will be listened
-		* @param {Function} callback - the function to be executed when a message in the channel is published
-		* @param {Object} context - the context under which the callback will be called
-		*/
-		subscribe : function (channel, callback, context) {
-			this.core.dispatcher.subscribe( channel, callback, context );
-		},
-
-		/**
-		* Unsubscribes to a channel of the core's dispatcher
-		* @param {String} channel - the channel in which we want to unsubscribe the callback
-		* @param {Function} callback - the function which we want to remove
-		*/
-		unsubscribe : function (channel, callback) {
-			this.core.dispatcher.unsubscribe(channel, callback);
-		},
-
-		/**
-		* AJAX abstracion
-		* @param {String} path - the path to the resource you want to fetch
-		* @param {Object} options - the options to be used when making the request
-		*/
-		request : function (path, options) {
-			return this.core.http.request(path, options);
-		},
-
-		/**
-		* Returns any configuration information that was output into the page
-		* for this instance of the module.
-		* @param {String} name - Specific config parameter
-		* @returns {*} config value or the entire configuration JSON object
-		*                if no name is specified (null if either not found)
-		*/
-		getConfig : function (name) {
-			return this.core.getModuleConfig(this.element, name);
-		},
-
-		/**
-		* Passthrough method that signals that an error has occurred.
-		*
-		* @param {Number} severity - the severity number
-		* @param {String} msg - the log message
-		* @param {Object} obj - an object following the message. Usualy an error
-		*/
-		reportError : function (severity, msg, obj) {
-			return this.core.reportError(severity, msg, obj);
-		}
-	});
-
-	Sandbox.extend = F.extend;
-	return Sandbox;
-}());
-/**
- * Flux Store
- *
- * Is where the `Core` and all of our feature `Modules` access data and business
- * logic in our SPA.
- */
-
-F.Store = (function(undefined){
-	"use strict";
-
-	var CHANGE = 'CHANGE',
-		ACTION = 'ACTION';
-
-	function Store (dispatcher, name) {
-		this._dispatcher = dispatcher;
-		this._name = name;
-
-		// Indicates if this store is updating.
-		// When updating must not accept dispatch calls.
-		this._isUpdating = false;
-
-		this._data = [];
-		this.actions = {};
-
-		this.init.apply(this, arguments);
-	}
-
-	// Attach all inheritable methods to the Store prototype.
-	F.compose(Store.prototype, {
-
-		/**
-		* Initialize is an empty function by default. Override it with your own
-		* initialization logic.
-		* 
-		* @param {PubSub} dispatcher - the dispatcher
-		* @param {String} name - the name of this store
-		*/
-		init : function() {
-			throw new Error("Store initialization not done. Override this function");
-		},
-
-		/**
-		* Allows views to subscribe to this store's change event
-		* @param {function} callback
-		*/
-		addChangeListener: function(callback) {
-			// Create _callbacks object, unless it already exists
-			var calls = this._callbacks || (this._callbacks = {});
-
-			// Create an array for the given event key, unless it exists, then
-			// append the callback to the array
-			(this._callbacks[CHANGE] || (this._callbacks[CHANGE] = [])).push({ callback : callback });
-		},
-
-		/**
-		 * Allows views to unsubscribe to this store's change event
-		* @param {function} callback
-		*/
-		removeChangeListener: function(callback) {
-			// Return if there isn't a _callbacks object, or
-			// if it doesn't contain an array for the given event
-			var list, calls, i, l;
-			if (!(calls = this._callbacks)) return this;
-			if (!(list  = this._callbacks[CHANGE])) return this;
-
-			// remove callback
-			for (i = 0, l = list.length; i < l; i++) {
-				var handler = list[i];
-				if (handler === callback) {
-					list.splice(i);
-				}
-			}
-		},
-
-		/**
-		* Runs the callbacks which were registered by views on this store
-		* @method
-		* @private
-		*/
-		emitChange: function() {
-			// Return if there isn't a _callbacks object, or
-			// if it doesn't contain an array for the given event
-			var list, calls, i, l;
-			if (!(calls = this._callbacks)) return this;
-			if (!(list  = this._callbacks[CHANGE])) return this;
-
-			// Invoke the callbacks
-			for (i = 0, l = list.length; i < l; i++) {
-				var handler = list[i];
-				handler.callback.apply();
-			}
-		}
-	});
-
-	Store.extend = F.extend;
-	return Store;
-}());
-/**
- * Extension
- *
- * `Extension`s augment the capabilities of the `Core`.
- */
-
-F.Extension = (function(undefined){
-    "use strict";
-
-    function Extension () {}
-
-    // Attach all inheritable methods to the Extension prototype.
-    F.compose(Extension.prototype, {
-
-        /**
-         * Init is an empty function by default. Override with your own logic.
-         * @return {void}
-         */
-        init: function(options) {
-            this._defaults = {};
-            this._options = $.extend( {}, this._defaults, options );
-        }
-    });
-
-    Extension.extend = F.extend;
-    return Extension;
-}());
-
-/**
- * Module
- *
- * A `Module` is an independent unit of functionallity that is part of the total 
- * structure of a web application, which consists of HTML + CSS + JavaScript 
- * and which should be able to live on it's own.
- */
-
-/* global riot, $ */
-F.Module = (function(undefined){
-	"use strict";
-
-	var module_selector = '[data-module]';
-
-	/**
-	 * @constructor
-	 * @param {Sandbox} the modules sandbox
-	 * @param {Object} options - settings for the module
-	 */
-	function Module(sandbox, name, options) {
-		this._sandbox = sandbox;
-		this._name = name;
-		this._defaults = {};
-		this._options  = {};
-		this._extensions = {};
-		this._stores = {};
-		this._options = $.extend( {}, this._defaults, options );
-		
-		// Access to jQuery and DOM versions of element
-		this.$el = null;
-		this.el  = null;
-	}
-
-	// Attach all inheritable methods to the Module prototype.
-	F.compose(Module.prototype, {
-		/**
-		* Initializes the module on the specified element with the given options
-		*
-		* Start is an empty function by default. Override it with your own implementation;
-		* 
-		* @param {Element} element - DOM element where module will be initialized
-		* @param {Object} extensions - extensions to be used by module
-		* @param {Object} stores - stores to be used by module
-		*/
-		start : function(element, extensions, stores) {
-			throw new Error("Module initialization not done. Override this function");
-		},
-
-		/**
-		* Destroys the module by unsubscribing for events and removing it from the DOM
-		*
-		* Destroy is an empty function by default. Override it with your own implementation;
-		*/
-		stop: function() {
-			throw new Error("Module stopping not done. Override this function");
-		}
-	});
-
-	Module.extend = F.extend;
-	return Module;
-}());
-/**
  * Router - the app router
  *
  * @see https://github.com/mmikowski/urianchor by Mike Mikowski
@@ -1272,3 +749,690 @@ F.router = (function($, crossroads, undefined){
 		stop	: stop
 	};
 }(jQuery, crossroads));
+/**
+ * Core
+ *
+ * The `Core` contains the main application object that is the heart of the 
+ * application architecture.
+ */
+
+/* global injector */
+
+F.Core = (function(injector, dispatcher, router, undefined) {
+	"use strict";
+
+	// Private
+	// ---
+	var _config      = { debug: false },   // Global configuration
+		_extensions  = {},   // Information about each registered extension by extensionName
+        _modules     = {},   // Information about each registered module by moduleName
+        _stores	     = {},   // Information about each registered store by storeName
+        _initialized = false // Flag whether the application has been initialized
+    ;
+
+    /**
+     * Resets all state to its default values
+     * @return {void}
+     * @private
+     */
+    function reset() {
+    	_config      = {};
+    	_extensions  = {};
+    	_modules     = {};
+    	_stores      = {};
+    	_initialized = false;
+    }
+
+    /**
+	 * Signals that an error has occurred. If in development mode, an error
+	 * is thrown. If in production mode, an event is fired.
+	 * @param {Error} [exception] The exception object to use.
+	 * @returns {void}
+	 * @private
+	 */
+    function error(exception) {
+		if (_config.debug) 
+			throw exception;
+		else
+			dispatcher.publish('error', { exception: exception });
+	}
+
+	/**
+	 * Makes an object production-ready by wrapping all its methods with a 
+	 * try-catch so that objects don't need to worry about trapping their own 
+	 * errors. When an error occurs, the error event is fired with the error information.
+	 * @see https://www.nczonline.net/blog/2009/04/28/javascript-error-handling-anti-pattern/
+	 * @param {Object} object Any object whose public methods should be wrapped.
+	 * @param {string} objectName The name that should be reported for the object
+	 *                            when an error occurs.
+	 * @returns {void}
+	 * @private
+	 * 
+	 * @example
+	 * var system = {
+	 *		fail: function(){
+	 *			throw new Error("Oops!");
+	 *		}
+	 *	};
+	 *
+	 *	function log(severity, message){
+	 *		alert(severity + ":" + message);
+	 *	}
+	 *
+	 *	if (!debugMode){
+	 *		productionize(system);
+	 *	}
+	 *
+	 *	system.fail();   //error is trapped!
+	 */
+	function productionize(object, objectName) {
+		var name,
+    		method;
+
+		for (name in object){
+			method = object[name];
+			if (typeof method === "function"){
+				object[name] = function(name, method){
+					return function(){
+						var errorPrefix = objectName + '.' + name + '() - ';
+						try {
+							return method.apply(this, arguments);
+						} catch (ex) {
+							ex.methodName = methodName;
+							ex.objectName = objectName;
+							ex.name = errorPrefix + ex.name;
+							ex.message = errorPrefix + ex.message;
+							error(ex);
+						}
+					};
+				}(name, method);
+			}
+		}
+	}
+
+
+	// Public
+	// ---
+    function Core() {}
+
+    F.compose(Core.prototype, {
+
+    	// App lifecycle
+		// ---
+		
+		/**
+		 * Initializes the application
+		 * @return {void}
+		 */
+		init: function(options) {
+			_config = $.extend({}, _config, options);
+
+			this.startAll(document.documentElement);
+
+			router.start();
+			dispatcher.publish('app init');
+			_initialized = true;
+		},
+
+		/**
+		 * Stops all modules and clears all saved state
+		 * @returns {Box.Application} The application object.
+		 */
+		destroy: function() {
+			this.stopAll(document.documentElement);
+			
+			reset();
+
+			router.stop();
+		},
+
+		// Registration Hooks
+		// ---
+
+		/**
+		 * Method used to add extensions on the core.
+		 * @param  {string}  extensionName  unique extension name. This name will be used when injecting the extension
+		 * @param  {array}   dependencies   list of dependencies this extension relies on. Generally these are other extensions
+		 * @param  {functon} factory        the extension factory function
+		 * @param  {object}  options        options for the extension initialization
+		 * @return {void}
+		 *
+		 * @example
+		 * var core = new F.Core();
+		 *
+		 * var loggerExtFactory = function(){
+		 *	    var Logger = F.Extension.extend({
+		 *	        init: function(options) {},
+		 *	        log: function(obj) { console.log(obj);}
+		 *	    });
+		 *
+		 *	    return new Logger();
+		 * };
+		 * 
+		 * core.registerExtension("logger", [], loggerExtFactory, {});
+		 *
+		 * var calculatorExtFactory = function(logger) {
+		 * 		var Calculator = F.Extension.extend({
+		 * 			init: function(options) {},
+		 * 			add: function(a,b) {return a+b;},
+		 * 			subsctract: function(a,b) {return a-b;}
+		 * 		});
+		 *
+		 * 		return new Calculator();
+		 * }
+		 *
+		 * core.registerExtension("calculator", ["logger"], calculatorExtFactory, {})
+		 */
+		registerExtension : function(extensionName, dependencies, factory, options) {
+			if (_extensions.hasOwnProperty(extensionName))
+				return error(new Error("An extension with the given name has already been registered. Ext name: " + extensionName));
+
+			dependencies = dependencies || [];
+			options = options || {};
+
+			var injectionSpec = dependencies;
+		    injectionSpec.push(factory);
+
+		    var extension = F.injector.resolve(injectionSpec);
+		    extension.init(options);
+		    _extensions[extensionName] = extension;
+
+		    F.injector.register(extensionName, extension);
+		},
+		
+		/**
+		 * Registers a store on the core
+		 * @param  {string} name      unique store identifier
+		 * @param  {Store}  instance  the store instance
+		 * @return {void}
+		 */
+		registerStore : function(name, instance) {
+    		_stores[name] = instance;
+    	},
+
+		/**
+		 * Method used to register modules on the core.
+		 * @param  {string}   moduleName  unique module identifier
+		 * @param  {array}    extensions  List of extensions this module relies on. 
+		 *                                These are the only extensions the module will be allowed to use.
+		 * @param  {function} factory     the module factory function
+		 * @param  {object}   options     options for the module initialization
+		 * @return {void}
+		 */
+		registerModule: function(moduleName, extensions, stores, factory, options) {
+			if (_extensions.hasOwnProperty(moduleName))
+				return error(new Error("Module with given name has already been registered. Mod name: " + moduleName));
+
+			_modules[moduleName] = {
+				factory    : factory,
+				extensions : extensions,
+				stores 	   : stores,
+				options    : options,
+				instance   : null
+			};
+		},
+
+		// Module lifecycle
+		// ---
+
+		/**
+		 * Starts a given module on a DOM element.
+		 * @param  {string} moduleName unique module identifier
+		 * @param  {string} element    the DOM element to which the module will be tied
+		 * @return {void}
+		 */
+		start: function(moduleName, element) {
+			if (!_modules.hasOwnProperty(moduleName))
+				return error(new Error("Trying to start non-registered module: " + moduleName));
+
+			var module = _modules[moduleName];
+			var sandbox = new F.Sandbox(this, moduleName, element);
+			module.instance = new module.factory(sandbox, moduleName, module.options);
+
+			var extensions = {};
+			var stores     = {};
+			
+			for (var i = 0; i < module.extensions.length; i++) {
+				var extName = module.extensions[i];
+
+				if (_extensions.hasOwnProperty(extName))
+					extensions[extName] = _extensions[extName];
+				else
+					return error(new Error("Module requires an unregistered extensions: " + extName));
+			}
+
+			for (var i = 0; i < module.stores.length; i++ ) {
+				var storeName = module.stores[i];
+
+				if (_stores.hasOwnProperty(storeName))
+					stores[storeName] = _stores[storeName];
+				else
+					return error(new Error("Module requires an unregistered store: " + storeName));
+			}
+
+			// Prevent errors from showing the browser, fire event instead
+			if (!_config.debug)
+				productionize(module.instance, moduleName);
+
+			module.instance.start(element, extensions, stores);
+		},
+
+		/**
+		 * Stops a given module.
+		 * @param  {string} moduleName unique module identifier
+		 * @return {void}
+		 */
+		stop: function(moduleName) {
+			var data = _modules[moduleName];
+
+			if (!(data && data.instance)) 
+				return error(new Error('Unable to stop module: ' + moduleName));
+			
+			data.instance.stop();
+			data.instance = null;
+		},
+
+		/**
+		 * Restarts the given module.
+		 * @param  {string} moduleName unique module identifier
+		 * @return {void}
+		 */
+		restart: function(moduleName) {
+			this.stop(moduleName);
+			this.start(moduleName);
+		},
+
+		/**
+		 * Starts all registered modules within an element. 
+		 * @return {void}
+		 */
+		startAll: function(root) {
+			for (var moduleName in _modules){
+				if(_modules.hasOwnProperty(moduleName)){
+					this.start(moduleName);
+				}
+			}
+
+			return this;
+		},
+
+		/**
+		 * Stops all registered modules within an element.
+		 * @return {void}
+		 */
+		stopAll: function(root) {
+			for (var moduleName in _modules){
+				if(_modules.hasOwnProperty(moduleName)){
+					this.stop(moduleName);
+				}
+			}
+
+			return this;
+		},
+
+		// Messaging
+		// ---
+		
+		/**
+		 * The dispatcher for communication
+		 * @todo don't expose the dispatcher. Proxy its methods instead.
+		 * @type {F.Dispatcher}
+		 */
+    	dispatcher: dispatcher,
+
+    	// Routing
+    	// ---
+    	
+    	/**
+    	 * The router for anchor management
+    	 * @todo  don't expose the router. Proxy its methods instead.
+    	 * @type {F.Router}
+    	 */
+    	router: router,
+
+		// Config
+		// ---
+		
+		/**
+		 * Returns configuration data
+		 * @param  {string} name the desired configuration parameter
+		 * @return {*}           config value or the entire JSON config object
+		 *                       if not name is specified (null if neither is found)
+		 */
+		getConfig: function(name) {
+			if (typeof name === 'undefined')
+				return _config;
+			else if (name in _config)
+				return _config[name];
+			else
+				return null;
+		},
+
+		/**
+		 * Sets the configuration data
+		 * @param {Object} config
+		 * @return {void}
+		 */
+		setConfig: function(config) {
+			if (_initialized)
+				return error(new Error('Cannot set configuration after application is initialized'));
+
+			_config = $.extend({}, _config, config);
+		},
+
+		// Error reporting
+		// ---
+
+		/**
+		 * Signals that an error has occurred. If in development mode, an error
+		 * is thrown. If in production mode, an event is fired.
+		 * @param {Error} [exception] The exception object to use.
+		 * @returns {void}
+		 */
+		reportError: error
+	});
+
+    Core.extend = F.extend;
+	return Core;
+}(F.injector, F.dispatcher, F.router));
+/**
+ * Sandbox
+ *
+ * Abstracton into the `Core` for use by `Module`s to interact with the environment.
+ */
+
+F.Sandbox = (function(undefined){
+	"use strict";
+
+	/**
+	 * @constructor
+	 * @param  {Core} core - the application core
+	 * @param  {String} moduleName - the module name
+	 * @param  {HTMLElement} element - the element underwhich this sandbox has control
+	 * @return {void}
+	 */
+	function Sandbox (core, moduleName, element) {
+		this.core 	  = core;
+		this.moduleName = moduleName;
+    	this.element  = element;
+	}
+
+	// Attach all inheritable methods to the Sanbox prototype.
+	F.compose(Sandbox.prototype, {
+		/**
+		* Checks if a module can publish a certain event.
+		* By default any module can publish. Override with your implementation.
+		* 
+		* @param  {String} moduleName - The Id of the module for which we're checking permissions
+		* @param  {String} channel - The event for we're checking if module has permission to publish to
+		* @return {Boolean} - true if module can publish. false otherwise
+		*/
+		moduleCanPublish : function (moduleName, channel) {
+			return true; // no-op
+		},
+
+		/**
+		* Publishes data into the core's dispatcher
+		* @param {String} channel - the channel into which the message will be published
+		* @param {Object} data - the data to be published
+		* @param {Function} callback - a callback to be called once publishing is done
+		* @param {Object} context - the context under which the callback will be called
+		*/
+		publish : function (channel, data, callback, context) {
+			if ( this.moduleCanPublish(this.moduleName, channel) ) {
+				this.core.dispatcher.publish.call(channel, data);
+			}
+		},
+
+		/**
+		 * Checks if a module can publish an action
+		 * @param  {string} moduleName unique module identifier
+		 * @param  {string} actionType unique action type identifier
+		 * @return {boolean}
+		 */
+		moduleCanDispatchAction: function(moduleName, actionType) {
+			return true; // no-op
+		},
+
+		/**
+		 * Publishes an action using the internal dispatcher creator.
+		 * This could also be done using an action creator
+		 * @return {void}
+		 */
+		dispatch: function(type, data) {
+			if (! this.moduleCanDispatchAction(this.moduleName, type))
+				throw new Error("module " + this.moduleName + " is not authorized to create action: " + action);
+
+			this.core.dispatcher.dispatch({type: type, data: data});
+		},
+
+		/**
+		* Subscribes to a channel of the core's dispatcher
+		* @param {String} channel - the channel to which messages will be listened
+		* @param {Function} callback - the function to be executed when a message in the channel is published
+		* @param {Object} context - the context under which the callback will be called
+		*/
+		subscribe : function (channel, callback, context) {
+			this.core.dispatcher.subscribe( channel, callback, context );
+		},
+
+		/**
+		* Unsubscribes to a channel of the core's dispatcher
+		* @param {String} channel - the channel in which we want to unsubscribe the callback
+		* @param {Function} callback - the function which we want to remove
+		*/
+		unsubscribe : function (channel, callback) {
+			this.core.dispatcher.unsubscribe(channel, callback);
+		},
+
+		/**
+		* Returns global configuration data
+		* for this instance of the module.
+		* @param {String} name - Specific config parameter
+		* @returns {*} config value or the entire configuration JSON object
+		*                if no name is specified (null if either not found)
+		*/
+		getConfig : function (name) {
+			return this.core.getConfig(this.element, name);
+		},
+
+		/**
+		* Passthrough method that signals that an error has occurred. If in development mode, an error
+		* is thrown. If in production mode, an event is fired.
+		* @param {Error} exception - the exception object to use
+		* @returns {void}
+		*/
+		reportError : function (exception) {
+			return this.core.reportError(exception);
+		}
+	});
+
+	Sandbox.extend = F.extend;
+	return Sandbox;
+}());
+/**
+ * Flux Store
+ *
+ * Is where the `Core` and all of our feature `Modules` access data and business
+ * logic in our SPA.
+ */
+
+F.Store = (function(undefined){
+	"use strict";
+
+	var CHANGE = 'CHANGE',
+		ACTION = 'ACTION';
+
+	function Store (dispatcher, name) {
+		this._dispatcher = dispatcher;
+		this._name = name;
+
+		// Indicates if this store is updating.
+		// When updating must not accept dispatch calls.
+		this._isUpdating = false;
+
+		this._data = [];
+		this.actions = {};
+
+		this.init.apply(this, arguments);
+	}
+
+	// Attach all inheritable methods to the Store prototype.
+	F.compose(Store.prototype, {
+
+		/**
+		* Initialize is an empty function by default. Override it with your own
+		* initialization logic.
+		* 
+		* @param {PubSub} dispatcher - the dispatcher
+		* @param {String} name - the name of this store
+		*/
+		init : function() {
+			throw new Error("Store initialization not done. Override this function");
+		},
+
+		/**
+		* Allows views to subscribe to this store's change event
+		* @param {function} callback
+		*/
+		addChangeListener: function(callback) {
+			// Create _callbacks object, unless it already exists
+			var calls = this._callbacks || (this._callbacks = {});
+
+			// Create an array for the given event key, unless it exists, then
+			// append the callback to the array
+			(this._callbacks[CHANGE] || (this._callbacks[CHANGE] = [])).push({ callback : callback });
+		},
+
+		/**
+		 * Allows views to unsubscribe to this store's change event
+		* @param {function} callback
+		*/
+		removeChangeListener: function(callback) {
+			// Return if there isn't a _callbacks object, or
+			// if it doesn't contain an array for the given event
+			var list, calls, i, l;
+			if (!(calls = this._callbacks)) return this;
+			if (!(list  = this._callbacks[CHANGE])) return this;
+
+			// remove callback
+			for (i = 0, l = list.length; i < l; i++) {
+				var handler = list[i];
+				if (handler === callback) {
+					list.splice(i);
+				}
+			}
+		},
+
+		/**
+		* Runs the callbacks which were registered by views on this store
+		* @method
+		* @private
+		*/
+		emitChange: function() {
+			// Return if there isn't a _callbacks object, or
+			// if it doesn't contain an array for the given event
+			var list, calls, i, l;
+			if (!(calls = this._callbacks)) return this;
+			if (!(list  = this._callbacks[CHANGE])) return this;
+
+			// Invoke the callbacks
+			for (i = 0, l = list.length; i < l; i++) {
+				var handler = list[i];
+				handler.callback.apply();
+			}
+		}
+	});
+
+	Store.extend = F.extend;
+	return Store;
+}());
+/**
+ * Extension
+ *
+ * `Extension`s augment the capabilities of the `Core`.
+ */
+
+F.Extension = (function(undefined){
+    "use strict";
+
+    function Extension () {}
+
+    // Attach all inheritable methods to the Extension prototype.
+    F.compose(Extension.prototype, {
+
+        /**
+         * Init is an empty function by default. Override with your own logic.
+         * @return {void}
+         */
+        init: function(options) {
+            this._defaults = {};
+            this._options = $.extend( {}, this._defaults, options );
+        }
+    });
+
+    Extension.extend = F.extend;
+    return Extension;
+}());
+
+/**
+ * Module
+ *
+ * A `Module` is an independent unit of functionallity that is part of the total 
+ * structure of a web application, which consists of HTML + CSS + JavaScript 
+ * and which should be able to live on it's own.
+ */
+
+/* global riot, $ */
+F.Module = (function(undefined){
+	"use strict";
+
+	var module_selector = '[data-module]';
+
+	/**
+	 * @constructor
+	 * @param {Sandbox} the modules sandbox
+	 * @param {Object} options - settings for the module
+	 */
+	function Module(sandbox, name, options) {
+		this._sandbox = sandbox;
+		this._name = name;
+		this._defaults = {};
+		this._options  = {};
+		this._extensions = {};
+		this._stores = {};
+		this._options = $.extend( {}, this._defaults, options );
+		
+		// Access to jQuery and DOM versions of element
+		this.$el = null;
+		this.el  = null;
+	}
+
+	// Attach all inheritable methods to the Module prototype.
+	F.compose(Module.prototype, {
+		/**
+		* Initializes the module on the specified element with the given options
+		*
+		* Start is an empty function by default. Override it with your own implementation;
+		* 
+		* @param {Element} element - DOM element where module will be initialized
+		* @param {Object} extensions - extensions to be used by module
+		* @param {Object} stores - stores to be used by module
+		*/
+		start : function(element, extensions, stores) {
+			throw new Error("Module initialization not done. Override this function");
+		},
+
+		/**
+		* Destroys the module by unsubscribing for events and removing it from the DOM
+		*
+		* Destroy is an empty function by default. Override it with your own implementation;
+		*/
+		stop: function() {
+			throw new Error("Module stopping not done. Override this function");
+		}
+	});
+
+	Module.extend = F.extend;
+	return Module;
+}());
