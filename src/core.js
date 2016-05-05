@@ -125,7 +125,7 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 
 		/**
 		 * Stops all modules and clears all saved state
-		 * @returns {Box.Application} The application object.
+		 * @returns {void}
 		 */
 		destroy: function() {
 			this.stopAll(document.documentElement);
@@ -140,10 +140,10 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 
 		/**
 		 * Method used to add extensions on the core.
-		 * @param  {string}  extensionName  unique extension name. This name will be used when injecting the extension
-		 * @param  {array}   dependencies   list of dependencies this extension relies on. Generally these are other extensions
-		 * @param  {functon} factory        the extension factory function
-		 * @param  {object}  options        options for the extension initialization
+		 * @param  {string}   extensionName  unique extension name. This name will be used when injecting the extension
+		 * @param  {array}    dependencies   list of dependencies this extension relies on. Generally these are other extensions
+		 * @param  {function} factory        the extension factory function
+		 * @param  {object}   options        options for the extension initialization
 		 * @return {void}
 		 *
 		 * @example
