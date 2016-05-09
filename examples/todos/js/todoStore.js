@@ -11,7 +11,8 @@ var TodoStore = (function(){
 		todos[id] = {
 			id 			: id,
 			text 		: todo,
-			completed	: false
+			completed	: false,
+			editing		: false
 		};
 		return id;
 	}
