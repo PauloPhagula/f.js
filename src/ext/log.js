@@ -121,6 +121,32 @@ var loggerExtFactory = function() {
 		};
 	}
 
+	/**
+	 * Patches the `console` to avoid errors in browsers that lack a `console`.
+	 * @return {void}
+	 */
+	function _monkeyPatchConsole() {
+	    var method;
+	    var noop = function () {};
+	    var methods = [
+	        'assert', 'clear', 'count', 'debug', 'dir', 'dirxml', 'error',
+	        'exception', 'group', 'groupCollapsed', 'groupEnd', 'info', 'log',
+	        'markTimeline', 'profile', 'profileEnd', 'table', 'time', 'timeEnd',
+	        'timeline', 'timelineEnd', 'timeStamp', 'trace', 'warn'
+	    ];
+	    var length = methods.length;
+	    var console = (window.console = window.console || {});
+
+	    while (length--) {
+	        method = methods[length];
+
+	        // Only stub undefined methods.
+	        if (!console[method]) {
+	            console[method] = noop;
+	        }
+	    }
+	}
+
 	var Logger = F.Extension.extend({
 
 		/**
@@ -128,6 +154,8 @@ var loggerExtFactory = function() {
 		 * @param {Object} options - the options for the new logger
 		 */
 		init: function(options) {
+			_monkeyPatchConsole();
+
 			var defaults = {
 				logLevel : ALL,
 				env	: 'development',
