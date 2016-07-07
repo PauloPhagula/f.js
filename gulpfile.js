@@ -20,7 +20,7 @@ var onError = function(error){
 
 gulp.task('build', function(){
     gulp.src([
-        'src/f.js', 
+        'src/f.js',
         'src/lib/dispatcher.js',
         'src/lib/injector.js',
         'src/lib/router.js',
@@ -36,7 +36,7 @@ gulp.task('build', function(){
 
 gulp.task('build-min', function(){
     gulp.src([
-        'src/f.js', 
+        'src/f.js',
         'src/lib/dispatcher.js',
         'src/lib/injector.js',
         'src/lib/router.js',

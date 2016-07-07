@@ -43,7 +43,7 @@ F.injector = (function(undefined){
     "use strict";
 
     var dependencies  = {};
-    
+
     var ARROW_ARG = /^([^\(]+?)=>/;
     var FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
     var FN_ARG_SPLIT = /,/;
@@ -98,8 +98,8 @@ F.injector = (function(undefined){
                 throw new Error('Incorrect injection token! Expected service name as string, got: ' + key);
             }
             args.push(
-            locals && locals.hasOwnProperty(key) ? 
-                locals[key] : 
+            locals && locals.hasOwnProperty(key) ?
+                locals[key] :
                 dependencies[key]
             );
         }

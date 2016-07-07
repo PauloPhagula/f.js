@@ -1,8 +1,8 @@
 /**
  * Module
  *
- * A `Module` is an independent unit of functionallity that is part of the total 
- * structure of a web application, which consists of HTML + CSS + JavaScript 
+ * A `Module` is an independent unit of functionallity that is part of the total
+ * structure of a web application, which consists of HTML + CSS + JavaScript
  * and which should be able to live on it's own.
  */
 
@@ -25,7 +25,7 @@ F.Module = (function(undefined){
 		this._extensions = {};
 		this._stores = {};
 		this._options = $.extend( {}, this._defaults, options );
-		
+
 		// Access to jQuery and DOM versions of element
 		this.$el = null;
 		this.el  = null;
@@ -37,7 +37,7 @@ F.Module = (function(undefined){
 		* Initializes the module on the specified element with the given options
 		*
 		* Start is an empty function by default. Override it with your own implementation;
-		* 
+		*
 		* @param {Element} element - DOM element where module will be initialized
 		* @param {Object} extensions - extensions to be used by module
 		* @param {Object} stores - stores to be used by module

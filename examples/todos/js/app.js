@@ -14,7 +14,7 @@ var app = (function() {
 	var core = new F.Core();
 
 	// Setting configuration for the app
-	core.setConfig({false: true});
+	core.setConfig({debug: true});
 
 	// Register global error handler
 	core.dispatcher.subscribe('error', function(error){
@@ -31,9 +31,9 @@ var app = (function() {
 
 	    return new Logger();
 	};
-	
+
 	// register the logger extension with no dependencies
-	core.registerExtension("logger", [], loggerExtFactory, {}); 
+	core.registerExtension("logger", [], loggerExtFactory, {});
 
 
 	// calculator extension depending on logger extension
@@ -50,17 +50,17 @@ var app = (function() {
 
 	// notice the second parameter stating the calculator extension depends on the logger extension
 	core.registerExtension("calculator", ["logger"], calculatorExtFactory, {});
-	
+
 	// Flux Action Creator creator Extension.
-	// 
+	//
     // Is a set of helper methods, used by module views's event handlers,
     // to construct actions to be piped into the dispatcher.
 	var actionCreatorExtFactory = function () {
 
 		var ActionCreator = F.Extension.extend({
 			createTodo: function(text) {
-				return { 
-					type : ActionTypes.CREATE_TODO, 
+				return {
+					type : ActionTypes.CREATE_TODO,
 					data : { text: text }
 				};
 			},
@@ -108,14 +108,14 @@ var app = (function() {
 	// Todo Module depending on logger extension and todoStore which will be injected on startup by the core
 	var TodoMVC = F.Module.extend({
 		start : function(element, extensions, stores){
-			
+
 			this._sandbox.dispatch({type: "da", data: null});
 			this._sandbox.reportError(new Error('Test error'));
 
 			var logger = extensions["logger"];
-			
+
 			var actionCreator = extensions["actionCreator"];
-			
+
 			var todoStore = stores["todoStore"];
 
 			this.el = element;

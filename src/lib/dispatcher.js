@@ -190,7 +190,7 @@ F.dispatcher = (function(){
 					_handler = handler;
 				}
 			};
-				
+
 			for (var i = 0; i < dispatchTokens.length; i++) {
 				var token = dispatchTokens[i];
 				if (_isPending[token]) {
@@ -201,7 +201,7 @@ F.dispatcher = (function(){
 				}
 
 				var _handler = null;
-				
+
 				this._callbacks[ACTION].forEach(_handlerFn(handler));
 
 				if (!_handler) {

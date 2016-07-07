@@ -25,7 +25,7 @@ F.Sandbox = (function(undefined){
 		/**
 		* Checks if a module can publish a certain event.
 		* By default any module can publish. Override with your implementation.
-		* 
+		*
 		* @param  {String} moduleName - The Id of the module for which we're checking permissions
 		* @param  {String} channel - The event for we're checking if module has permission to publish to
 		* @return {Boolean} - true if module can publish. false otherwise

@@ -1,0 +1,45 @@
+# This file is for unifying the coding style for different editors and IDEs
+# editorconfig.org
+
+# top-most EditorConfig file
+root = true
+
+# Default settings:
+# Unix-style newlines with a newline ending every file
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+
+[*.php]
+indent_size = 4
+
+[*.html]
+indent_size = 2
+
+[*.js]
+indent_size = 4
+
+[*.css]
+indent_size = 4
+
+[*.less]
+indent_size = 4
+
+[{*.txt}]
+end_of_line = crlf
+
+[*.sh]
+end_of_line = lf
+[*.{cmd, bat}]
+end_of_line = crlf
+
+[*.md]
+trim_trailing_whitespace = false
+
+
+[{*.json,*.yml,*.xml,*.eslintrc,*.jshintrc}]
+indent_style = space
+indent_size = 2

@@ -16,7 +16,7 @@ var F = (function($, _, undefined){
     var previousF = F;
 
     // Current version of the library. Keep in sync with `package.json` and `bower.json`.
-    F.VERSION = '0.1.1';
+    F.VERSION = '0.1.2';
 
     // Set framework to debug mode. Disabled by default
     F.DEBUG = false;
@@ -41,7 +41,7 @@ var F = (function($, _, undefined){
      *
      * Taken from Backbone.js of Jeremy Ashkenas
      * @see https://github.com/jashkenas/backbone/blob/master/backbone.js#L1839
-     * 
+     *
      * @param  {Object} protoProps - the instance properties for the *Class*
      * @param  {Object} staticProps - the static properties for the *Class*
      * @return {Function} - a new constructor function

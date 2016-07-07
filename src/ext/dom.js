@@ -1,7 +1,7 @@
 /**
  * DOM Extension for the core.
- * 
- * It exposes the same interface always but allows choosing the implementation 
+ *
+ * It exposes the same interface always but allows choosing the implementation
  * from a available list of implementations.
  *
  */

@@ -6,8 +6,8 @@ test = injector.resolve(['dep', function(a, b) {
     "use strict";
     console.log("dep: " + a);
     console.log("b: " + b);
-    return { 
-        sum: function(c, d) { return c+d+a; } 
+    return {
+        sum: function(c, d) { return c+d+a; }
     };
 }]);
 
@@ -15,8 +15,8 @@ test = injector.resolve(function(dep, b) {
     "use strict";
     console.log("dep: " + a);
     console.log("b: " + b);
-    return { 
-        sum: function(c, d) { return c+d+a; } 
+    return {
+        sum: function(c, d) { return c+d+a; }
     };
 });
 
@@ -24,8 +24,8 @@ test.sum(1,2);
 
 
 var logger =  {
-    log: function(obj) { 
-        console.log(obj); 
+    log: function(obj) {
+        console.log(obj);
     }
 };
 

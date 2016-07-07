@@ -66,9 +66,9 @@ F.util = (function($, _, undefined){
 		},
 
         /**
-        * @see https://lodash.com/docs#template     
-        * @see https://engineering.linkedin.com/frontend/client-side-templating-throwdown-mustache-handlebars-dustjs-and-more       
-        */      
+        * @see https://lodash.com/docs#template
+        * @see https://engineering.linkedin.com/frontend/client-side-templating-throwdown-mustache-handlebars-dustjs-and-more
+        */
         template : _.template,
 
 		/*
@@ -87,8 +87,8 @@ F.util = (function($, _, undefined){
 					currentArg = null;
 				while (i--) {
 					currentArg = args[i];
-					hash += (currentArg === Object(currentArg)) ? 
-                        JSON.stringify(currentArg) : 
+					hash += (currentArg === Object(currentArg)) ?
+                        JSON.stringify(currentArg) :
                         currentArg;
 					fn.memoize || (fn.memoize = {});
 				}

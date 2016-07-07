@@ -31,7 +31,7 @@ F.Store = (function(undefined){
 		/**
 		* Initialize is an empty function by default. Override it with your own
 		* initialization logic.
-		* 
+		*
 		* @param {PubSub} dispatcher - the dispatcher
 		* @param {String} name - the name of this store
 		*/

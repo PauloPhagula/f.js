@@ -1,6 +1,6 @@
 /**
  * Storage extension for the core.
- * 
+ *
  * Initial code taken from Cache provider of Gia (@bonejp) who took from Dustin Diaz (@ded).
  * http://www.dustindiaz.com/javascript-cache-provider/
  */
@@ -85,7 +85,7 @@ var storageExtFactory = function() {
 
             if (all)
                 _cache = {};
-        } 
+        }
     });
 
     return CacheProvider;

@@ -1,7 +1,7 @@
 /**
  * Core
  *
- * The `Core` contains the main application object that is the heart of the 
+ * The `Core` contains the main application object that is the heart of the
  * application architecture.
  */
 
@@ -40,15 +40,15 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 	 * @private
 	 */
     function error(exception) {
-		if (_config.debug) 
+		if (_config.debug)
 			throw exception;
 		else
 			dispatcher.publish('error', { exception: exception });
 	}
 
 	/**
-	 * Makes an object production-ready by wrapping all its methods with a 
-	 * try-catch so that objects don't need to worry about trapping their own 
+	 * Makes an object production-ready by wrapping all its methods with a
+	 * try-catch so that objects don't need to worry about trapping their own
 	 * errors. When an error occurs, the error event is fired with the error information.
 	 * @see https://www.nczonline.net/blog/2009/04/28/javascript-error-handling-anti-pattern/
 	 * @param {Object} object Any object whose public methods should be wrapped.
@@ -56,7 +56,7 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 	 *                            when an error occurs.
 	 * @returns {void}
 	 * @private
-	 * 
+	 *
 	 * @example
 	 * var system = {
 	 *		fail: function(){
@@ -108,7 +108,7 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 
     	// App lifecycle
 		// ---
-		
+
 		/**
 		 * Initializes the application
 		 * @return {void}
@@ -129,7 +129,7 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 		 */
 		destroy: function() {
 			this.stopAll(document.documentElement);
-			
+
 			reset();
 
 			router.stop();
@@ -157,7 +157,7 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 		 *
 		 *	    return new Logger();
 		 * };
-		 * 
+		 *
 		 * core.registerExtension("logger", [], loggerExtFactory, {});
 		 *
 		 * var calculatorExtFactory = function(logger) {
@@ -188,7 +188,7 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 
 		    F.injector.register(extensionName, extension);
 		},
-		
+
 		/**
 		 * Registers a store on the core
 		 * @param  {string} name      unique store identifier
@@ -202,14 +202,14 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 		/**
 		 * Method used to register modules on the core.
 		 * @param  {string}   moduleName  unique module identifier
-		 * @param  {array}    extensions  List of extensions this module relies on. 
+		 * @param  {array}    extensions  List of extensions this module relies on.
 		 *                                These are the only extensions the module will be allowed to use.
 		 * @param  {function} factory     the module factory function
 		 * @param  {object}   options     options for the module initialization
 		 * @return {void}
 		 */
 		registerModule: function(moduleName, extensions, stores, factory, options) {
-			if (_extensions.hasOwnProperty(moduleName))
+			if (_modules.hasOwnProperty(moduleName))
 				return error(new Error("Module with given name has already been registered. Mod name: " + moduleName));
 
 			_modules[moduleName] = {
@@ -240,7 +240,7 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 
 			var extensions = {};
 			var stores     = {};
-			
+
 			for (var i = 0; i < module.extensions.length; i++) {
 				var extName = module.extensions[i];
 
@@ -274,9 +274,9 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 		stop: function(moduleName) {
 			var data = _modules[moduleName];
 
-			if (!(data && data.instance)) 
+			if (!(data && data.instance))
 				return error(new Error('Unable to stop module: ' + moduleName));
-			
+
 			data.instance.stop();
 			data.instance = null;
 		},
@@ -292,7 +292,7 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 		},
 
 		/**
-		 * Starts all registered modules within an element. 
+		 * Starts all registered modules within an element.
 		 * @return {void}
 		 */
 		startAll: function(root) {
@@ -321,7 +321,7 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 
 		// Messaging
 		// ---
-		
+
 		/**
 		 * The dispatcher for communication
 		 * @todo don't expose the dispatcher. Proxy its methods instead.
@@ -331,7 +331,7 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 
     	// Routing
     	// ---
-    	
+
     	/**
     	 * The router for anchor management
     	 * @todo  don't expose the router. Proxy its methods instead.
@@ -341,7 +341,7 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 
 		// Config
 		// ---
-		
+
 		/**
 		 * Returns configuration data
 		 * @param  {string} name the desired configuration parameter
