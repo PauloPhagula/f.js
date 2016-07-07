@@ -16,7 +16,7 @@ var F = (function($, _, undefined){
     var previousF = F;
 
     // Current version of the library. Keep in sync with `package.json` and `bower.json`.
-    F.VERSION = '0.1.1';
+    F.VERSION = '0.1.2';
 
     // Set framework to debug mode. Disabled by default
     F.DEBUG = false;
@@ -41,7 +41,7 @@ var F = (function($, _, undefined){
      *
      * Taken from Backbone.js of Jeremy Ashkenas
      * @see https://github.com/jashkenas/backbone/blob/master/backbone.js#L1839
-     * 
+     *
      * @param  {Object} protoProps - the instance properties for the *Class*
      * @param  {Object} staticProps - the static properties for the *Class*
      * @return {Function} - a new constructor function
@@ -76,6 +76,7 @@ var F = (function($, _, undefined){
 
     return F;
 }(jQuery, _));
+
 /**
  * Dispatcher - the communication / app nexus / pub-sub extension
  *
@@ -268,7 +269,7 @@ F.dispatcher = (function(){
 					_handler = handler;
 				}
 			};
-				
+
 			for (var i = 0; i < dispatchTokens.length; i++) {
 				var token = dispatchTokens[i];
 				if (_isPending[token]) {
@@ -279,7 +280,7 @@ F.dispatcher = (function(){
 				}
 
 				var _handler = null;
-				
+
 				this._callbacks[ACTION].forEach(_handlerFn(handler));
 
 				if (!_handler) {
@@ -321,6 +322,7 @@ F.dispatcher = (function(){
 		}
 	};
 }());
+
 /*
 
 Dependency Injector
@@ -366,7 +368,7 @@ F.injector = (function(undefined){
     "use strict";
 
     var dependencies  = {};
-    
+
     var ARROW_ARG = /^([^\(]+?)=>/;
     var FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
     var FN_ARG_SPLIT = /,/;
@@ -421,8 +423,8 @@ F.injector = (function(undefined){
                 throw new Error('Incorrect injection token! Expected service name as string, got: ' + key);
             }
             args.push(
-            locals && locals.hasOwnProperty(key) ? 
-                locals[key] : 
+            locals && locals.hasOwnProperty(key) ?
+                locals[key] :
                 dependencies[key]
             );
         }
@@ -540,6 +542,7 @@ F.injector = (function(undefined){
         resolve  : resolve
     };
 }());
+
 /**
  * Router - the app router
  *
@@ -749,10 +752,11 @@ F.router = (function($, crossroads, undefined){
 		stop	: stop
 	};
 }(jQuery, crossroads));
+
 /**
  * Core
  *
- * The `Core` contains the main application object that is the heart of the 
+ * The `Core` contains the main application object that is the heart of the
  * application architecture.
  */
 
@@ -791,15 +795,15 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 	 * @private
 	 */
     function error(exception) {
-		if (_config.debug) 
+		if (_config.debug)
 			throw exception;
 		else
 			dispatcher.publish('error', { exception: exception });
 	}
 
 	/**
-	 * Makes an object production-ready by wrapping all its methods with a 
-	 * try-catch so that objects don't need to worry about trapping their own 
+	 * Makes an object production-ready by wrapping all its methods with a
+	 * try-catch so that objects don't need to worry about trapping their own
 	 * errors. When an error occurs, the error event is fired with the error information.
 	 * @see https://www.nczonline.net/blog/2009/04/28/javascript-error-handling-anti-pattern/
 	 * @param {Object} object Any object whose public methods should be wrapped.
@@ -807,7 +811,7 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 	 *                            when an error occurs.
 	 * @returns {void}
 	 * @private
-	 * 
+	 *
 	 * @example
 	 * var system = {
 	 *		fail: function(){
@@ -859,7 +863,7 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 
     	// App lifecycle
 		// ---
-		
+
 		/**
 		 * Initializes the application
 		 * @return {void}
@@ -876,11 +880,11 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 
 		/**
 		 * Stops all modules and clears all saved state
-		 * @returns {Box.Application} The application object.
+		 * @returns {void}
 		 */
 		destroy: function() {
 			this.stopAll(document.documentElement);
-			
+
 			reset();
 
 			router.stop();
@@ -891,10 +895,10 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 
 		/**
 		 * Method used to add extensions on the core.
-		 * @param  {string}  extensionName  unique extension name. This name will be used when injecting the extension
-		 * @param  {array}   dependencies   list of dependencies this extension relies on. Generally these are other extensions
-		 * @param  {functon} factory        the extension factory function
-		 * @param  {object}  options        options for the extension initialization
+		 * @param  {string}   extensionName  unique extension name. This name will be used when injecting the extension
+		 * @param  {array}    dependencies   list of dependencies this extension relies on. Generally these are other extensions
+		 * @param  {function} factory        the extension factory function
+		 * @param  {object}   options        options for the extension initialization
 		 * @return {void}
 		 *
 		 * @example
@@ -908,7 +912,7 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 		 *
 		 *	    return new Logger();
 		 * };
-		 * 
+		 *
 		 * core.registerExtension("logger", [], loggerExtFactory, {});
 		 *
 		 * var calculatorExtFactory = function(logger) {
@@ -939,7 +943,7 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 
 		    F.injector.register(extensionName, extension);
 		},
-		
+
 		/**
 		 * Registers a store on the core
 		 * @param  {string} name      unique store identifier
@@ -953,14 +957,14 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 		/**
 		 * Method used to register modules on the core.
 		 * @param  {string}   moduleName  unique module identifier
-		 * @param  {array}    extensions  List of extensions this module relies on. 
+		 * @param  {array}    extensions  List of extensions this module relies on.
 		 *                                These are the only extensions the module will be allowed to use.
 		 * @param  {function} factory     the module factory function
 		 * @param  {object}   options     options for the module initialization
 		 * @return {void}
 		 */
 		registerModule: function(moduleName, extensions, stores, factory, options) {
-			if (_extensions.hasOwnProperty(moduleName))
+			if (_modules.hasOwnProperty(moduleName))
 				return error(new Error("Module with given name has already been registered. Mod name: " + moduleName));
 
 			_modules[moduleName] = {
@@ -991,7 +995,7 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 
 			var extensions = {};
 			var stores     = {};
-			
+
 			for (var i = 0; i < module.extensions.length; i++) {
 				var extName = module.extensions[i];
 
@@ -1025,9 +1029,9 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 		stop: function(moduleName) {
 			var data = _modules[moduleName];
 
-			if (!(data && data.instance)) 
+			if (!(data && data.instance))
 				return error(new Error('Unable to stop module: ' + moduleName));
-			
+
 			data.instance.stop();
 			data.instance = null;
 		},
@@ -1043,7 +1047,7 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 		},
 
 		/**
-		 * Starts all registered modules within an element. 
+		 * Starts all registered modules within an element.
 		 * @return {void}
 		 */
 		startAll: function(root) {
@@ -1072,7 +1076,7 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 
 		// Messaging
 		// ---
-		
+
 		/**
 		 * The dispatcher for communication
 		 * @todo don't expose the dispatcher. Proxy its methods instead.
@@ -1082,7 +1086,7 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 
     	// Routing
     	// ---
-    	
+
     	/**
     	 * The router for anchor management
     	 * @todo  don't expose the router. Proxy its methods instead.
@@ -1092,7 +1096,7 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 
 		// Config
 		// ---
-		
+
 		/**
 		 * Returns configuration data
 		 * @param  {string} name the desired configuration parameter
@@ -1135,6 +1139,7 @@ F.Core = (function(injector, dispatcher, router, undefined) {
     Core.extend = F.extend;
 	return Core;
 }(F.injector, F.dispatcher, F.router));
+
 /**
  * Sandbox
  *
@@ -1162,7 +1167,7 @@ F.Sandbox = (function(undefined){
 		/**
 		* Checks if a module can publish a certain event.
 		* By default any module can publish. Override with your implementation.
-		* 
+		*
 		* @param  {String} moduleName - The Id of the module for which we're checking permissions
 		* @param  {String} channel - The event for we're checking if module has permission to publish to
 		* @return {Boolean} - true if module can publish. false otherwise
@@ -1250,6 +1255,7 @@ F.Sandbox = (function(undefined){
 	Sandbox.extend = F.extend;
 	return Sandbox;
 }());
+
 /**
  * Flux Store
  *
@@ -1283,7 +1289,7 @@ F.Store = (function(undefined){
 		/**
 		* Initialize is an empty function by default. Override it with your own
 		* initialization logic.
-		* 
+		*
 		* @param {PubSub} dispatcher - the dispatcher
 		* @param {String} name - the name of this store
 		*/
@@ -1347,6 +1353,7 @@ F.Store = (function(undefined){
 	Store.extend = F.extend;
 	return Store;
 }());
+
 /**
  * Extension
  *
@@ -1378,8 +1385,8 @@ F.Extension = (function(undefined){
 /**
  * Module
  *
- * A `Module` is an independent unit of functionallity that is part of the total 
- * structure of a web application, which consists of HTML + CSS + JavaScript 
+ * A `Module` is an independent unit of functionallity that is part of the total
+ * structure of a web application, which consists of HTML + CSS + JavaScript
  * and which should be able to live on it's own.
  */
 
@@ -1402,7 +1409,7 @@ F.Module = (function(undefined){
 		this._extensions = {};
 		this._stores = {};
 		this._options = $.extend( {}, this._defaults, options );
-		
+
 		// Access to jQuery and DOM versions of element
 		this.$el = null;
 		this.el  = null;
@@ -1414,7 +1421,7 @@ F.Module = (function(undefined){
 		* Initializes the module on the specified element with the given options
 		*
 		* Start is an empty function by default. Override it with your own implementation;
-		* 
+		*
 		* @param {Element} element - DOM element where module will be initialized
 		* @param {Object} extensions - extensions to be used by module
 		* @param {Object} stores - stores to be used by module
