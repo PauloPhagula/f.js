@@ -12,16 +12,23 @@ F.Store = (function(undefined){
 		ACTION = 'ACTION';
 
 	function Store (dispatcher, name) {
+		var self = this;
 		this._dispatcher = dispatcher;
 		this._name = name;
 
-		// Indicates if this store is updating.
-		// When updating must not accept dispatch calls.
-		this._isUpdating = false;
-
+		this._changed = false;
 		this._data = [];
-		this.actions = {};
 
+		this._dispatchFlow = function(payload) {
+			self._changed = false;
+			self._handleDispatch(payload);
+			if (self._changed) {
+				self.emitChange();
+			}
+		}
+
+		self._dispatchToken = dispatcher.subscribe(ACTION, this._dispatchFlow);
+		this.actions = {};
 		this.init.apply(this, arguments);
 	}
 
@@ -37,6 +44,19 @@ F.Store = (function(undefined){
 		*/
 		init : function() {
 			throw new Error("Store initialization not done. Override this function");
+		},
+
+		_handleDispatch : function(payload) {
+			throw new Error("Store payload handling not done. Override this function");
+		},
+
+		/**
+		 * This exposes a unique string to identify each store's registered callback.
+		 * This is used with the dispatcher's waitFor method to devlaratively depend
+		 * on other stores updating themselves first.
+		 */
+		getDispatchToken: function() {
+			return this._dispatchToken;
 		},
 
 		/**

@@ -54,38 +54,38 @@ var TodoStore = (function(F){
 
 	return F.Store.extend({
 		init : function() {
+		},
 
-			var self = this;
-			this.dispatchToken = self._dispatcher.subscribe(ActionTypes.ACTION, function(payload){
-				switch (payload.type) {
-					case ActionTypes.CREATE_TODO:
-						add(payload.data.text);
-						self.emitChange();
-					break;
-					case ActionTypes.UPDATE_TODO:
-						update(payload.data.id, payload.data.updates);
-						self.emitChange();
-					break;
-					case ActionTypes.DELETE_TODO:
-						remove(payload.data.id);
-						self.emitChange();
-					break;
-					case ActionTypes.CLEAR_COMPLETED:
-						clearCompleted();
-						self.emitChange();
-					break;
-					case ActionTypes.MARK_ALL_COMPLETE:
-						markAllComplete();
-						self.emitChange();
-					break;
-					case ActionTypes.MARK_ALL_INCOMPLETE:
-						markAllIncomplete();
-						self.emitChange();
-					break;
-					default:
-					break;
-				}
-			});
+		// Override
+		_handleDispatch: function(payload){
+			switch (payload.type) {
+				case ActionTypes.CREATE_TODO:
+					add(payload.data.text);
+					this.emitChange();
+				break;
+				case ActionTypes.UPDATE_TODO:
+					update(payload.data.id, payload.data.updates);
+					this.emitChange();
+				break;
+				case ActionTypes.DELETE_TODO:
+					remove(payload.data.id);
+					this.emitChange();
+				break;
+				case ActionTypes.CLEAR_COMPLETED:
+					clearCompleted();
+					this.emitChange();
+				break;
+				case ActionTypes.MARK_ALL_COMPLETE:
+					markAllComplete();
+					this.emitChange();
+				break;
+				case ActionTypes.MARK_ALL_INCOMPLETE:
+					markAllIncomplete();
+					this.emitChange();
+				break;
+				default:
+				break;
+			}
 		},
 
 		getAll: function() {

@@ -127,15 +127,19 @@ var F = (function(undefined){
 F.dispatcher = (function(undefined){
 	"use strict";
 
-	var _prefix = 'ID_';
-	var ACTION = 'ACTION';
+	var _prefix = 'ID_',
+		ACTION = 'ACTION',
 
-	var
 		_isDispatching = false,
 		_isHandled = {},
 		_isPending = {},
 		_lastID = 1,
-		_pendingPayload = null
+		_pendingPayload = null,
+
+		_throwIfDispatching = function(methodName) {
+			if (_isDispatching)
+				throw new Error('Cannot run ' + methodName + 'in the middle of a dispatch.');
+		}
 	;
 
 	return {
@@ -150,6 +154,7 @@ F.dispatcher = (function(undefined){
 		* @param {Object} context - the object under whiches context the callback is to be called
 		*/
 		subscribe: function (channel, callback, context) {
+			_throwIfDispatching('Dispatcher.subscribe(...)');
 			// Create _callbacks object, unless it already exists
 			var calls = this._callbacks || (this._callbacks = {});
 
@@ -169,7 +174,7 @@ F.dispatcher = (function(undefined){
 		* @param {Function} callcack - the callback to be unregistered
 		*/
 		unsubscribe: function (channel, callback) {
-
+			_throwIfDispatching('Dispatcher.subscribe(...)');
 			// Return if there isn't a _callbacks object, or
 			// if it doesn't contain an array for the given event
 			var list, calls, i, l;
@@ -200,13 +205,7 @@ F.dispatcher = (function(undefined){
 			var ev = args.shift();
 
 			if (ev === ACTION) {
-
-				/*
-				if(!this._isDispatching){
-					throw new Error('dispatcher.publish(...): Cannot dispatch in the middle of a dispatch');
-				}
-				*/
-				this._start(args);
+				this._startDispatching(args);
 
 				try {
 					var list, calls, i, l;
@@ -221,7 +220,7 @@ F.dispatcher = (function(undefined){
 						handler.callback.apply(handler.context || null, args);
 					}
 				} finally {
-					this._stop();
+					this._stopDispatching();
 				}
 
 				return;
@@ -251,6 +250,7 @@ F.dispatcher = (function(undefined){
 		* }
 		*/
 		dispatch: function (payload) {
+			_throwIfDispatching('Dispatcher.dispatch(...)');
 			this.publish(ACTION, payload);
 		},
 
@@ -274,16 +274,13 @@ F.dispatcher = (function(undefined){
 		*     PrependedTextStore.dispatchToken,
 		*     YeatAnotherstore.dispatchToken
 		*   ]);
-		* 	 TodoStore.create(PrependedTextStore.getText() + '' + action.text);
+		* 	TodoStore.create(PrependedTextStore.getText() + '' + action.text);
 		*   TodoStore.emit('chage');
 		*   break;
 		*/
 		waitFor: function (dispatchTokens) {
-			/*
-			if (!this.isDispatching) {
-				throw new Error('dispatcher.waitFor(...): Must be invoked while dispatching');
-			}
-			*/
+			_throwIfDispatching('Dispatcher.waitFor(...)');
+
 			var _handlerFn = function (handler) {
 				if (handler.id === token) {
 					_handler = handler;
@@ -316,7 +313,7 @@ F.dispatcher = (function(undefined){
 		/**
 		* Setup booking used for dispatching
 		*/
-		_start: function (payload) {
+		_startDispatching: function (payload) {
 			// Return if there isn't a _callbacks object, or
 			// if it doesn't contain an array for the given event
 			var list, calls, i, l;
@@ -336,7 +333,7 @@ F.dispatcher = (function(undefined){
 		/**
 		* Clear booking used for dispatching
 		*/
-		_stop: function () {
+		_stopDispatching: function () {
 			_pendingPayload = null;
 			_isDispatching = false;
 		}
@@ -735,7 +732,7 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 					try {
 						return method.apply(this, arguments);
 					} catch (ex) {
-						ex.methodName = methodName;
+						ex.methodName = name;
 						ex.objectName = objectName;
 						ex.name = errorPrefix + ex.name;
 						ex.message = errorPrefix + ex.message;
@@ -1170,16 +1167,23 @@ F.Store = (function(undefined){
 		ACTION = 'ACTION';
 
 	function Store (dispatcher, name) {
+		var self = this;
 		this._dispatcher = dispatcher;
 		this._name = name;
 
-		// Indicates if this store is updating.
-		// When updating must not accept dispatch calls.
-		this._isUpdating = false;
-
+		this._changed = false;
 		this._data = [];
-		this.actions = {};
 
+		this._dispatchFlow = function(payload) {
+			self._changed = false;
+			self._handleDispatch(payload);
+			if (self._changed) {
+				self.emitChange();
+			}
+		}
+
+		self._dispatchToken = dispatcher.subscribe(ACTION, this._dispatchFlow);
+		this.actions = {};
 		this.init.apply(this, arguments);
 	}
 
@@ -1195,6 +1199,19 @@ F.Store = (function(undefined){
 		*/
 		init : function() {
 			throw new Error("Store initialization not done. Override this function");
+		},
+
+		_handleDispatch : function(payload) {
+			throw new Error("Store payload handling not done. Override this function");
+		},
+
+		/**
+		 * This exposes a unique string to identify each store's registered callback.
+		 * This is used with the dispatcher's waitFor method to devlaratively depend
+		 * on other stores updating themselves first.
+		 */
+		getDispatchToken: function() {
+			return this._dispatchToken;
 		},
 
 		/**

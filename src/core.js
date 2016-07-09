@@ -83,7 +83,7 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 					try {
 						return method.apply(this, arguments);
 					} catch (ex) {
-						ex.methodName = methodName;
+						ex.methodName = name;
 						ex.objectName = objectName;
 						ex.name = errorPrefix + ex.name;
 						ex.message = errorPrefix + ex.message;

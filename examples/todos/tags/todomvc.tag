@@ -29,7 +29,7 @@
 					<a class="{ selected : active_route_active }" href="#/active" onclick={ filter }>Active</a>
 				</li>
 				<li>
-					<a class="{ selected : completed_route_active }" href="#completed" onclick={ filter }>Completed</a>
+					<a class="{ selected : completed_route_active }" href="#/completed" onclick={ filter }>Completed</a>
 				</li>
 			</ul>
 			<!-- Hidden if no completed todos are left ↓ -->
