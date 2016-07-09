@@ -8,7 +8,7 @@
  * @see https://github.com/patik/console.log-wrapper
  */
 
-/* global $ */
+/* global F */
 
 var loggerExtFactory = function() {
 	"use strict";
@@ -162,7 +162,7 @@ var loggerExtFactory = function() {
 				errorLoggingEndpoint: null
 			};
 
-			_options = $.extend( {}, defaults, options );
+			_options = F.compose( {}, defaults, options );
 		},
 
 		/**

@@ -14,7 +14,7 @@ var app = (function() {
 	var core = new F.Core();
 
 	// Setting configuration for the app
-	core.setConfig({debug: true});
+	core.setConfig({debug: false});
 
 	// Register global error handler
 	core.dispatcher.subscribe('error', function(error){
@@ -155,14 +155,14 @@ var app = (function() {
 	// Application initialization
 	// ---
 
-	var boot = function() {
-		core.init();
-	};
-
 	return {
-		boot: boot
+		boot: function() {
+			core.init();
+		},
+		shutdown: function() {
+			core.destroy();
+		}
 	};
-
 }());
 
 app.boot();

@@ -76,25 +76,26 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 	 */
 	function productionize(object, objectName) {
 		var name,
-    		method;
+    		method,
+    		wrap = function(name, method){
+				return function(){
+					var errorPrefix = objectName + '.' + name + '() - ';
+					try {
+						return method.apply(this, arguments);
+					} catch (ex) {
+						ex.methodName = methodName;
+						ex.objectName = objectName;
+						ex.name = errorPrefix + ex.name;
+						ex.message = errorPrefix + ex.message;
+						error(ex);
+					}
+				};
+			};
 
 		for (name in object){
 			method = object[name];
 			if (typeof method === "function"){
-				object[name] = function(name, method){
-					return function(){
-						var errorPrefix = objectName + '.' + name + '() - ';
-						try {
-							return method.apply(this, arguments);
-						} catch (ex) {
-							ex.methodName = methodName;
-							ex.objectName = objectName;
-							ex.name = errorPrefix + ex.name;
-							ex.message = errorPrefix + ex.message;
-							error(ex);
-						}
-					};
-				}(name, method);
+				object[name] = wrap(name, method);
 			}
 		}
 	}
@@ -114,7 +115,7 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 		 * @return {void}
 		 */
 		init: function(options) {
-			_config = $.extend({}, _config, options);
+			_config = F.compose({}, _config, options);
 
 			this.startAll(document.documentElement);
 
@@ -241,7 +242,9 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 			var extensions = {};
 			var stores     = {};
 
-			for (var i = 0; i < module.extensions.length; i++) {
+			var i; // loop controller variable
+
+			for (i = 0; i < module.extensions.length; i++) {
 				var extName = module.extensions[i];
 
 				if (_extensions.hasOwnProperty(extName))
@@ -250,7 +253,7 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 					return error(new Error("Module requires an unregistered extensions: " + extName));
 			}
 
-			for (var i = 0; i < module.stores.length; i++ ) {
+			for (i = 0; i < module.stores.length; i++ ) {
 				var storeName = module.stores[i];
 
 				if (_stores.hasOwnProperty(storeName))
@@ -366,7 +369,7 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 			if (_initialized)
 				return error(new Error('Cannot set configuration after application is initialized'));
 
-			_config = $.extend({}, _config, config);
+			_config = F.compose({}, _config, config);
 		},
 
 		// Error reporting

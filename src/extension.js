@@ -18,7 +18,7 @@ F.Extension = (function(undefined){
          */
         init: function(options) {
             this._defaults = {};
-            this._options = $.extend( {}, this._defaults, options );
+            this._options = F.compose( {}, this._defaults, options );
         }
     });
 

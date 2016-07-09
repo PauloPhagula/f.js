@@ -23,13 +23,13 @@
 			<!-- Remove this if you don't implement routing -->
 			<ul class="filters">
 				<li>
-					<a class="{ selected : all_route_active }" href="/all" onclick={ filter }>All</a>
+					<a class="{ selected : all_route_active }" href="#/all" onclick={ filter }>All</a>
 				</li>
 				<li>
-					<a class="{ selected : active_route_active }" href="/active" onclick={ filter }>Active</a>
+					<a class="{ selected : active_route_active }" href="#/active" onclick={ filter }>Active</a>
 				</li>
 				<li>
-					<a class="{ selected : completed_route_active }" href="/completed" onclick={ filter }>Completed</a>
+					<a class="{ selected : completed_route_active }" href="#completed" onclick={ filter }>Completed</a>
 				</li>
 			</ul>
 			<!-- Hidden if no completed todos are left ↓ -->
@@ -46,7 +46,7 @@
 			ESC_KEY = 27;
 
 		self.all_route_active = true;
-		$('body').keydown(function(e){
+		document.querySelector('body').addEventListener('keydown', function(e){
 			switch(e.keyCode) {
 				case ENTER_KEY:
 					var textArea = document.querySelector('input.new-todo'),

@@ -6,7 +6,7 @@
  * and which should be able to live on it's own.
  */
 
-/* global riot, $ */
+/* global F */
 F.Module = (function(undefined){
 	"use strict";
 
@@ -24,7 +24,7 @@ F.Module = (function(undefined){
 		this._options  = {};
 		this._extensions = {};
 		this._stores = {};
-		this._options = $.extend( {}, this._defaults, options );
+		this._options = F.compose( {}, this._defaults, options );
 
 		// Access to jQuery and DOM versions of element
 		this.$el = null;

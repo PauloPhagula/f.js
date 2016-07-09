@@ -2,9 +2,7 @@
  * F - a JavaScript framework for modular and scalable SPAs
  */
 
-/* global jQuery, _ */
-
-var F = (function($, _, undefined){
+var F = (function(undefined){
     "use strict";
 
     // Initial Setup
@@ -16,7 +14,7 @@ var F = (function($, _, undefined){
     var previousF = F;
 
     // Current version of the library. Keep in sync with `package.json` and `bower.json`.
-    F.VERSION = '0.1.2';
+    F.VERSION = '0.1.3';
 
     // Set framework to debug mode. Disabled by default
     F.DEBUG = false;
@@ -28,11 +26,22 @@ var F = (function($, _, undefined){
         return this;
     };
 
+    // Patch Object
+    Object.getOwnPropertyDescriptors = function getOwnPropertyDescriptors(obj) {
+        var descriptors = {};
+        for (var prop in obj) {
+            if (obj.hasOwnProperty(prop)) {
+                descriptors[prop] = Object.getOwnPropertyDescriptor(obj, prop);
+            }
+        }
+        return descriptors;
+    };
+
     // Util
     // ---
 
     // Composes objects by combining them into a new
-    F.compose = _.extend;
+    F.compose = Object.assign;
 
     /**
      * Helper function to correctly set up the prototype chain for subclasses.
@@ -41,6 +50,7 @@ var F = (function($, _, undefined){
      *
      * Taken from Backbone.js of Jeremy Ashkenas
      * @see https://github.com/jashkenas/backbone/blob/master/backbone.js#L1839
+     * @see https://gist.github.com/juandopazo/1367191
      *
      * @param  {Object} protoProps - the instance properties for the *Class*
      * @param  {Object} staticProps - the static properties for the *Class*
@@ -53,18 +63,25 @@ var F = (function($, _, undefined){
         // The constructor function for the new subclass is either defined by you
         // (the "constructor" property in your `extend` definition), or defaulted
         // by us to simply call the parent constructor.
-        if (protoProps && _.has(protoProps, 'constructor')) {
-            child = protoProps.constructor;
-        } else {
-            child = function(){ return parent.apply(this, arguments); };
+        if (!protoProps.hasOwnProperty('constructor')) {
+            Object.defineProperty(protoProps, 'constructor', {
+                value: function () {
+                    // Default call to superclass as in maxmin classes
+                    parent.apply(this, arguments);
+                },
+                writable: true,
+                configurable: true,
+                enumerable: false
+            });
         }
 
+        child = protoProps.constructor;
         // Add static properties to the constructor function, if supplied.
-        _.extend(child, parent, staticProps);
+        Object.assign(child, parent, staticProps);
 
         // Set the prototype chain to inherit from `parent`, without calling
         // `parent`'s constructor function and add the prototype properties.
-        child.prototype = _.create(parent.prototype, protoProps);
+        child.prototype = Object.create(parent.prototype, Object.getOwnPropertyDescriptors(protoProps));
         child.prototype.constructor = child;
 
         // Set a convenience property in case the parent's prototype is needed
@@ -75,7 +92,7 @@ var F = (function($, _, undefined){
     };
 
     return F;
-}(jQuery, _));
+}());
 
 /**
  * Dispatcher - the communication / app nexus / pub-sub extension
@@ -104,7 +121,10 @@ var F = (function($, _, undefined){
  * // unsubscribing
  * PubSub.unsubscrube('wem', fn);
  */
-F.dispatcher = (function(){
+
+/** global F */
+
+F.dispatcher = (function(undefined){
 	"use strict";
 
 	var _prefix = 'ID_';
@@ -546,78 +566,13 @@ F.injector = (function(undefined){
 /**
  * Router - the app router
  *
- * @see https://github.com/mmikowski/urianchor by Mike Mikowski
- * @see http://millermedeiros.github.io/crossroads.js/
+ * @see https://github.com/krasimir/navigo
  */
 
-/* global jQuery */
-/* global crossroads */
-/* global uriAnchor */
-
-F.router = (function($, crossroads, undefined){
+F.router = (function(Navigo, undefined){
 	"use strict";
 
-	var
-		// Dynamic information shared across the module
-		stateMap = {
-			$container  : null,
-			anchorMap	: {
-				page : 'home',
-				title: 'Home'
-			}
-		},
-
-		_router = crossroads.create()
-	;
-
-	_router.normalizeFn = crossroads.NORM_AS_OBJECT;
-
-
-	/**
-	 * Return copy of stored anchor map; minimizes overhead
-	 * @method
-	 * @private
-	 */
-	var copyAnchorMap = function(){
-		return $.extend(true, {}, stateMap.anchorMap);
-	};
-
-	/**
-	 * Handles changes in the hash
-	 * @method
-	 * @private
-	 *
-	 * @param {Event} e - the click event
-	 */
-	var _onHashChange = function(e){
-		var
-			anchor_map_previous = copyAnchorMap(),
-			anchor_map_proposed
-		;
-
-		// attempt to parse anchor
-		try {
-			anchor_map_proposed = $.uriAnchor.makeAnchorMap();
-		}
-		catch ( error ) {
-			$.uriAnchor.setAnchor( anchor_map_previous, null, true );
-			return false;
-		}
-
-		stateMap.anchorMap = anchor_map_proposed;
-
-		// Change window title
-		document.title = anchor_map_proposed.title || '';
-
-		// Get new hash and pass it to crossroads for callback calling.
-		var route = '/',
-			hash = window.location.hash;
-		if (hash.length > 0) {
-			route = hash.split('#').pop();
-		}
-		_router.parse(route);
-		return false;
-	};
+	var _router = new Navigo()
 
 	/**
 	 * Handles URL clicks when the router is turned on
@@ -625,63 +580,48 @@ F.router = (function($, crossroads, undefined){
 	 *
 	 * @param {Event} e - the click event
 	 */
-	var _handleURLClick = function(e){
-		// Get the absolute anchor href.
-		var href = {
-				prop: $(this).prop('href'),
-				attr: $(this).attr('href')
-			};
+	var _handleURLClick = function(e) {
+		var target = e.target;
+		if (target.tagName === "A" && !target.hasAttribute('data-external')) {
+			// Get the absolute anchor href.
+			var href = target.href;
 
-		if (href.attr.indexOf('javascript:void(0)') > -1)
-			return;
+			if (href.indexOf('javascript:void(0)') > -1)
+				return;
 
-		// Stop the default event to ensure the link will
-		// not cause a page refresh.
-		e.preventDefault();
+			// not a client-side navigation URL
+			if (href.indexOf('#/') === -1)
+				return;
 
-		// Navigate away. If possible, construct an object and use this.go(obj)
-		window.location.hash = href.attr;
+			// Stop the default event to ensure the link will
+			// not cause a page refresh.
+			e.preventDefault();
+
+			// Get the hash part of the URL and navigate away.
+
+			href = '/' + href.split('#/')[1];
+			_router.navigate(href);
+		}
 	};
 
 	// Public API
 	// --------------
 
 	/**
-	 * Creates a new route pattern and add it to crossroads routes collection
-	 *
-	 * @method addRoute
+	 * Maps a handler to a given URL pattern.
 	 *
 	 * @param {String} pattern String pattern that should be used to match against requests
 	 * @param {Function} handler Function that should be executed when a request matches the route pattern
 	 */
 	var add = function(pattern, handler) {
-		_router.addRoute(pattern, handler);
+		_router.on(pattern, handler);
 	};
 
 	/**
-	 * listen to onHashChange event;
-	 * get new hash
-	 * pass it to crossroads
-	 * trigger hashchange in the beggining
+	 *
 	 */
 	var start = function() {
-
-		// configure uriAnchor to use our schema
-		$.uriAnchor.configModule({
-			schema_map : stateMap.anchorMap
-		});
-
-		// Handle URI anchor change events.
-		// This is done /after/ all feature modules are configured
-		// and initialized, otherwise they will not be ready to handle
-		// the trigger event, which is used to ensure the anchor
-		// is considered on load
-		$(window)
-			.on( 'hashchange', _onHashChange )
-			.trigger( 'hashchange' );
-
-		// delegate URL anchor click
-		$(document).on('click', 'a[href]:not([data-external])', _handleURLClick);
+		document.addEventListener('click', _handleURLClick);
 	};
 
 	/**
@@ -689,69 +629,26 @@ F.router = (function($, crossroads, undefined){
 	 * @method
 	 * @public
 	 */
-	var stop = function(){
-		$(window).off('hashchange', _onHashChange);
-		$(document).off('click', _handleURLClick);
+	var stop = function() {
+		document.removeEventListener('click', _handleURLClick);
 	};
 
 	/**
-	 * changeAnchorPart
-	 * @purpose: Changes part of the URI anchor component
-	 * @param  {object} args the map describing what part of the URI anchor we want changed.
-	 * @return {boolean}
-	 *         * true   the anchor portion of the URI was updated
-	 *         * false   the anchor portion of the URI could not be updated
+	 * Navigates to the given url
+	 * @param  {url} the url to navigate to.
 	 */
-	var go = function(obj) {
-		var
-			anchorMapRevise = copyAnchorMap(),
-			bool_return = true,
-			key_name, key_name_dep
-		;
-
-		// Merge changes into anchor map
-		KEYVAL:
-		for(key_name in obj){
-			if(obj.hasOwnProperty(key_name)){
-				// skip dependent keys during iteration
-				if(key_name.indexOf('_') === 0){ continue KEYVAL; }
-
-				// update independent key value
-				anchorMapRevise[key_name] = obj[key_name];
-
-				// update matching dependent key
-				key_name_dep = '_' + key_name;
-				if(obj[key_name_dep]){
-					anchorMapRevise[key_name_dep] = obj[key_name_dep];
-				}
-				else{
-					delete anchorMapRevise[key_name_dep];
-					delete anchorMapRevise['_s' + key_name_dep];
-				}
-			}
-		}
-
-		// Attempt to update URI; revert if not successful
-		try {
-			$.uriAnchor.setAnchor(anchorMapRevise);
-		}
-		catch(error) {
-			// replace URI with existing state
-			$.uriAnchor.setAnchor(stateMap.anchorMap, null, true);
-			bool_return = false;
-		}
-
-		return bool_return;
+	var navigate = function(url) {
+		_router.navigate(url);
 	};
 
 	// Return public methods
 	return {
 		add		: add,
-		go		: go,
+		navigate: navigate,
 		start	: start,
 		stop	: stop
 	};
-}(jQuery, crossroads));
+}(Navigo));
 
 /**
  * Core
@@ -831,25 +728,26 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 	 */
 	function productionize(object, objectName) {
 		var name,
-    		method;
+    		method,
+    		wrap = function(name, method){
+				return function(){
+					var errorPrefix = objectName + '.' + name + '() - ';
+					try {
+						return method.apply(this, arguments);
+					} catch (ex) {
+						ex.methodName = methodName;
+						ex.objectName = objectName;
+						ex.name = errorPrefix + ex.name;
+						ex.message = errorPrefix + ex.message;
+						error(ex);
+					}
+				};
+			};
 
 		for (name in object){
 			method = object[name];
 			if (typeof method === "function"){
-				object[name] = function(name, method){
-					return function(){
-						var errorPrefix = objectName + '.' + name + '() - ';
-						try {
-							return method.apply(this, arguments);
-						} catch (ex) {
-							ex.methodName = methodName;
-							ex.objectName = objectName;
-							ex.name = errorPrefix + ex.name;
-							ex.message = errorPrefix + ex.message;
-							error(ex);
-						}
-					};
-				}(name, method);
+				object[name] = wrap(name, method);
 			}
 		}
 	}
@@ -869,7 +767,7 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 		 * @return {void}
 		 */
 		init: function(options) {
-			_config = $.extend({}, _config, options);
+			_config = F.compose({}, _config, options);
 
 			this.startAll(document.documentElement);
 
@@ -996,7 +894,9 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 			var extensions = {};
 			var stores     = {};
 
-			for (var i = 0; i < module.extensions.length; i++) {
+			var i; // loop controller variable
+
+			for (i = 0; i < module.extensions.length; i++) {
 				var extName = module.extensions[i];
 
 				if (_extensions.hasOwnProperty(extName))
@@ -1005,7 +905,7 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 					return error(new Error("Module requires an unregistered extensions: " + extName));
 			}
 
-			for (var i = 0; i < module.stores.length; i++ ) {
+			for (i = 0; i < module.stores.length; i++ ) {
 				var storeName = module.stores[i];
 
 				if (_stores.hasOwnProperty(storeName))
@@ -1121,7 +1021,7 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 			if (_initialized)
 				return error(new Error('Cannot set configuration after application is initialized'));
 
-			_config = $.extend({}, _config, config);
+			_config = F.compose({}, _config, config);
 		},
 
 		// Error reporting
@@ -1374,7 +1274,7 @@ F.Extension = (function(undefined){
          */
         init: function(options) {
             this._defaults = {};
-            this._options = $.extend( {}, this._defaults, options );
+            this._options = F.compose( {}, this._defaults, options );
         }
     });
 
@@ -1390,7 +1290,7 @@ F.Extension = (function(undefined){
  * and which should be able to live on it's own.
  */
 
-/* global riot, $ */
+/* global F */
 F.Module = (function(undefined){
 	"use strict";
 
@@ -1408,7 +1308,7 @@ F.Module = (function(undefined){
 		this._options  = {};
 		this._extensions = {};
 		this._stores = {};
-		this._options = $.extend( {}, this._defaults, options );
+		this._options = F.compose( {}, this._defaults, options );
 
 		// Access to jQuery and DOM versions of element
 		this.$el = null;

@@ -1,6 +1,6 @@
 /* global F, ActionTypes */
 
-var TodoStore = (function(){
+var TodoStore = (function(F){
 	"use strict";
 
 	var todos = {},
@@ -19,7 +19,7 @@ var TodoStore = (function(){
 
 	function update (id, updates) {
 		if(!todos[id]) return;
-		var updatedTodo = $.extend({}, todos[id], updates);
+		var updatedTodo = F.compose({}, todos[id], updates);
 		todos[id] = updatedTodo;
 	}
 
@@ -96,4 +96,4 @@ var TodoStore = (function(){
 			return todos[id];
 		}
 	});
-}());
+}(F));

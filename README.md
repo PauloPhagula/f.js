@@ -6,7 +6,7 @@ F is a JavaScript framework for developing modular and scalable SPAs with reusab
 
 It has nothing new of it's own. It instead, tries to mix and match good principles and best-practices to create a small, easy and powerful *frankenstein* framework.
 
-Bottom line, this could be said to be: [aura](http://aurajs.com/) + [flux](https://facebook.github.io/flux/docs/overview.html) + [riot](http://riotjs.com/).
+Bottom line, this could be said to be: [aura](http://aurajs.com/) + [flux](https://facebook.github.io/flux/docs/overview.html).
 
 ## Concepts
 
@@ -27,7 +27,9 @@ Responsabilities:
 
 Extensions are loaded in your application when it starts. They allow you to add features to the application, and are available to the `Modules` through dependency Injection.
 
-The framework provides some extensions on it's own with some basic functionallity but they're not required to use it, in fact they're not part of the build at all. You must get them from the [ext](./ext) folder
+The framework provides some extensions on it's own with some basic functionallity but they're not required to use it, in fact they're not part of the build at all. You must get them from the [src/ext](./src/ext) folder.
+
+Note: **The HTTP extension depends on the new (fetch API)[https://fetch.spec.whatwg.org/]. Before using it, [make sure the targeted browsers for your app support it](http://caniuse.com/#search=fetch). If they don't, please consider using the (gituhub/fetch polyfill)[https://github.com/github/fetch] or writting your own extension to support old XHR!**.
 
 ### Sandbox
 
@@ -95,12 +97,9 @@ F requires the dependencies liste bellow. As long as you have them, just downloa
 Also check out the examples listed in bellow, they provide a good hint on how to use the framework.
 
 ### Dependencies
-- [jQuery](http://jquery.com/)
-- [riotjs](http://riotjs.com/)
-- [signals](http://millermedeiros.github.com/js-signals/)
-- [crossroads](https://millermedeiros.github.io/crossroads.js/)
-- [lodash](https://lodash.com/)
-- [jQuery uriAnchor Plugin](https://github.com/mmikowski/urianchor)
+- [navigo](https://github.com/krasimir/navigo)
+
+Note: **The example uses riotjs but that is not a dependency of the library, it could be react, Backbone view or Anything.**
 
 ## Examples
 

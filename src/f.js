@@ -2,9 +2,7 @@
  * F - a JavaScript framework for modular and scalable SPAs
  */
 
-/* global jQuery, _ */
-
-var F = (function($, _, undefined){
+var F = (function(undefined){
     "use strict";
 
     // Initial Setup
@@ -16,7 +14,7 @@ var F = (function($, _, undefined){
     var previousF = F;
 
     // Current version of the library. Keep in sync with `package.json` and `bower.json`.
-    F.VERSION = '0.1.2';
+    F.VERSION = '0.1.3';
 
     // Set framework to debug mode. Disabled by default
     F.DEBUG = false;
@@ -28,11 +26,22 @@ var F = (function($, _, undefined){
         return this;
     };
 
+    // Patch Object
+    Object.getOwnPropertyDescriptors = function getOwnPropertyDescriptors(obj) {
+        var descriptors = {};
+        for (var prop in obj) {
+            if (obj.hasOwnProperty(prop)) {
+                descriptors[prop] = Object.getOwnPropertyDescriptor(obj, prop);
+            }
+        }
+        return descriptors;
+    };
+
     // Util
     // ---
 
     // Composes objects by combining them into a new
-    F.compose = _.extend;
+    F.compose = Object.assign;
 
     /**
      * Helper function to correctly set up the prototype chain for subclasses.
@@ -41,6 +50,7 @@ var F = (function($, _, undefined){
      *
      * Taken from Backbone.js of Jeremy Ashkenas
      * @see https://github.com/jashkenas/backbone/blob/master/backbone.js#L1839
+     * @see https://gist.github.com/juandopazo/1367191
      *
      * @param  {Object} protoProps - the instance properties for the *Class*
      * @param  {Object} staticProps - the static properties for the *Class*
@@ -53,18 +63,25 @@ var F = (function($, _, undefined){
         // The constructor function for the new subclass is either defined by you
         // (the "constructor" property in your `extend` definition), or defaulted
         // by us to simply call the parent constructor.
-        if (protoProps && _.has(protoProps, 'constructor')) {
-            child = protoProps.constructor;
-        } else {
-            child = function(){ return parent.apply(this, arguments); };
+        if (!protoProps.hasOwnProperty('constructor')) {
+            Object.defineProperty(protoProps, 'constructor', {
+                value: function () {
+                    // Default call to superclass as in maxmin classes
+                    parent.apply(this, arguments);
+                },
+                writable: true,
+                configurable: true,
+                enumerable: false
+            });
         }
 
+        child = protoProps.constructor;
         // Add static properties to the constructor function, if supplied.
-        _.extend(child, parent, staticProps);
+        Object.assign(child, parent, staticProps);
 
         // Set the prototype chain to inherit from `parent`, without calling
         // `parent`'s constructor function and add the prototype properties.
-        child.prototype = _.create(parent.prototype, protoProps);
+        child.prototype = Object.create(parent.prototype, Object.getOwnPropertyDescriptors(protoProps));
         child.prototype.constructor = child;
 
         // Set a convenience property in case the parent's prototype is needed
@@ -75,4 +92,4 @@ var F = (function($, _, undefined){
     };
 
     return F;
-}(jQuery, _));
+}());

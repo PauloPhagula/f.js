@@ -25,7 +25,10 @@
  * // unsubscribing
  * PubSub.unsubscrube('wem', fn);
  */
-F.dispatcher = (function(){
+
+/** global F */
+
+F.dispatcher = (function(undefined){
 	"use strict";
 
 	var _prefix = 'ID_';

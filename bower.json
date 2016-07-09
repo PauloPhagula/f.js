@@ -1,7 +1,7 @@
 {
   "name": "f",
   "description": "F - a JavaScript framework for modular and scalable SPAs",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "authors": [
     "Paulo Phagula <pphagula@gmail.com>"
   ],
@@ -13,10 +13,6 @@
     "tests"
   ],
   "dependencies": {
-    "crossroads": "~0.12.2",
-    "jquery": "~2.1.4",
-    "riot": "~2.2.4",
-    "lodash": "~4.6.1",
-    "js-signals": "signals#~1.0.0"
+    "navigo": "^2.1.1"
   }
 }
