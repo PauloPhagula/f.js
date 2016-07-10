@@ -1,5 +1,5 @@
 /*!
- * f, v0.1.4 (2016/07/10 11:32)
+ * f, v0.1.5 (2016/07/10 11:43)
  * A JavaScript framework for modular and scalable SPAs.
  * <https://github.com/dareenzo/f-es>
  *
@@ -21,7 +21,7 @@ var factory = function (Navigo) {
     var previousF = F;
 
     // Current version of the library. Keep in sync with `package.json` and `bower.json`.
-    F.VERSION = '0.1.4';
+    F.VERSION = '0.1.5';
 
     // Set framework to debug mode. Disabled by default
     F.DEBUG = false;
