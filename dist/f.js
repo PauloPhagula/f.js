@@ -1,5 +1,5 @@
 /*!
- * f, v0.1.5 (2016/07/10 11:43)
+ * f, v0.1.5 (2016/07/10 12:04)
  * A JavaScript framework for modular and scalable SPAs.
  * <https://github.com/dareenzo/f-es>
  *
@@ -1365,9 +1365,9 @@ F.Module = (function(undefined){
 };
 
 if (typeof define === 'function' && define.amd) {
-    define(['navigo'], factory);
+    define(['Navigo'], factory);
 } else if (typeof module !== 'undefined' && module.exports) { //Node
-    module.exports = factory(require('navigo'));
+    module.exports = factory(require('Navigo'));
 } else {
     /*jshint sub:true */
     window['F'] = factory(window['Navigo']);

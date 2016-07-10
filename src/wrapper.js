@@ -24,9 +24,9 @@ var factory = function (Navigo) {
 };
 
 if (typeof define === 'function' && define.amd) {
-    define(['navigo'], factory);
+    define(['Navigo'], factory);
 } else if (typeof module !== 'undefined' && module.exports) { //Node
-    module.exports = factory(require('navigo'));
+    module.exports = factory(require('Navigo'));
 } else {
     /*jshint sub:true */
     window['F'] = factory(window['Navigo']);
