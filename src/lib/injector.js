@@ -37,8 +37,6 @@ Usage:
     doSomething();
  */
 
-/** global F */
-
 F.injector = (function(undefined){
     "use strict";
 

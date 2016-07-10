@@ -25,7 +25,7 @@ F.Store = (function(undefined){
 			if (self._changed) {
 				self.emitChange();
 			}
-		}
+		};
 
 		self._dispatchToken = dispatcher.subscribe(ACTION, this._dispatchFlow);
 		this.actions = {};

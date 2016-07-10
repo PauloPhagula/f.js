@@ -1,10 +1,17 @@
 /*!
- * F - a JavaScript framework for modular and scalable SPAs
+ * f, v0.1.4 (2016/07/10 11:32)
+ * A JavaScript framework for modular and scalable SPAs.
+ * <https://github.com/dareenzo/f-es>
+ *
+ * Author: Paulo Phagula <https://dareenzo.github.io/>
+ * License: MIT
+ * 
  */
-
-var F = (function(undefined){
-    "use strict";
-
+(function () {
+	
+var factory = function (Navigo) {
+	"use strict";
+	    
     // Initial Setup
     // -------------
 
@@ -91,10 +98,7 @@ var F = (function(undefined){
         return child;
     };
 
-    return F;
-}());
-
-/**
+	/**
  * Dispatcher - the communication / app nexus / pub-sub extension
  *
  * Taken from: Facebook Dispatcher and Alex MacCaw - JavaScript Web Applications - Pag.28
@@ -121,8 +125,6 @@ var F = (function(undefined){
  * // unsubscribing
  * PubSub.unsubscrube('wem', fn);
  */
-
-/** global F */
 
 F.dispatcher = (function(undefined){
 	"use strict";
@@ -340,7 +342,7 @@ F.dispatcher = (function(undefined){
 	};
 }());
 
-/*
+	/*
 
 Dependency Injector
 
@@ -378,8 +380,6 @@ Usage:
 
     doSomething();
  */
-
-/** global F */
 
 F.injector = (function(undefined){
     "use strict";
@@ -560,7 +560,7 @@ F.injector = (function(undefined){
     };
 }());
 
-/**
+	/**
  * Router - the app router
  *
  * @see https://github.com/krasimir/navigo
@@ -569,7 +569,7 @@ F.injector = (function(undefined){
 F.router = (function(Navigo, undefined){
 	"use strict";
 
-	var _router = new Navigo()
+	var _router = new Navigo();
 
 	/**
 	 * Handles URL clicks when the router is turned on
@@ -647,7 +647,7 @@ F.router = (function(Navigo, undefined){
 	};
 }(Navigo));
 
-/**
+	/**
  * Core
  *
  * The `Core` contains the main application object that is the heart of the
@@ -1037,7 +1037,7 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 	return Core;
 }(F.injector, F.dispatcher, F.router));
 
-/**
+	/**
  * Sandbox
  *
  * Abstracton into the `Core` for use by `Module`s to interact with the environment.
@@ -1153,7 +1153,7 @@ F.Sandbox = (function(undefined){
 	return Sandbox;
 }());
 
-/**
+	/**
  * Flux Store
  *
  * Is where the `Core` and all of our feature `Modules` access data and business
@@ -1180,7 +1180,7 @@ F.Store = (function(undefined){
 			if (self._changed) {
 				self.emitChange();
 			}
-		}
+		};
 
 		self._dispatchToken = dispatcher.subscribe(ACTION, this._dispatchFlow);
 		this.actions = {};
@@ -1271,7 +1271,7 @@ F.Store = (function(undefined){
 	return Store;
 }());
 
-/**
+	/**
  * Extension
  *
  * `Extension`s augment the capabilities of the `Core`.
@@ -1299,7 +1299,7 @@ F.Extension = (function(undefined){
     return Extension;
 }());
 
-/**
+	/**
  * Module
  *
  * A `Module` is an independent unit of functionallity that is part of the total
@@ -1359,4 +1359,18 @@ F.Module = (function(undefined){
 
 	Module.extend = F.extend;
 	return Module;
+}());
+
+    return F;
+};
+
+if (typeof define === 'function' && define.amd) {
+    define(['navigo'], factory);
+} else if (typeof module !== 'undefined' && module.exports) { //Node
+    module.exports = factory(require('navigo'));
+} else {
+    /*jshint sub:true */
+    window['F'] = factory(window['Navigo']);
+}
+
 }());

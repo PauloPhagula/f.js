@@ -1,13 +1,27 @@
 {
   "name": "f",
-  "description": "F - a JavaScript framework for modular and scalable SPAs",
   "version": "0.1.4",
+  "keywords": [
+    "spa",
+    "flux",
+    "modular",
+    "scalable",
+    "minimal"
+  ],
+  "description": "A JavaScript framework for modular and scalable SPAs.",
+  "homepage": "https://github.com/dareenzo/f-es",
+  "bugs": {
+    "url": "https://github.com/dareenzo/f-es/issues"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Paulo Phagula",
+    "url": "https://dareenzo.github.io/"
+  },
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/dareenzo/F-ES.git"
   },
-  "author": "Paulo Phagula <pphagula@gmail.com>",
-  "license": "MIT",
   "dependencies": {},
   "devDependencies": {
     "gulp": "^3.9.0",

@@ -7,7 +7,7 @@
 F.router = (function(Navigo, undefined){
 	"use strict";
 
-	var _router = new Navigo()
+	var _router = new Navigo();
 
 	/**
 	 * Handles URL clicks when the router is turned on
