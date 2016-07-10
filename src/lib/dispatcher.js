@@ -26,8 +26,6 @@
  * PubSub.unsubscrube('wem', fn);
  */
 
-/** global F */
-
 F.dispatcher = (function(undefined){
 	"use strict";
 

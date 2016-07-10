@@ -1,10 +1,4 @@
-/*!
- * F - a JavaScript framework for modular and scalable SPAs
- */
-
-var F = (function(undefined){
-    "use strict";
-
+    
     // Initial Setup
     // -------------
 
@@ -14,7 +8,7 @@ var F = (function(undefined){
     var previousF = F;
 
     // Current version of the library. Keep in sync with `package.json` and `bower.json`.
-    F.VERSION = '0.1.4';
+    F.VERSION = '::VERSION_NUMBER::';
 
     // Set framework to debug mode. Disabled by default
     F.DEBUG = false;
@@ -90,6 +84,3 @@ var F = (function(undefined){
 
         return child;
     };
-
-    return F;
-}());
