@@ -3,7 +3,7 @@
  */
 
 /* global F */
-F.util = (function(undefined){
+utilExtFactory = function(){
 	"use strict";
 
 	// Thanks to Andrea Giammarchi
@@ -157,7 +157,7 @@ F.util = (function(undefined){
 	};
 	tmpl.settings = tmplSettings;
 
-	return {
+	Util = F.Extension.extend({
 		ready: function (fn) {
 	   		if (document.readyState === 'complete' || document.readyState !== 'loading') {
 		    	fn();
@@ -277,5 +277,7 @@ F.util = (function(undefined){
         delcookie: function (name, domain){
             document.cookie = name + "=blah; expires=Fri, 31 Dec 1999 23:59:59 GMT;" + (domain ? 'domain='+domain : '');
         }
-	};
-}());
+	});
+
+	return new Util();
+}

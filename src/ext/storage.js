@@ -88,5 +88,5 @@ var storageExtFactory = function() {
         }
     });
 
-    return CacheProvider;
+    return new CacheProvider();
 };
