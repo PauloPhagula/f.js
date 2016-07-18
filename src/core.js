@@ -47,6 +47,26 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 	}
 
 	/**
+	 * Global error event handler.
+	 * @param  {string} message      [description]
+	 * @param  {string} file         [description]
+	 * @param  {number} lineNumber   [description]
+	 * @param  {number} columnNumber [description]
+	 * @param  {Error} exception    [description]
+	 * @return {boolean}              [description]
+	 */
+	function onerror(message, file, lineNumber, columnNumber, exception) {
+		if (_config.debug)
+			return false;
+
+		if (exception === undefined)
+			exception = new Error(message, file, lineNumber);
+
+    	error(exception);
+    	return true;
+    }
+
+	/**
 	 * Makes an object production-ready by wrapping all its methods with a
 	 * try-catch so that objects don't need to worry about trapping their own
 	 * errors. When an error occurs, the error event is fired with the error information.
@@ -117,6 +137,8 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 		init: function(options) {
 			_config = F.compose({}, _config, options);
 
+			window.addEventListener('error', onerror); // Setup global error tracking before anything else runs.
+
 			this.startAll(document.documentElement);
 
 			router.start();
@@ -131,6 +153,7 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 		destroy: function() {
 			this.stopAll(document.documentElement);
 
+			window.removeEventListener('error', onerror);
 			reset();
 
 			router.stop();

@@ -72,9 +72,9 @@ gulp.task('build', function(){
     var wrapper = readFile('src/wrapper.js'),
         deploy  = tmpl(wrapper, {
             f          : readFile('src/f.js'),
-            dispatcher : readFile('src/lib/dispatcher.js'),
-            injector   : readFile('src/lib/injector.js'),
-            router     : readFile('src/lib/router.js'),
+            dispatcher : readFile('src/dispatcher.js'),
+            injector   : readFile('src/injector.js'),
+            router     : readFile('src/router.js'),
             core       : readFile('src/core.js'),
             sandbox    : readFile('src/sandbox.js'),
             store      : readFile('src/store.js'),
