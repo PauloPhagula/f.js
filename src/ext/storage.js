@@ -10,7 +10,7 @@ var storageExtFactory = function() {
 
     var _cache = {};
 
-    CacheProvider = F.Extension.extend({
+    var CacheProvider = F.Extension.extend({
 
         init: function(options) {
             try {

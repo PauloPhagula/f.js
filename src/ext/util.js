@@ -157,7 +157,7 @@ utilExtFactory = function(){
 	};
 	tmpl.settings = tmplSettings;
 
-	Util = F.Extension.extend({
+	var Util = F.Extension.extend({
 		ready: function (fn) {
 	   		if (document.readyState === 'complete' || document.readyState !== 'loading') {
 		    	fn();
