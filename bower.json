@@ -13,6 +13,7 @@
     "tests"
   ],
   "dependencies": {
-    "navigo": "^2.1.1"
+    "navigo": "^2.1.1",
+    "mustache.js": "mustache#^2.2.1"
   }
 }

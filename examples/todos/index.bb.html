@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" data-framework="F">
+  <head>
+    <meta charset="utf-8">
+    <title>F • TodoMVC</title>
+    <link rel="stylesheet" href="css/base.css" charset="utf-8">
+    <link rel="stylesheet" href="css/index.css" charset="utf-8">
+  </head>
+  <body>
+    <div data-module="todomvc"></div>
+    <footer class="info">
+      <p>Double-click to edit a todo</p>
+      <!-- Change this out with your name and url ↓ -->
+      <p>Created by <a href="https://github.com/dareenzo" data-external>Paulo Phagula</a></p>
+      <p>Part of <a href="http://todomvc.com" data-external>TodoMVC</a></p>
+    </footer>
+
+    <script id="tpl-todomvc" type="text/template">
+      <section class="todoapp">
+  			<header class="header">
+  				<h1>todos</h1>
+  				<input class="new-todo" placeholder="What needs to be done?" autofocus="true">
+  			</header>
+  			<section class="main">
+  				<input class="toggle-all" type="checkbox">
+  				<label for="toggle-all">Mark all as complete</label>
+  				<ul class="todo-list">
+            {{#todos}}
+              {{^hide}}
+      					<li class="{{#completed}}completed{{/completed}} {{#editing}}editing{{/editing}}">
+      						<div class="view">
+      							<input class="toggle" type="checkbox" {{#completed}}checked{{/completed}} >
+      							<label>{{text}}</label>
+      							<button class="destroy"></button>
+      						</div>
+      						<input name="todoeditbox" class="edit" type="text" value="Create a TodoMVC template">
+      					</li>
+              {{/hide}}
+            {{/todos}}
+  				</ul>
+  			</section>
+  			<footer class="footer">
+  				<span class="todo-count"><strong>{{pendingtodos}}</strong> {{pendingText}}left</span>
+  				<ul class="filters">
+  					<li>
+  						<a {{#all_route_active}}class="selected"{{/all_route_active}} href="#/">All</a>
+  					</li>
+  					<li>
+  						<a {{#active_route_active}}class="selected"{{/active_route_active}}href="#/active">Active</a>
+  					</li>
+  					<li>
+  						<a {{#completed_route_active}}class="selected"{{/completed_route_active}}href="#/completed">Completed</a>
+  					</li>
+  				</ul>
+  				<button class="clear-completed">Clear completed</button>
+  			</footer>
+  		</section>
+    </script>
+
+    <!-- Scripts here. Don't remove -->
+    <script src="js/base.js"></script>
+
+    <script src="../../bower_components/navigo/lib/navigo.min.js"></script>
+    <script src="../../bower_components/mustache.js/mustache.min.js"></script>
+
+    <script src="../../dist/f.min.js"></script>
+
+    <script src="js/actionTypes.js"></script>
+    <script src="js/todoStore.js"></script>
+    <script src="js/actionTypes.js"></script>
+    <script src="js/app.bb.js"></script>
+
+  </body>
+</html>

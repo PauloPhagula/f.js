@@ -1,5 +1,5 @@
 /*!
- * f, v0.1.7 (2016/07/18 21:12)
+ * f, v0.1.7 (2016/07/19 15:34)
  * A JavaScript framework for modular and scalable SPAs.
  * <https://github.com/dareenzo/f-es>
  *
@@ -11,7 +11,7 @@
 	
 var factory = function (Navigo) {
 	"use strict";
-	    
+	
     // Initial Setup
     // -------------
 
@@ -569,7 +569,7 @@ F.injector = (function(undefined){
 F.router = (function(Navigo, undefined){
 	"use strict";
 
-	var _router = new Navigo();
+	var _router = new Navigo(null, true);
 
 	/**
 	 * Handles URL clicks when the router is turned on
