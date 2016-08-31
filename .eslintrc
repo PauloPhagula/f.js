@@ -1,0 +1,25 @@
+{
+  "env": {
+    "browser": true,
+    "node": true,
+    "commonjs": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "script",
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "globals": {
+    "console": true,
+    "require": true,
+    "define": true,
+    "$": true,
+   "_": true
+  },
+  "rules": {
+    "strict": [1, "function"],
+    "valid-jsdoc": [1]
+  },
+}

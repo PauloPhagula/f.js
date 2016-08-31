@@ -1,48 +1,49 @@
-/*
-
-Dependency Injector
-
-All code is a mixture of the content from the following sources:
-    Krasimir Sonev      - http://krasimirtsonev.com/blog/article/Dependency-injection-in-JavaScript
-    Tero Parviainen     - http://teropa.info/blog/2014/06/04/angularjs-dependency-injection-from-the-inside-out.html
-    Merrick Christensen - http://merrickchristensen.com/articles/javascript-dependency-injection.html
-    Yusufaytas          - http://stackoverflow.com/a/20058395
-    Alex Rothenberg     - http://www.alexrothenberg.com/2013/02/11/the-magic-behind-angularjs-dependency-injection.html
-
-Usage:
-    var Service = function() {
-        return { name: 'Service' };
-    }
-    var Router = function() {
-        return { name: 'Router' };
-    }
-
-    injector.register('service', Service);
-    injector.register('router', Router);
-
-    // when specifying the names of the dependencies, the parameter names in the function can be anything
-    var doSomething = injector.resolve(['service', 'router', function(q, s) {
-        console.log(q().name === 'Service');
-        console.log(s().name === 'Router');
-    }]);
-
-    doSomething();
-
-    // When not specifying the dependency names, the parameter names in the function must have the same name as the dependencies
-    var doSomething = injector.resolve(function(service, router){
-        console.log(q().name === 'Service');
-        console.log(s().name === 'Router');
-    });
-
-    doSomething();
+/**
+ * @fileOverview contains the Dependency Injector definition
+ *
+ * All code is a mixture of the content from the following sources:
+ *     Krasimir Sonev      - http://krasimirtsonev.com/blog/article/Dependency-injection-in-JavaScript
+ *     Tero Parviainen     - http://teropa.info/blog/2014/06/04/angularjs-dependency-injection-from-the-inside-out.html
+ *     Merrick Christensen - http://merrickchristensen.com/articles/javascript-dependency-injection.html
+ *     Yusufaytas          - http://stackoverflow.com/a/20058395
+ *     Alex Rothenberg     - http://www.alexrothenberg.com/2013/02/11/the-magic-behind-angularjs-dependency-injection.html
+ * 
+ * @usage:
+ *     var Service = function() {
+ *         return { name: 'Service' };
+ *     }
+ *     var Router = function() {
+ *         return { name: 'Router' };
+ *     }
+ *
+ *     injector.register('service', Service);
+ *     injector.register('router', Router);
+ *
+ *      * when specifying the names of the dependencies, the parameter names in the function can be anything
+ *     var doSomething = injector.resolve(['service', 'router', function(q, s) {
+ *         console.log(q().name === 'Service');
+ *         console.log(s().name === 'Router');
+ *     }]);
+ *
+ *     doSomething();
+ *
+ *      * When not specifying the dependency names, the parameter names in the function must have the same name as the dependencies
+ *     var doSomething = injector.resolve(function(service, router){
+ *         console.log(q().name === 'Service');
+ *         console.log(s().name === 'Router');
+ *     });
+ *
+ *     doSomething();
  */
 
+/**
+ * @memberof F
+ */
 F.injector = (function(undefined){
     "use strict";
 
     var dependencies  = {};
 
-    var ARROW_ARG = /^([^\(]+?)=>/;
     var FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
     var FN_ARG_SPLIT = /,/;
     var FN_ARG = /^\s*(_?)(\S+?)\1\s*$/;
@@ -80,6 +81,12 @@ F.injector = (function(undefined){
         return $inject;
     }
 
+    /**
+     * Registers an object instance in the injector
+     * @param  {string} key   the reference name for the instance
+     * @param  {*} value the value of the instance
+     * @return {void}
+     */
     function register (key, value) {
         dependencies[key] = value;
     }
@@ -117,12 +124,6 @@ F.injector = (function(undefined){
     }
 
     /**
-     * @ngdoc function
-     * @name angular.isFunction
-     * @module ng
-     * @kind function
-     *
-     * @description
      * Determines if a reference is a `Function`.
      *
      * @param {*} value Reference to check.
@@ -177,19 +178,14 @@ F.injector = (function(undefined){
     }
 
     var ngMinErr = minErr('ng');
-    /**
-     * throw error if the name given is hasOwnProperty
-     * @param  {String} name    the name to test
-     * @param  {String} context the context in which the name is used, such as module or directive
-     */
-    function assertNotHasOwnProperty(name, context) {
-        if (name === 'hasOwnProperty') {
-            throw ngMinErr('badname', "hasOwnProperty is not a valid {0} name", context);
-        }
-    }
 
     /**
-     * throw error if the argument is falsy.
+     * Checks if the given argument is falsy.
+     * @param {*} arg object to be analysed
+     * @param {string} name the argument's name
+     * @param {string} reason the reason to be used for the failure message 
+     * @returns {*} the argument if is not falsy
+     * @throws {Error} if the argument is falsy.
      */
     function assertArg(arg, name, reason) {
         if (!arg) {

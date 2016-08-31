@@ -1,27 +1,45 @@
-    
+
     // Initial Setup
     // -------------
 
-    // Save the previous value of the `F` variable, so that it can be
-    // restored later on, if `noConflict` is used.
+    /**
+     * The one global object for F.
+     * @namespace F
+     */
     var F = {};
+
+    /**
+     * The previous value of the `F` variable, so that it can be
+     * restored later on, if `noConflict` is used.
+     * @type {F}
+     */
     var previousF = F;
 
-    // Current version of the library. Keep in sync with `package.json` and `bower.json`.
+    /**
+     * Current version of the library.
+     * Must be keept in sync with `package.json` and `bower.json`.
+     * @type {String}
+     */
     F.VERSION = '::VERSION_NUMBER::';
 
-    // Set framework to debug mode. Disabled by default
+    /**
+     * Set framework to debug mode. Disabled by default
+     * @type {Boolean}
+     */
     F.DEBUG = false;
 
-    // Runs F.js in *noConflict* mode, returning the `F` variable
-    // to its previous owner. Returns a reference to this F object.
+    /**
+     * Runs F.js in *noConflict* mode, returning the `F` variable
+     * to its previous owner.
+     * @return {F} a reference to this F object
+     */
     F.noConflict = function() {
         F = previousF;
         return this;
     };
 
     // Patch Object
-    Object.getOwnPropertyDescriptors = function getOwnPropertyDescriptors(obj) {
+    Object.getOwnPropertyDescriptors = function (obj) {
         var descriptors = {};
         for (var prop in obj) {
             if (obj.hasOwnProperty(prop)) {
@@ -34,7 +52,7 @@
     // Util
     // ---
 
-    // Composes objects by combining them into a new
+    // Composes objects by combining them into a new one
     F.compose = Object.assign;
 
     /**
@@ -83,4 +101,62 @@
         child.__super__ = parent.prototype;
 
         return child;
+    };
+
+    /**
+     * Performs event delegation setting.
+     * @param  {HTMLElement} element the element we want to delegate events for
+     * @param  {string} event    the type of event we want to delegate
+     * @param  {string} selector a css selector
+     * @param  {Function} handler  the handler fuction
+     * @param  {Object} context  the context under which the handler fn
+     *                           will be called
+     * @param {boolan} useCapture indicates that events of this type will be 
+     *                           dispatched to the registered listener before 
+     *                           being dispatched to any EventTarget beneath 
+     *                           it in the DOM tree
+     * @return {void}
+     */
+    F.delegateEvent = function(element, event, selector, handler, context, useCapture) {
+
+        var listener =  function(e){
+            if (typeof selector === "undefined" || selector === null) {
+                return handler.call(context || null, e);
+            } else if (e.target && e.target.matches(selector)) {
+                // console.log('event: ' + eventName + ', selector: ' + selector + ', handler: ' + handler + ', matches: ' + e.target.matches(selector));
+                return handler.call(context || null, e);
+            }
+        };
+
+        useCapture = useCapture || false;
+        element.addEventListener(event, listener, useCapture);
+    };
+
+    /**
+     * Performs event delegation unsetting.
+     * @param  {HTMLElement} element the element we want to undelegate events for
+     * @param  {string} event    the type of event we want to undelegate
+     * @param  {string} selector a css selector
+     * @param  {Function} handler  the handler fuction
+     * @param  {Object} context  the context under which the handler fn
+     *                           will be called
+     * @param {boolean} useCapture indicates that events of this type will be 
+     *                             dispatched to the registered listener before
+     *                             being dispatched to any EventTarget beneath
+     *                             it in the DOM tree
+     * @return {void}
+     */
+    F.undelegateEvent = function(element, event, selector, handler, context, useCapture) {
+
+        var listener = function(e) {
+            if (typeof selector === "undefined" || selector === null) {
+                return handler.call(context || null, e);
+            } else if (e.target && e.target.matches(selector)) {
+                // console.log('event: ' + eventName + ', selector: ' + selector + ', handler: ' + handler + ', matches: ' + e.target.matches(selector));
+                return handler.call(context || null, e);
+            }
+        };
+        useCapture = useCapture || false;
+
+        element.removeEventListener(event, listener, useCapture);
     };

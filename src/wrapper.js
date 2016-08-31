@@ -7,29 +7,25 @@
  * License: ::LICENSE::
  * 
  */
-(function () {
-	
-var factory = function (Navigo) {
-	"use strict";
+(function () { 'use strict';
+
+var factory = function () {
 	//::f:://
-	//::dispatcher:://
 	//::injector:://
-	//::router:://
+	//::dispatcher:://
 	//::core:://
 	//::sandbox:://
-	//::store:://
-	//::extension:://
 	//::module:://
     return F;
 };
 
 if (typeof define === 'function' && define.amd) {
-    define(['Navigo'], factory);
+    define(factory);
 } else if (typeof module !== 'undefined' && module.exports) { //Node
-    module.exports = factory(require('Navigo'));
+    module.exports = factory();
 } else {
     /*jshint sub:true */
-    window['F'] = factory(window['Navigo']);
+    window['F'] = factory();
 }
 
 }());

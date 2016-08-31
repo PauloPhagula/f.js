@@ -1,6 +1,4 @@
-/* global F, ActionTypes */
-
-var TodoStore = (function(F){
+var todoStoreSvcFactory = function(core){
 	"use strict";
 
 	var todos = {},
@@ -52,7 +50,7 @@ var TodoStore = (function(F){
 		}
 	}
 
-	return F.Store.extend({
+	var TodoStore = F.Store.extend({
 		init : function() {
 		},
 
@@ -96,4 +94,6 @@ var TodoStore = (function(F){
 			return todos[id];
 		}
 	});
-}(F));
+
+	return new TodoStore(core);
+};
