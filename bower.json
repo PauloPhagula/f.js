@@ -1,7 +1,6 @@
 {
   "name": "f",
   "description": "F - a JavaScript framework for modular and scalable SPAs",
-  "version": "0.1.7",
   "authors": [
     "Paulo Phagula <pphagula@gmail.com>"
   ],
@@ -13,7 +12,5 @@
     "tests"
   ],
   "dependencies": {
-    "navigo": "^2.1.1",
-    "mustache.js": "mustache#^2.2.1"
   }
 }

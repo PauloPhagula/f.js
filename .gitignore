@@ -1,4 +1,7 @@
 .DS_STORE
 node_modules/
 bower_components/
+docs/
+doc/
 npm-debug.log
+/nbproject/private/

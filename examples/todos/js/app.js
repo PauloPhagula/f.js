@@ -1,7 +1,6 @@
-/* global F, riot, $, TodoStore, ActionCreator */
+/* global F, riot */
 
-var app = (function() {
-	"use strict";
+var app = (function() {"use strict";
 
 	// override and replace default sandbox
 	F.Sandbox = F.Sandbox.extend({
@@ -10,54 +9,14 @@ var app = (function() {
 		}
 	});
 
-	// Start by creating the core
-	var core = new F.Core();
-
-	// Setting configuration for the app
-	core.setConfig({debug: false});
-
-	// Register global error handler
-	core.dispatcher.subscribe('error', function(error){
-		console.log('error' + error.exception); // Could be send via email
-	});
-
-	// Logger Extension
-	var loggerExtFactory = function(){
-
-	    var Logger = F.Extension.extend({
-	        init: function(options) {},
-	        log: function(obj) { console.log(obj);}
-	    });
-
-	    return new Logger();
-	};
-
-	// register the logger extension with no dependencies
-	core.registerExtension("logger", [], loggerExtFactory, {});
-
-
-	// calculator extension depending on logger extension
-	var calculatorExtFactory = function(logger) {
-
-		var Calculator = F.Extension.extend({
-			init: function(options) {},
-			add: function(a,b) {return a+b;},
-			subsctract: function(a,b) {return a-b;}
-		});
-
-		return new Calculator();
-	};
-
-	// notice the second parameter stating the calculator extension depends on the logger extension
-	core.registerExtension("calculator", ["logger"], calculatorExtFactory, {});
-
 	// Flux Action Creator creator Extension.
 	//
     // Is a set of helper methods, used by module views's event handlers,
     // to construct actions to be piped into the dispatcher.
-	var actionCreatorExtFactory = function () {
+	var actionCreatorSvcFactory = function (core) {
 
-		var ActionCreator = F.Extension.extend({
+		return {
+			init: function(options) {},
 			createTodo: function(text) {
 				return {
 					type : ActionTypes.CREATE_TODO,
@@ -94,32 +53,21 @@ var app = (function() {
 					data : null
 				};
 			}
-		});
-
-		return new ActionCreator();
+		};
 	};
-
-	core.registerExtension("actionCreator", [], actionCreatorExtFactory, {});
-
-	// todoStore see todoStore.js
-	var store = new TodoStore(core.dispatcher, 'todoStore');
-	core.registerStore('todoStore', store);
 
 	// Todo Module depending on logger extension and todoStore which will be injected on startup by the core
 	var TodoMVC = F.Module.extend({
-		start : function(element, extensions, stores){
 
-			this._sandbox.dispatch({type: "da", data: null});
-			this._sandbox.reportError(new Error('Test error'));
+		events: {
+            'click .some-class': 'clickHandler'
+        },
 
-			var logger = extensions["logger"];
+		start : function(element, services) {
+			var actionCreator = services.actionCreator;
+			var todoStore = services.todoStore;
 
-			var actionCreator = extensions["actionCreator"];
-
-			var todoStore = stores["todoStore"];
-
-			this.el = element;
-			this.$el = document.querySelector('[data-module="' + this._name + '"]');
+			this.$el = element;
 
 			// Local Setup
 			this._options.actionCreator = actionCreator;
@@ -128,39 +76,68 @@ var app = (function() {
 			this._options.sandbox = this._sandbox;
 
 			// Mouting module to DOM
-			var tags = riot.mount(this.$el, this._name, this._options);
+			riot.mount(this.$el, this._name, this._options);
 		},
 
-		stop : function() {}
+		stop : function() {},
+
+		clickHandler: function(event) {}
 	});
 
-	// notice: the second parameter stating on which ext the modules depends
-	// notice: the third parameter stating on which stores the module depens
-	core.registerModule('todomvc', ["logger", "actionCreator"], ["todoStore"], TodoMVC, {});
+	 // if the `router` also manages `views`/`modules` then the router is also the `core`
+    // and thus both should somehow be merged
+    var AppRouter = F.Router.extend({
+        routes: { // 'pattern flags': 'handler'
+            '/:action': 'hitRoute',
+            '/(.*)/ i': 'hitRegex'
+        },
 
+        currentView: null,
+        previousView: null,
+        swapViews: function(view) {
 
-	// Router registrations
-	core.router.add('/all', function(){
-		console.log('route: /all is hit');
-	});
+        },
 
-	core.router.add('/active', function(){
-		console.log('route: /active is hit');
-	});
+        hitRoute: function(params) {
+            console.log('hit route: ' + params.action);
+        },
 
-	core.router.add('/completed', function(){
-		console.log('route: /completed is hit');
-	});
+        hitRegex: function(pos) {
+            console.log('hit regex:' + pos);
+        }
+    });
+
+   	var router = new AppRouter('examples/todos/', true);
 
 	// Application initialization
 	// ---
+	
+	// Start by creating the core
+	var core = new F.Core();
+
+	// Setting configuration for the app
+	core.setConfig({debug: false}); 
+
+	// Register global error handler
+	core.dispatcher.subscribe('error', function(error){
+		console.log('error: ', error); // Could be send via email
+	});
+
+	core.registerService("actionCreator", [], actionCreatorSvcFactory, {});
+	core.registerService('todoStore', ["core"], todoStoreSvcFactory, {});
+	
+	// notice: the second parameter stating on which ext the modules depends
+	// notice: the third parameter stating on which stores the module depens
+	core.registerModule('todomvc', ["actionCreator", "todoStore"], TodoMVC, {});
 
 	return {
 		boot: function() {
 			core.init();
+			router.start();
 		},
 		shutdown: function() {
 			core.destroy();
+			router.stop();
 		}
 	};
 }());

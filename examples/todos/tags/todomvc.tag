@@ -13,7 +13,7 @@
 			<ul class="todo-list">
 				<!-- These are here just to show the structure of the list todos -->
 				<!-- List todos should get the class `editing` when editing and `completed` when marked as completed -->
-				<li riot-tag="todotodo" class="{ completed: t.completed, editing: t.editing}" each={ t in todos } todo={t} parentview={parent} if={!t.hide}></li>
+				<li riot-tag="todotodo" class="{ completed: t.completed, editing: t.editing }" each={ t in todos } todo={t} parentview={parent} if={!t.hide}></li>
 			</ul>
 		</section>
 		<!-- This footer should hidden by default and shown when there are todos -->

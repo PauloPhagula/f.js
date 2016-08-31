@@ -1,22 +1,26 @@
 /**
- * Core
- *
- * The `Core` contains the main application object that is the heart of the
- * application architecture.
+ * @fileoverview contains the main application object that is the heart of the
+ *               application architecture.
  */
 
-/* global injector */
-
-F.Core = (function(injector, dispatcher, router, undefined) {
+/**
+ * @memberof F
+ */
+F.Core = (function(injector, undefined) {
 	"use strict";
 
 	// Private
 	// ---
-	var _config      = { debug: false },   // Global configuration
-		_extensions  = {},   // Information about each registered extension by extensionName
-        _modules     = {},   // Information about each registered module by moduleName
-        _stores	     = {},   // Information about each registered store by storeName
-        _initialized = false // Flag whether the application has been initialized
+	var _config      = { debug: false }, // Global configuration
+
+		// Flag indicating if the application has been initialized.
+		_initialized = false,
+
+        _dispatcher  = new F.Dispatcher(),
+
+		// Information about registered services, modules and stores by name
+		_services  	 = {},
+        _modules     = {}
     ;
 
     /**
@@ -26,16 +30,15 @@ F.Core = (function(injector, dispatcher, router, undefined) {
      */
     function reset() {
     	_config      = {};
-    	_extensions  = {};
+    	_services    = {};
     	_modules     = {};
-    	_stores      = {};
     	_initialized = false;
     }
 
     /**
 	 * Signals that an error has occurred. If in development mode, an error
 	 * is thrown. If in production mode, an event is fired.
-	 * @param {Error} [exception] The exception object to use.
+	 * @param {Error} exception The exception object to use.
 	 * @returns {void}
 	 * @private
 	 */
@@ -43,7 +46,7 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 		if (_config.debug)
 			throw exception;
 		else
-			dispatcher.publish('error', { exception: exception });
+			_dispatcher.publish('error', { exception: exception });
 	}
 
 	/**
@@ -123,7 +126,14 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 
 	// Public
 	// ---
-    function Core() {}
+	
+	/**
+	 * Core class definition.
+	 * @class Core
+	 */
+    function Core() {
+    	F.injector.register('core', this);
+    }
 
     F.compose(Core.prototype, {
 
@@ -131,23 +141,26 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 		// ---
 
 		/**
-		 * Initializes the application
+		 * Initializes the application.
+		 * @memberOf Core
+		 * @param {object} options the configuration object for the core.
 		 * @return {void}
 		 */
 		init: function(options) {
 			_config = F.compose({}, _config, options);
 
-			window.addEventListener('error', onerror); // Setup global error tracking before anything else runs.
+			// Setup global error tracking before anything else runs.
+			window.addEventListener('error', onerror);
 
 			this.startAll(document.documentElement);
 
-			router.start();
-			dispatcher.publish('app init');
+			_dispatcher.publish('app init');
 			_initialized = true;
 		},
 
 		/**
-		 * Stops all modules and clears all saved state
+		 * Stops all modules and clears all saved state.
+		 * @memberOf Core
 		 * @returns {void}
 		 */
 		destroy: function() {
@@ -155,26 +168,25 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 
 			window.removeEventListener('error', onerror);
 			reset();
-
-			router.stop();
 		},
 
 		// Registration Hooks
 		// ---
 
 		/**
-		 * Method used to add extensions on the core.
-		 * @param  {string}   extensionName  unique extension name. This name will be used when injecting the extension
-		 * @param  {array}    dependencies   list of dependencies this extension relies on. Generally these are other extensions
-		 * @param  {function} factory        the extension factory function
-		 * @param  {object}   options        options for the extension initialization
+		 * Method used to add services on the core.
+		 * @memberOf Core
+		 * @param  {string}   serviceName  unique service name. This name will be used when injecting the service
+		 * @param  {array}    dependencies   list of dependencies this service relies on. Generally these are other services
+		 * @param  {function} factory        the service factory function
+		 * @param  {object}   options        options for the service initialization
 		 * @return {void}
 		 *
 		 * @example
 		 * var core = new F.Core();
 		 *
-		 * var loggerExtFactory = function(){
-		 *	    var Logger = F.Extension.extend({
+		 * var loggerSvcFactory = function(){
+		 *	    var Logger = F.Service.extend({
 		 *	        init: function(options) {},
 		 *	        log: function(obj) { console.log(obj);}
 		 *	    });
@@ -182,10 +194,10 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 		 *	    return new Logger();
 		 * };
 		 *
-		 * core.registerExtension("logger", [], loggerExtFactory, {});
+		 * core.registerService("logger", [], loggerSvcFactory, {});
 		 *
-		 * var calculatorExtFactory = function(logger) {
-		 * 		var Calculator = F.Extension.extend({
+		 * var calculatorSvcFactory = function(logger) {
+		 * 		var Calculator = F.Service.extend({
 		 * 			init: function(options) {},
 		 * 			add: function(a,b) {return a+b;},
 		 * 			subsctract: function(a,b) {return a-b;}
@@ -194,52 +206,43 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 		 * 		return new Calculator();
 		 * }
 		 *
-		 * core.registerExtension("calculator", ["logger"], calculatorExtFactory, {})
+		 * core.registerService("calculator", ["logger"], calculatorSvcFactory, {})
 		 */
-		registerExtension : function(extensionName, dependencies, factory, options) {
-			if (_extensions.hasOwnProperty(extensionName))
-				return error(new Error("An extension with the given name has already been registered. Ext name: " + extensionName));
+		registerService : function(serviceName, dependencies, factory, options) {
+			if (_services.hasOwnProperty(serviceName)) {
+				return error(new Error("Service '"  + serviceName + "' already registered."));
+			}
 
 			dependencies = dependencies || [];
 			options = options || {};
 
-			var injectionSpec = dependencies;
-		    injectionSpec.push(factory);
+		    dependencies.push(factory);
 
-		    var extension = F.injector.resolve(injectionSpec);
-		    extension.init(options);
-		    _extensions[extensionName] = extension;
+		    var service = F.injector.resolve(dependencies);
+		    service.init(options);
+		    _services[serviceName] = service;
 
-		    F.injector.register(extensionName, extension);
+		    F.injector.register(serviceName, service);
 		},
 
 		/**
-		 * Registers a store on the core
-		 * @param  {string} name      unique store identifier
-		 * @param  {Store}  instance  the store instance
-		 * @return {void}
-		 */
-		registerStore : function(name, instance) {
-    		_stores[name] = instance;
-    	},
-
-		/**
 		 * Method used to register modules on the core.
+		 * @memberOf Core
 		 * @param  {string}   moduleName  unique module identifier
-		 * @param  {array}    extensions  List of extensions this module relies on.
-		 *                                These are the only extensions the module will be allowed to use.
-		 * @param  {function} factory     the module factory function
+		 * @param  {array}    services  List of services this module relies on.
+		 *                              These are the only services the module will be allowed to use.
+		 * @param  {function} factory     the module's factory function
 		 * @param  {object}   options     options for the module initialization
 		 * @return {void}
 		 */
-		registerModule: function(moduleName, extensions, stores, factory, options) {
-			if (_modules.hasOwnProperty(moduleName))
+		registerModule: function(moduleName, services, factory, options) {
+			if (_modules.hasOwnProperty(moduleName)) {
 				return error(new Error("Module with given name has already been registered. Mod name: " + moduleName));
+			}
 
 			_modules[moduleName] = {
 				factory    : factory,
-				extensions : extensions,
-				stores 	   : stores,
+				services   : services,
 				options    : options,
 				instance   : null
 			};
@@ -250,58 +253,55 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 
 		/**
 		 * Starts a given module on a DOM element.
+		 * @memberOf Core
 		 * @param  {string} moduleName unique module identifier
-		 * @param  {string} element    the DOM element to which the module will be tied
+		 * @param  {Element} element    the DOM element to which the module will be tied
 		 * @return {void}
 		 */
 		start: function(moduleName, element) {
-			if (!_modules.hasOwnProperty(moduleName))
+			if (!_modules.hasOwnProperty(moduleName)) {
 				return error(new Error("Trying to start non-registered module: " + moduleName));
+			}
+
+			element = element || document.querySelector('[data-module="' + moduleName + '"');
 
 			var module = _modules[moduleName];
 			var sandbox = new F.Sandbox(this, moduleName, element);
 			module.instance = new module.factory(sandbox, moduleName, module.options);
 
-			var extensions = {};
-			var stores     = {};
+			var services = {};
 
 			var i; // loop controller variable
 
-			for (i = 0; i < module.extensions.length; i++) {
-				var extName = module.extensions[i];
+			for (i = 0; i < module.services.length; i++) {
+				var svcName = module.services[i];
 
-				if (_extensions.hasOwnProperty(extName))
-					extensions[extName] = _extensions[extName];
+				if (_services.hasOwnProperty(svcName))
+					services[svcName] = _services[svcName];
 				else
-					return error(new Error("Module requires an unregistered extensions: " + extName));
-			}
-
-			for (i = 0; i < module.stores.length; i++ ) {
-				var storeName = module.stores[i];
-
-				if (_stores.hasOwnProperty(storeName))
-					stores[storeName] = _stores[storeName];
-				else
-					return error(new Error("Module requires an unregistered store: " + storeName));
+					return error(new Error("Module requires an unregistered services: " + svcName));
 			}
 
 			// Prevent errors from showing the browser, fire event instead
-			if (!_config.debug)
+			if (!_config.debug) {
 				productionize(module.instance, moduleName);
+			}
 
-			module.instance.start(element, extensions, stores);
+			module.instance.start(element, services);
 		},
 
 		/**
 		 * Stops a given module.
+		 * @memberOf Core
 		 * @param  {string} moduleName unique module identifier
 		 * @return {void}
 		 */
 		stop: function(moduleName) {
 			var data = _modules[moduleName];
 
-			if (!(data && data.instance))
+			if (!(data && data.instance)) {
 				return error(new Error('Unable to stop module: ' + moduleName));
+			}
 
 			data.instance.stop();
 			data.instance = null;
@@ -309,6 +309,7 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 
 		/**
 		 * Restarts the given module.
+		 * @memberOf Core
 		 * @param  {string} moduleName unique module identifier
 		 * @return {void}
 		 */
@@ -319,6 +320,8 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 
 		/**
 		 * Starts all registered modules within an element.
+		 * @memberOf Core
+		 * @param {root} root DOM Element bellow which all the modules will be started.
 		 * @return {void}
 		 */
 		startAll: function(root) {
@@ -333,6 +336,8 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 
 		/**
 		 * Stops all registered modules within an element.
+		 * @memberOf Core
+		 * @param {root} root DOM Element bellow which all the modules will be stopped.
 		 * @return {void}
 		 */
 		stopAll: function(root) {
@@ -350,26 +355,29 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 
 		/**
 		 * The dispatcher for communication
+		 * @memberOf Core
 		 * @todo don't expose the dispatcher. Proxy its methods instead.
 		 * @type {F.Dispatcher}
 		 */
-    	dispatcher: dispatcher,
+    	dispatcher: _dispatcher,
 
     	// Routing
     	// ---
 
     	/**
     	 * The router for anchor management
+    	 * @memberOf Core
     	 * @todo  don't expose the router. Proxy its methods instead.
     	 * @type {F.Router}
     	 */
-    	router: router,
+    	// router: router,
 
 		// Config
 		// ---
 
 		/**
 		 * Returns configuration data
+		 * @memberOf Core
 		 * @param  {string} name the desired configuration parameter
 		 * @return {*}           config value or the entire JSON config object
 		 *                       if not name is specified (null if neither is found)
@@ -385,8 +393,10 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 
 		/**
 		 * Sets the configuration data
-		 * @param {Object} config
+		 * @memberOf Core
+		 * @param {Object} config the configuration to merged to the existing configuration
 		 * @return {void}
+		 * @throws {Error} If core is already initialized.
 		 */
 		setConfig: function(config) {
 			if (_initialized)
@@ -395,12 +405,41 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 			_config = F.compose({}, _config, config);
 		},
 
+		// Services
+		// ---
+
+		/**
+		 * Checks if the `Core` has a `Service` with the given name registered.
+		 * @memberOf Core
+		 * @param  {string}  serviceName the name of the service to be checked
+		 * @return {Boolean}             true if the service is registered
+		 *                               false otherwise
+		 */
+		hasService: function(serviceName) {
+			return _services.hasOwnProperty(serviceName);
+		},
+
+		/**
+		 * Convenience method used by `Module`s to get dynamically get 
+		 * `Service`s during runtime, instead of using DI
+		 * @memberOf Core
+		 * @param  {string} serviceName the name of the service we want
+		 * @return {Object}             the instance of service we're trying to get.
+		 * @throws {Error} If no service with given name is registed
+		 */
+		getService: function(serviceName) {
+			if (!_services.hasOwnProperty(serviceName))
+				return error(new Error("Extennsion '" + serviceName + "' Not found"));
+			return _services[serviceName];
+		},
+
 		// Error reporting
 		// ---
 
 		/**
 		 * Signals that an error has occurred. If in development mode, an error
 		 * is thrown. If in production mode, an event is fired.
+		 * @memberOf Core
 		 * @param {Error} [exception] The exception object to use.
 		 * @returns {void}
 		 */
@@ -409,4 +448,4 @@ F.Core = (function(injector, dispatcher, router, undefined) {
 
     Core.extend = F.extend;
 	return Core;
-}(F.injector, F.dispatcher, F.router));
+}(F.injector));

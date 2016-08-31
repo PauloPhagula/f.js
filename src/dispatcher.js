@@ -1,87 +1,172 @@
 /**
- * Dispatcher - the communication / app nexus / pub-sub extension
+ * @fileOverview contains the dispatcher definition used for
+ * 				 communication in the application.
  *
- * Taken from: Facebook Dispatcher and Alex MacCaw - JavaScript Web Applications - Pag.28
+ * @see:
+ * https://facebook.github.io/flux/docs/dispatcher.html
+ * Alex MacCaw - JavaScript Web Applications - Pag.28
  *
  * The Flux dispatcher is different from pub-sub in two ways
  * 1) Callbacks are not subscribed to particular events. Every payload is
  *      dispatched to every registered callback.
  * 2) Callbacks can be deferred in whole or part until other callbacks have
  *      been executed.
- * But since we need to support both, if we're using actions then we use the channel as 'ACTION'
- * so all participants in Flux can listen
+ * Since we need to support both, if we're publishing actions then
+ * we use the 'ACTION' channel, so all participants in Flux can listen
  *
- * @check https://facebook.github.io/flux/docs/dispatcher.html
  * @usage:
+ *
+ * // creating the dispatcher
+ * var dispatcher = F.Dispatcher();
+ *
  * // creating the callback
  * var fn = function(payload) { alert('wem!'); }
  *
  * // subscribing
- * PubSub.subscribe('wem', fn);
+ * dispatcher.subscribe('wem', fn);
  *
  * // publishing
- * PubSub.publish('wem');
+ * dispatcher.publish('wem');
  *
  * // unsubscribing
- * PubSub.unsubscrube('wem', fn);
+ * dispatcher.unsubscrube('wem', fn);
  */
 
-F.dispatcher = (function(undefined){
+/**
+ * @memberof F
+ */
+F.Dispatcher = (function(undefined){
 	"use strict";
 
-	var _prefix = 'ID_',
+	/**
+	 * @class Dispatcher
+	 */
+	function Dispatcher() {}
+
+	var 
+		/** 
+		 * @constant {String} PREFIX
+		 * @description the dispatch token prefix.
+		 * @private
+		 */
+		PREFIX = 'ID_',
+		/**
+		 * @constant {String} ACTION
+		 * @description the action dispatch channel name.
+		 * @private
+		 */
 		ACTION = 'ACTION',
 
 		_isDispatching = false,
 		_isHandled = {},
 		_isPending = {},
+		_callbacks = {},
 		_lastID = 1,
 		_pendingPayload = null,
 
+		/**
+		 * Utility function to throw errors when attemping other operations
+		 * during ongoing `dispatch`.
+		 * @memberOf Dispatcher
+		 *
+		 * @param  {String} methodName the name of the method attempted
+		 *                             to run
+		 * @return {void}
+		 * @throws {Error} If Dispatcher is dispatching
+		 */
 		_throwIfDispatching = function(methodName) {
-			if (_isDispatching)
-				throw new Error('Cannot run ' + methodName + 'in the middle of a dispatch.');
+			if (_isDispatching) {
+				throw new Error('Cannot run '
+					+ methodName
+					+ 'in the middle of a dispatch.'
+				);
+			}
+		},
+
+		/**
+		 * Setup booking used for dispatching.
+		 * @memberOf Dispatcher
+		 * @private
+		 *
+		 * @param {object} payload the dispatch payload
+		 * @returns {void}
+		 */
+		_startDispatching = function (payload) {
+			// Return if there isn't a _callbacks object, or
+			// if it doesn't contain an array for the given event
+			var list, calls, i, l;
+			if (!(calls = _callbacks)) return;
+			if (!(list = _callbacks[ACTION])) return;
+
+			// Invoke the callbacks
+			for (i = 0, l = list.length; i < l; i++) {
+				var handler = list[i];
+				_isPending[handler.id] = false;
+				_isHandled[handler.id] = false;
+			}
+			_pendingPayload = payload;
+			_isDispatching = true;
+		},
+
+		/**
+		 * Clear booking used for dispatching.
+		 * @memberOf Dispatcher
+		 * @private
+		 * @returns {void}
+		 */
+		_stopDispatching = function () {
+			_pendingPayload = null;
+			_isDispatching = false;
 		}
 	;
 
-	return {
+	F.compose(Dispatcher.prototype, {
+
 		/**
 		* Registers a callback to be called when an event is published.
-		* returns a token that can be used with `waitfFor()`
+		* returns a token that can be used with `waitfFor()`.
+		* @memberOf Dispatcher
 		* @method
 		* @public
 		*
 		* @param {String} channel - event / channel / action
 		* @param {Function} callback - the callback to be registered
 		* @param {Object} context - the object under whiches context the callback is to be called
+		* @returns {string} the subscription registration token
 		*/
 		subscribe: function (channel, callback, context) {
 			_throwIfDispatching('Dispatcher.subscribe(...)');
 			// Create _callbacks object, unless it already exists
-			var calls = this._callbacks || (this._callbacks = {});
+			_callbacks = _callbacks || (_callbacks = {});
 
 			// Create an array for the given event key, unless it exists, then
 			// append the callback to the array
-			var id = _prefix + _lastID++;
-			(this._callbacks[channel] || (this._callbacks[channel] = [])).push({ callback: callback, context: context, id: id });
+			var id = PREFIX + _lastID++;
+			(_callbacks[channel] || (_callbacks[channel] = [])).push({
+				callback: callback,
+				context: context,
+				id: id
+			});
 			return id;
 		},
 
 		/**
-		* Deregisters a callback for an event
+		* Deregisters a callback for an event.
+		* @memberOf Dispatcher
 		* @method
 		* @public
 		*
-		* @param {String} channel
-		* @param {Function} callcack - the callback to be unregistered
+		* @param {String} channel the channel on which to subcribe
+		* @param {Function} callback the callback to be unsubcribed
+		* @returns {void}
 		*/
 		unsubscribe: function (channel, callback) {
 			_throwIfDispatching('Dispatcher.subscribe(...)');
 			// Return if there isn't a _callbacks object, or
 			// if it doesn't contain an array for the given event
 			var list, calls, i, l;
-			if (!(calls = this._callbacks[channel])) return this;
-			if (!(list = this._callbacks[channel])) return this;
+			if (!(calls = _callbacks[channel])) return this;
+			if (!(list = _callbacks[channel])) return this;
 
 			// remove callback
 			for (i = 0, l = list.length; i < l; i++) {
@@ -93,12 +178,14 @@ F.dispatcher = (function(undefined){
 		},
 
 		/**
-		* Publishes an event and callsback all subscribers to that event
+		* Publishes an event and callsback all subscribers to that event.
+		* @memberOf Dispatcher
 		* @method
 		* @public
 		*
 		* @param {String} eventName - the event / channel / action name
 		* @param {Object} payload - the data to be published for the event / channel / action
+		* @returns {void}
 		*/
 		publish: function () {
 			// Turn arguments object into a real array
@@ -107,12 +194,12 @@ F.dispatcher = (function(undefined){
 			var ev = args.shift();
 
 			if (ev === ACTION) {
-				this._startDispatching(args);
+				_startDispatching(args);
 
 				try {
 					var list, calls, i, l;
-					if (!(calls = this._callbacks)) return;
-					if (!(list = this._callbacks[ACTION])) return;
+					if (!(calls = _callbacks)) return;
+					if (!(list = _callbacks[ACTION])) return;
 
 					for (i = 0, l = list.length; i < l; i++) {
 						var handler = list[i];
@@ -122,7 +209,7 @@ F.dispatcher = (function(undefined){
 						handler.callback.apply(handler.context || null, args);
 					}
 				} finally {
-					this._stopDispatching();
+					_stopDispatching();
 				}
 
 				return;
@@ -131,8 +218,8 @@ F.dispatcher = (function(undefined){
 			// Return if there isn't a _callbacks object, or
 			// if it doesn't contain an array for the given event
 			var list1, calls1, i1, l1;
-			if (!(calls1 = this._callbacks)) return;
-			if (!(list1 = this._callbacks[ev])) return;
+			if (!(calls1 = _callbacks)) return;
+			if (!(list1 = _callbacks[ev])) return;
 
 			// Invoke the callbacks
 			for (i1 = 0, l1 = list1.length; i1 < l1; i1++) {
@@ -144,12 +231,14 @@ F.dispatcher = (function(undefined){
 		},
 
 		/**
-		* Helper method to publish an action
+		* Helper method to publish an action.
+		* @memberOf Dispatcher
 		* @param {Object} payload - the action to be published
 		* Payload : {
 		*   type : 'action-name',
 		*   data : {}
 		* }
+		* @returns {void}
 		*/
 		dispatch: function (payload) {
 			_throwIfDispatching('Dispatcher.dispatch(...)');
@@ -168,7 +257,9 @@ F.dispatcher = (function(undefined){
 		* A problem arises if we create circular dependencies.
 		* If Store A waits for Store B, and B waits for A, then we could wind up in an endless loop.
 		* The Dispatcher will flag these circular dependencies with console errors.
-		*
+		* 
+		* @memberOf Dispatcher
+		* 
 		* @param {Array} dispatchTokens - an array of dipatcher registry indexes, which we refer to here as each store's dispatchToken
 		* @usage:
 		* case 'TODO_CREATE':
@@ -179,6 +270,7 @@ F.dispatcher = (function(undefined){
 		* 	TodoStore.create(PrependedTextStore.getText() + '' + action.text);
 		*   TodoStore.emit('chage');
 		*   break;
+		* @return {void}
 		*/
 		waitFor: function (dispatchTokens) {
 			_throwIfDispatching('Dispatcher.waitFor(...)');
@@ -200,7 +292,7 @@ F.dispatcher = (function(undefined){
 
 				var _handler = null;
 
-				this._callbacks[ACTION].forEach(_handlerFn(handler));
+				_callbacks[ACTION].forEach(_handlerFn(handler));
 
 				if (!_handler) {
 					throw new Error('dispatcher.waitFor(...):' + token + ' does not map to a registered callback.');
@@ -210,34 +302,8 @@ F.dispatcher = (function(undefined){
 				_handler.callback.apply(_handler.context || null);
 				_isHandled[token] = true;
 			}
-		},
-
-		/**
-		* Setup booking used for dispatching
-		*/
-		_startDispatching: function (payload) {
-			// Return if there isn't a _callbacks object, or
-			// if it doesn't contain an array for the given event
-			var list, calls, i, l;
-			if (!(calls = this._callbacks)) return;
-			if (!(list = this._callbacks[ACTION])) return;
-
-			// Invoke the callbacks
-			for (i = 0, l = list.length; i < l; i++) {
-				var handler = list[i];
-				_isPending[handler.id] = false;
-				_isHandled[handler.id] = false;
-			}
-			_pendingPayload = payload;
-			_isDispatching = true;
-		},
-
-		/**
-		* Clear booking used for dispatching
-		*/
-		_stopDispatching: function () {
-			_pendingPayload = null;
-			_isDispatching = false;
 		}
-	};
+	});
+
+	return Dispatcher;
 }());
