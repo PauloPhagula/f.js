@@ -1,5 +1,5 @@
 /**
- * @fileoverview Definition of the application router
+ * @fileOverview Definition of the application router
  *
  * @todo  Make it based on states.
  * A state can be represented by an URL. And navigating to the state with the a
@@ -7,7 +7,6 @@
  *
  * A state has a name, URL pattern defining a set of required params
  */
-/** jshint: scripturl:true */
 /** global window, document */
 
 
@@ -21,7 +20,7 @@ F.Router = (function(Navigo, undefined){
 	 * @private
 	 *
 	 * @param {Event} event the click event
-	 * @todo use event delegation instead hooking direcly like this
+	 * @todo use event delegation instead hooking directly like this
 	 * @returns {void}
 	 */
 	var _handleURLClick = function(event) {
@@ -61,10 +60,10 @@ F.Router = (function(Navigo, undefined){
 	};
 
 	/**
-	 * Handles the hashchange which is fired when the fragment identifier of the URL has changed
+	 * Handles the hash-change which is fired when the fragment identifier of the URL has changed
 	 * @private
 	 *
-	 * @param  {HashChangeEvent} e The hashchange event
+	 * @param  {HashChangeEvent} e The hash-change event
 	 * @returns {void}
 	 */
 	var _handleHashChange = function(e) {

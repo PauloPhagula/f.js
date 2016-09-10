@@ -1,8 +1,8 @@
 "use strict";
 
 var gulp = require('gulp'),
-  	gutil = require('gulp-util'),
-  	plumber = require('gulp-plumber'),
+    gutil = require('gulp-util'),
+    plumber = require('gulp-plumber'),
     eslint = require('gulp-eslint'),
     sh = require('shelljs'),
     shell = require('gulp-shell'),

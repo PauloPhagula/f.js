@@ -108,12 +108,12 @@
      * @param  {HTMLElement} element the element we want to delegate events for
      * @param  {string} event    the type of event we want to delegate
      * @param  {string} selector a css selector
-     * @param  {Function} handler  the handler fuction
+     * @param  {Function} handler  the handler function
      * @param  {Object} context  the context under which the handler fn
      *                           will be called
-     * @param {boolan} useCapture indicates that events of this type will be 
-     *                           dispatched to the registered listener before 
-     *                           being dispatched to any EventTarget beneath 
+     * @param {boolean} useCapture indicates that events of this type will be
+     *                           dispatched to the registered listener before
+     *                           being dispatched to any EventTarget beneath
      *                           it in the DOM tree
      * @return {void}
      */
@@ -137,10 +137,10 @@
      * @param  {HTMLElement} element the element we want to undelegate events for
      * @param  {string} event    the type of event we want to undelegate
      * @param  {string} selector a css selector
-     * @param  {Function} handler  the handler fuction
+     * @param  {Function} handler  the handler function
      * @param  {Object} context  the context under which the handler fn
      *                           will be called
-     * @param {boolean} useCapture indicates that events of this type will be 
+     * @param {boolean} useCapture indicates that events of this type will be
      *                             dispatched to the registered listener before
      *                             being dispatched to any EventTarget beneath
      *                             it in the DOM tree

@@ -1,6 +1,6 @@
 /**
- * @fileOverview contains the Sandbox definition which is an abstraction 
- * 				 into the `Core` for use by `Module`s to interact with 
+ * @fileOverview contains the Sandbox definition which is an abstraction
+ * 				 into the `Core` for use by `Module`s to interact with
  * 				 the environment.
  */
 
@@ -14,7 +14,7 @@ F.Sandbox = (function(undefined){
 	 * @class Sandbox
 	 * @param  {Core} core - the application core
 	 * @param  {String} moduleName - the module name
-	 * @param  {HTMLElement} element - the element underwhich this sandbox has control
+	 * @param  {HTMLElement} element - the element under which this sandbox has control
 	 * @return {void}
 	 */
 	function Sandbox (core, moduleName, element) {
@@ -23,7 +23,7 @@ F.Sandbox = (function(undefined){
     	this.element  = element;
 	}
 
-	// Attach all inheritable methods to the Sanbox prototype.
+	// Attach all inheritable methods to the Sandbox prototype.
 	F.compose(Sandbox.prototype, {
 		/**
 		* Checks if a module can publish a certain event.
@@ -43,7 +43,7 @@ F.Sandbox = (function(undefined){
 		*
 		* @memberof Sandbox
 		* @method
-		* 
+		*
 		* @param {String} channel - the channel into which the message will be published
 		* @param {Object} data - the data to be published
 		* @param {Function} callback - a callback to be called once publishing is done
@@ -61,7 +61,7 @@ F.Sandbox = (function(undefined){
 		 * @memberof Sandbox
 		 * @method
 		 * @abstract
-		 * 
+		 *
 		 * @param  {string} moduleName unique module identifier
 		 * @param  {string} actionType unique action type identifier
 		 * @return {boolean} flag indicate if the module can dispatch the given action type.
@@ -83,7 +83,7 @@ F.Sandbox = (function(undefined){
 		 */
 		dispatch: function(type, data) {
 			if (! this.moduleCanDispatchAction(this.moduleName, type))
-				throw new Error("module " + this.moduleName + " is not authorized to create action: " + action);
+				throw new Error("module " + this.moduleName + " is not authorized to create action of type: " + type);
 
 			this.core.dispatcher.dispatch({type: type, data: data});
 		},
@@ -92,7 +92,7 @@ F.Sandbox = (function(undefined){
 		* Subscribes to a channel of the core's dispatcher
 		* @memberof Sandbox
 		* @method
-		* 
+		*
 		* @param {String} channel - the channel to which messages will be listened
 		* @param {Function} callback - the function to be executed when a message in the channel is published
 		* @param {Object} context - the context under which the callback will be called
@@ -107,7 +107,7 @@ F.Sandbox = (function(undefined){
 		*
 		* @memberof Sandbox
 		* @method
-		* 
+		*
 		* @param {String} channel - the channel in which we want to unsubscribe the callback
 		* @param {Function} callback - the function which we want to remove
 		* @returns {void}
@@ -130,12 +130,12 @@ F.Sandbox = (function(undefined){
 		},
 
 		/**
-		* Passthrough method that signals that an error has occurred. If in development mode, an error
+		* Pass-through method that signals that an error has occurred. If in development mode, an error
 		* is thrown. If in production mode, an event is fired.
 		*
 		* @memberof Sandbox
 		* @method
-		* 
+		*
 		* @param {Error} exception - the exception object to use
 		* @returns {void}
 		*/
@@ -155,12 +155,12 @@ F.Sandbox = (function(undefined){
 		},
 
 		/**
-		 * Convenience method used by `Module`s to get dynamically get 
+		 * Convenience method used by `Module`s to get dynamically get
 		 * `Service`s during runtime, instead of using DI.
 		 * @memberof Sandbox
 		 * @param  {string} serviceName the name of the service we want
 		 * @return {Object}             the instance of service we're trying to get.
-		 * @throws {Error} If no service with given name is registed
+		 * @throws {Error} If no service with given name is registered
 		 */
 		getService: function (serviceName) {
 			return this.core.getService(extensionName);
@@ -168,7 +168,7 @@ F.Sandbox = (function(undefined){
 
 		/**
 		 * Returns the element that represents the module.
-		 * 
+		 *
 		 * @memberof Sandbox
 		 * @method
 		 * @returns {HTMLElement} The element representing the module.

@@ -29,11 +29,11 @@
  * dispatcher.publish('wem');
  *
  * // unsubscribing
- * dispatcher.unsubscrube('wem', fn);
+ * dispatcher.unsubscribe('wem', fn);
  */
 
 /**
- * @memberof F
+ * @memberOf F
  */
 F.Dispatcher = (function(undefined){
 	"use strict";
@@ -43,8 +43,8 @@ F.Dispatcher = (function(undefined){
 	 */
 	function Dispatcher() {}
 
-	var 
-		/** 
+	var
+		/**
 		 * @constant {String} PREFIX
 		 * @description the dispatch token prefix.
 		 * @private
@@ -151,13 +151,13 @@ F.Dispatcher = (function(undefined){
 		},
 
 		/**
-		* Deregisters a callback for an event.
+		* De-registers a callback for an event.
 		* @memberOf Dispatcher
 		* @method
 		* @public
 		*
-		* @param {String} channel the channel on which to subcribe
-		* @param {Function} callback the callback to be unsubcribed
+		* @param {String} channel the channel on which to subscribe
+		* @param {Function} callback the callback to be unsubscribed
 		* @returns {void}
 		*/
 		unsubscribe: function (channel, callback) {
@@ -178,7 +178,7 @@ F.Dispatcher = (function(undefined){
 		},
 
 		/**
-		* Publishes an event and callsback all subscribers to that event.
+		* Publishes an event and calls back all subscribers to that event.
 		* @memberOf Dispatcher
 		* @method
 		* @public
@@ -226,8 +226,6 @@ F.Dispatcher = (function(undefined){
 				var handler1 = list1[i1];
 				handler1.callback.apply(handler1.context || null, args);
 			}
-
-			return;
 		},
 
 		/**
@@ -257,18 +255,18 @@ F.Dispatcher = (function(undefined){
 		* A problem arises if we create circular dependencies.
 		* If Store A waits for Store B, and B waits for A, then we could wind up in an endless loop.
 		* The Dispatcher will flag these circular dependencies with console errors.
-		* 
+		*
 		* @memberOf Dispatcher
-		* 
-		* @param {Array} dispatchTokens - an array of dipatcher registry indexes, which we refer to here as each store's dispatchToken
+		*
+		* @param {Array} dispatchTokens - an array of dispatcher registry indexes, which we refer to here as each store's dispatchToken
 		* @usage:
 		* case 'TODO_CREATE':
 		*   dispatcher.waitFor([
 		*     PrependedTextStore.dispatchToken,
-		*     YeatAnotherstore.dispatchToken
+		*     YetAnotherStore.dispatchToken
 		*   ]);
 		* 	TodoStore.create(PrependedTextStore.getText() + '' + action.text);
-		*   TodoStore.emit('chage');
+		*   TodoStore.emit('change');
 		*   break;
 		* @return {void}
 		*/

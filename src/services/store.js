@@ -1,7 +1,7 @@
 /**
  * @fileOverview Flux Store definition where the `Core` and all feature
  * 				 `Modules` access data and business logic in our SPA.
- * 
+ *
  */
 
 F.Store = (function(undefined){
@@ -17,7 +17,6 @@ F.Store = (function(undefined){
 	 *
 	 * @param {F.Dispatcher} core the application on which the store
 	 *                                  listens for action messages
-	 * @param {String} name      the store name
 	 */
 	function Store (core) {
 		var self = this;
@@ -28,11 +27,11 @@ F.Store = (function(undefined){
 
 		/**
 		 * Execute the flow of a dispatch handling.
-		 * 
+		 *
 		 * @memberOf Store
 		 * @method _dispatchFlow
 		 * @private
-		 * 
+		 *
 		 * @param  {Object} payload the content of the dispatch
 		 * @return {void}
 		 */
@@ -56,7 +55,7 @@ F.Store = (function(undefined){
 		/**
 		 * Initialize is an empty function by default. Override it with your own
 		 * initialization logic.
-		 * 
+		 *
 		 * @memberOf Store
 		 * @method init
 		 * @public
@@ -75,7 +74,7 @@ F.Store = (function(undefined){
 		 * @method  _handleDispatch
 		 * @protected
 		 * @abstract
-		 * 
+		 *
 		 * @param  {Object} payload the content of the dispatch
 		 * @return {void}
 		 */
@@ -85,7 +84,7 @@ F.Store = (function(undefined){
 
 		/**
 		 * This exposes a unique string to identify each store's registered callback.
-		 * This is used with the dispatcher's waitFor method to devlaratively depend
+		 * This is used with the dispatcher's waitFor method to declaratively depend
 		 * on other stores updating themselves first.
 		 *
 		 * @memberOf Store
@@ -104,7 +103,7 @@ F.Store = (function(undefined){
 		 * @memberOf Store
 		 * @method addChangeListener
 		 * @public
-		 * 
+		 *
 		 * @param {function} callback the function to be called when the `CHANGE` event fires
 		 * @returns {void}
 		 */
@@ -118,7 +117,7 @@ F.Store = (function(undefined){
 		 * @memberOf Store
 		 * @method removeChangeListener
 		 * @public
-		 * 
+		 *
 		 * @param {function} callback the callback function being removed
 		 * @returns {void}
 		 */

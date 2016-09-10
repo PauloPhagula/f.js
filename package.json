@@ -1,6 +1,6 @@
 {
   "name": "f",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "keywords": [
     "spa",
     "flux",
@@ -9,9 +9,9 @@
     "minimal"
   ],
   "description": "A JavaScript framework for modular and scalable SPAs.",
-  "homepage": "https://github.com/dareenzo/f-es",
+  "homepage": "https://github.com/dareenzo/f.js",
   "bugs": {
-    "url": "https://github.com/dareenzo/f-es/issues"
+    "url": "https://github.com/dareenzo/f.js/issues"
   },
   "license": "MIT",
   "author": {
@@ -20,7 +20,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/dareenzo/F-ES.git"
+    "url": "git+ssh://git@github.com/dareenzo/f.js.git"
   },
   "dependencies": {},
   "devDependencies": {

@@ -1,6 +1,6 @@
 /**
- * @fileoverview contains the basic `Module` definition, which is an 
- * independent unit of functionallity that is part of the total 
+ * @fileOverview contains the basic `Module` definition, which is an
+ * independent unit of functionality that is part of the total
  * structure of a web application, consisting of HTML + CSS + JavaScript
  * and which should be able to live on it's own.
  */
@@ -12,7 +12,7 @@ F.Module = (function(undefined){
 
 	/**
 	 * Module base class definition.
-	 * 
+	 *
 	 * @class Module
 	 * @param {Sandbox} sandbox the modules sandbox
 	 * @param {string} name the name of the module
@@ -46,12 +46,12 @@ F.Module = (function(undefined){
 		/**
 		* Initializes the module on the specified element with the given options
 		* Start is an empty function by default. Override it with your own implementation;
-		* 
+		*
 		* @memberof Module
 		* @method
 		* @public
 		* @abstract
-		* 
+		*
 		* @param {Element} element - DOM element where module will be initialized
 		* @param {Object} services - services to be used by module
 		* @param {Object} stores - stores to be used by module
@@ -94,7 +94,7 @@ F.Module = (function(undefined){
 		 * @method delegateEvents
 		 * @protected
 		 * @final
-		 * 
+		 *
 		 * @param  {Object} events [description]
 		 * @return {void}
 		 */
@@ -121,13 +121,13 @@ F.Module = (function(undefined){
         },
 
         /**
-         * Removes the modules's delegated events. 
+         * Removes the modules's delegated events.
          * @memberof Module
          * @method undelegateEvents
          * @protected
          * @final
-         * 
-         * @param  {Objects} events [description]
+         *
+         * @param  {Object} events [description]
          * @return {void}
          */
         undelegateEvents: function(events) {
@@ -155,15 +155,15 @@ F.Module = (function(undefined){
 
         /**
          * Conventioned render method.
-         * Defaults to a no-op but can be overriden with  code that 
-         * renders the `Module`s template from model data, and updates 
+         * Defaults to a no-op but can be overridden with  code that
+         * renders the `Module`s template from model data, and updates
          * this.el with the new HTML.
-         * 
+         *
          * @memberof Module
          * @method
          * @protected
          * @abstract
-         * 
+         *
          * @return {void}
          */
         render: function(){}

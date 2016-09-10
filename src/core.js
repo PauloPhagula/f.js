@@ -1,5 +1,5 @@
 /**
- * @fileoverview contains the main application object that is the heart of the
+ * @fileOverview contains the main application object that is the heart of the
  *               application architecture.
  */
 
@@ -126,7 +126,7 @@ F.Core = (function(injector, undefined) {
 
 	// Public
 	// ---
-	
+
 	/**
 	 * Core class definition.
 	 * @class Core
@@ -177,7 +177,7 @@ F.Core = (function(injector, undefined) {
 		 * Method used to add services on the core.
 		 * @memberOf Core
 		 * @param  {string}   serviceName  unique service name. This name will be used when injecting the service
-		 * @param  {array}    dependencies   list of dependencies this service relies on. Generally these are other services
+		 * @param  {Array}    dependencies   list of dependencies this service relies on. Generally these are other services
 		 * @param  {function} factory        the service factory function
 		 * @param  {object}   options        options for the service initialization
 		 * @return {void}
@@ -200,7 +200,7 @@ F.Core = (function(injector, undefined) {
 		 * 		var Calculator = F.Service.extend({
 		 * 			init: function(options) {},
 		 * 			add: function(a,b) {return a+b;},
-		 * 			subsctract: function(a,b) {return a-b;}
+		 * 			subtract: function(a,b) {return a-b;}
 		 * 		});
 		 *
 		 * 		return new Calculator();
@@ -229,7 +229,7 @@ F.Core = (function(injector, undefined) {
 		 * Method used to register modules on the core.
 		 * @memberOf Core
 		 * @param  {string}   moduleName  unique module identifier
-		 * @param  {array}    services  List of services this module relies on.
+		 * @param  {Array}    services  List of services this module relies on.
 		 *                              These are the only services the module will be allowed to use.
 		 * @param  {function} factory     the module's factory function
 		 * @param  {object}   options     options for the module initialization
@@ -420,7 +420,7 @@ F.Core = (function(injector, undefined) {
 		},
 
 		/**
-		 * Convenience method used by `Module`s to get dynamically get 
+		 * Convenience method used by `Module`s to get dynamically get
 		 * `Service`s during runtime, instead of using DI
 		 * @memberOf Core
 		 * @param  {string} serviceName the name of the service we want
@@ -429,7 +429,7 @@ F.Core = (function(injector, undefined) {
 		 */
 		getService: function(serviceName) {
 			if (!_services.hasOwnProperty(serviceName))
-				return error(new Error("Extennsion '" + serviceName + "' Not found"));
+				return error(new Error("Extension '" + serviceName + "' Not found"));
 			return _services[serviceName];
 		},
 
