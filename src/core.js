@@ -51,12 +51,12 @@ F.Core = (function(injector, undefined) {
 
 	/**
 	 * Global error event handler.
-	 * @param  {string} message      [description]
-	 * @param  {string} file         [description]
-	 * @param  {number} lineNumber   [description]
-	 * @param  {number} columnNumber [description]
-	 * @param  {Error} exception    [description]
-	 * @return {boolean}              [description]
+	 * @param  {string} message      error message
+	 * @param  {string} file         URL of the script where the error was raised
+	 * @param  {number} lineNumber   Line number where error was raised
+	 * @param  {number} columnNumber Column number for the line where the error occurred
+	 * @param  {Error} exception     the error object
+	 * @return {boolean}             When the function returns true, this prevents the firing of the default event handler.
 	 */
 	function onerror(message, file, lineNumber, columnNumber, exception) {
 		if (_config.debug)
