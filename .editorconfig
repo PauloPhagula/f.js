@@ -1,7 +1,7 @@
 # This file is for unifying the coding style for different editors and IDEs
 # editorconfig.org
 
-# top-most EditorConfig file
+# This is the top-most .editconfig file; do not search in parent directories
 root = true
 
 # Default settings:
@@ -12,34 +12,17 @@ end_of_line = lf
 insert_final_newline = true
 trim_trailing_whitespace = true
 indent_style = space
-
-[*.php]
 indent_size = 4
-
-[*.html]
-indent_size = 2
-
-[*.js]
-indent_size = 4
-
-[*.css]
-indent_size = 4
-
-[*.less]
-indent_size = 4
-
-[{*.txt}]
-end_of_line = crlf
+max_line_length = 80
 
 [*.sh]
 end_of_line = lf
-[*.{cmd, bat}]
+
+[*.{cmd, bat, txt}]
 end_of_line = crlf
 
-[*.md]
+[*.{md, rst, diff}]
 trim_trailing_whitespace = false
 
-
-[{*.json,*.yml,*.xml,*.eslintrc,*.jshintrc}]
-indent_style = space
-indent_size = 2
+[*.sql, *.sh]
+max_line_length =
