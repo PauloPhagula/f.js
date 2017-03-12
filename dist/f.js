@@ -1,5 +1,5 @@
 /*!
- * f, v0.1.8 (2016/09/10 19:35)
+ * f, v0.1.8 (2017/03/12 19:49)
  * A JavaScript framework for modular and scalable SPAs.
  * <https://github.com/dareenzo/f.js>
  *
@@ -424,8 +424,7 @@ F.injector = (function(undefined){
 /**
  * @memberOf F
  */
-F.Dispatcher = (function(undefined){
-	"use strict";
+F.Dispatcher = (function(undefined){ "use strict";
 
 	/**
 	 * @class Dispatcher
@@ -554,7 +553,7 @@ F.Dispatcher = (function(undefined){
 			// Return if there isn't a _callbacks object, or
 			// if it doesn't contain an array for the given event
 			var list, calls, i, l;
-			if (!(calls = _callbacks[channel])) return this;
+			if (!(calls = _callbacks)) return this;
 			if (!(list = _callbacks[channel])) return this;
 
 			// remove callback
@@ -587,17 +586,34 @@ F.Dispatcher = (function(undefined){
 
 				try {
 					var list, calls, i, l;
-					if (!(calls = _callbacks)) return;
-					if (!(list = _callbacks[ACTION])) return;
+
+					if (!(calls = _callbacks))
+                        return;
+
+					if (!(list = _callbacks[ACTION]))
+                        return;
 
 					for (i = 0, l = list.length; i < l; i++) {
 						var handler = list[i];
-						if (_isPending[handler.id]) {
+                        console.log(handler);
+
+                        if (!handler) {
+                            continue;
+                        }
+
+                        if (typeof handler.callback != 'function') {
+                            continue;
+                        }
+
+                        if (_isPending[handler.id]) {
 							continue;
 						}
+
 						handler.callback.apply(handler.context || null, args);
 					}
-				} finally {
+				} catch (error) {
+                    console.log(error);
+                } finally {
 					_stopDispatching();
 				}
 
@@ -613,7 +629,9 @@ F.Dispatcher = (function(undefined){
 			// Invoke the callbacks
 			for (i1 = 0, l1 = list1.length; i1 < l1; i1++) {
 				var handler1 = list1[i1];
-				handler1.callback.apply(handler1.context || null, args);
+                if (handler1 && (typeof handler1.callback === 'function')) {
+                    handler1.callback.apply(handler1.context || null, args);
+                }
 			}
 		},
 
@@ -629,6 +647,19 @@ F.Dispatcher = (function(undefined){
 		*/
 		dispatch: function (payload) {
 			_throwIfDispatching('Dispatcher.dispatch(...)');
+
+            if (typeof payload != 'object') {
+                return;
+            }
+
+            if (!'type' in payload) {
+                return;
+            }
+
+            if (!'data' in payload) {
+                return;
+            }
+
 			this.publish(ACTION, payload);
 		},
 
@@ -692,7 +723,7 @@ F.Dispatcher = (function(undefined){
 		}
 	});
 
-	return Dispatcher;
+    return Dispatcher;
 }());
 
 	/**
@@ -748,12 +779,12 @@ F.Core = (function(injector, undefined) {
 
 	/**
 	 * Global error event handler.
-	 * @param  {string} message      [description]
-	 * @param  {string} file         [description]
-	 * @param  {number} lineNumber   [description]
-	 * @param  {number} columnNumber [description]
-	 * @param  {Error} exception    [description]
-	 * @return {boolean}              [description]
+	 * @param  {string} message      error message
+	 * @param  {string} file         URL of the script where the error was raised
+	 * @param  {number} lineNumber   Line number where error was raised
+	 * @param  {number} columnNumber Column number for the line where the error occurred
+	 * @param  {Error} exception     the error object
+	 * @return {boolean}             When the function returns true, this prevents the firing of the default event handler.
 	 */
 	function onerror(message, file, lineNumber, columnNumber, exception) {
 		if (_config.debug)

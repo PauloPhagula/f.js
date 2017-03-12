@@ -4,8 +4,7 @@
  *
  */
 
-F.Store = (function(undefined){
-	"use strict";
+F.Store = (function(undefined){ "use strict";
 
 	var CHANGE = 'CHANGE',
 		ACTION = 'ACTION';

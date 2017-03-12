@@ -104,12 +104,16 @@ gulp.task('lint', function(){
 gulp.task('doc', function(cb){
     gulp.src(
         [
-            './README.md', 
+            './README.md',
             DIST_PATH
-        ], 
+        ],
         {
             read: false
         }
     )
     .pipe(jsdoc(cb));
+});
+
+gulp.task('test', function(){
+    sh.exec("./node_modules/.bin/karma start karma.conf.js --single-run");
 });

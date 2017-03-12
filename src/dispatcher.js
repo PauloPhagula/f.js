@@ -35,8 +35,7 @@
 /**
  * @memberOf F
  */
-F.Dispatcher = (function(undefined){
-	"use strict";
+F.Dispatcher = (function(undefined){ "use strict";
 
 	/**
 	 * @class Dispatcher
@@ -165,7 +164,7 @@ F.Dispatcher = (function(undefined){
 			// Return if there isn't a _callbacks object, or
 			// if it doesn't contain an array for the given event
 			var list, calls, i, l;
-			if (!(calls = _callbacks[channel])) return this;
+			if (!(calls = _callbacks)) return this;
 			if (!(list = _callbacks[channel])) return this;
 
 			// remove callback
@@ -198,17 +197,34 @@ F.Dispatcher = (function(undefined){
 
 				try {
 					var list, calls, i, l;
-					if (!(calls = _callbacks)) return;
-					if (!(list = _callbacks[ACTION])) return;
+
+					if (!(calls = _callbacks))
+                        return;
+
+					if (!(list = _callbacks[ACTION]))
+                        return;
 
 					for (i = 0, l = list.length; i < l; i++) {
 						var handler = list[i];
-						if (_isPending[handler.id]) {
+                        console.log(handler);
+
+                        if (!handler) {
+                            continue;
+                        }
+
+                        if (typeof handler.callback != 'function') {
+                            continue;
+                        }
+
+                        if (_isPending[handler.id]) {
 							continue;
 						}
+
 						handler.callback.apply(handler.context || null, args);
 					}
-				} finally {
+				} catch (error) {
+                    console.log(error);
+                } finally {
 					_stopDispatching();
 				}
 
@@ -224,7 +240,9 @@ F.Dispatcher = (function(undefined){
 			// Invoke the callbacks
 			for (i1 = 0, l1 = list1.length; i1 < l1; i1++) {
 				var handler1 = list1[i1];
-				handler1.callback.apply(handler1.context || null, args);
+                if (handler1 && (typeof handler1.callback === 'function')) {
+                    handler1.callback.apply(handler1.context || null, args);
+                }
 			}
 		},
 
@@ -240,6 +258,19 @@ F.Dispatcher = (function(undefined){
 		*/
 		dispatch: function (payload) {
 			_throwIfDispatching('Dispatcher.dispatch(...)');
+
+            if (typeof payload != 'object') {
+                return;
+            }
+
+            if (!'type' in payload) {
+                return;
+            }
+
+            if (!'data' in payload) {
+                return;
+            }
+
 			this.publish(ACTION, payload);
 		},
 
@@ -303,5 +334,5 @@ F.Dispatcher = (function(undefined){
 		}
 	});
 
-	return Dispatcher;
+    return Dispatcher;
 }());
