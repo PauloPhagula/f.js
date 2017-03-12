@@ -1,6 +1,18 @@
 f.js
 ****
 
+.. image:: https://travis-ci.org/dareenzo/f.js.svg?branch=master
+    :target: https://travis-ci.org/dareenzo/f.js
+    :alt: Build
+
+.. image:: https://coveralls.io/repos/github/dareenzo/f.js/badge.svg?branch=master
+    :target: https://coveralls.io/github/dareenzo/f.js?branch=master
+    :alt: Coverage
+
+.. image:: https://img.shields.io/github/license/dareenzo/f.js.svg
+    :target: https://github.com/dareenzo/f.js/blob/master/LICENSE
+    :alt: License
+
 .. _Riot: http://riotjs.com
 .. _React: https://facebook.github.io/react/
 .. _Polymer: https://www.polymer-project.org/1.0/
@@ -193,8 +205,8 @@ no dependencies ;D
 .. note::
 
     Although the example uses Riot_ for the views and Navigo_ for
-    routing, they're dependencies of the framework, it's just an example
-    using them, but it could be anything else.
+    routing, they're not dependencies of the framework, it's just an
+    example using them, but it could be anything else.
 
 
 Examples
@@ -202,6 +214,7 @@ Examples
 
 - `Todos <examples/todos>`_ - An implementation the famous TODOs app by
   `TODO MVC <http://todomvc.com>`_.
+
   - Start a simple HTTP Server (like ``python -m SimpleHTTPServer`` for example) from the root of the project and browse it.
   - Navigate to the ``examples/todos`` folder and it should show up.
 
