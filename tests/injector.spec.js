@@ -2,7 +2,7 @@ describe('Injector', function() { 'use strict';
 
     var logger =  {
         log: function(obj) {
-            console.log(obj);
+            // console.log(obj);
         }
     };
 

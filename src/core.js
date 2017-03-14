@@ -6,8 +6,7 @@
 /**
  * @memberof F
  */
-F.Core = (function(injector, undefined) {
-	"use strict";
+F.Core = (function(injector, undefined) { "use strict";
 
 	// Private
 	// ---
