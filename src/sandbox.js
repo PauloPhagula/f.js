@@ -7,8 +7,7 @@
 /**
  * @memberof F
  */
-F.Sandbox = (function(undefined){
-	"use strict";
+F.Sandbox = (function(undefined){ "use strict";
 
 	/**
 	 * @class Sandbox
@@ -18,9 +17,9 @@ F.Sandbox = (function(undefined){
 	 * @return {void}
 	 */
 	function Sandbox (core, moduleName, element) {
-		this.core 	  = core;
+		this.core = core;
 		this.moduleName = moduleName;
-    	this.element  = element;
+    	this.element = element;
 	}
 
 	// Attach all inheritable methods to the Sandbox prototype.
@@ -82,10 +81,15 @@ F.Sandbox = (function(undefined){
 		 * @return {void}
 		 */
 		dispatch: function(type, data) {
-			if (! this.moduleCanDispatchAction(this.moduleName, type))
-				throw new Error("module " + this.moduleName + " is not authorized to create action of type: " + type);
+			if (!this.moduleCanDispatchAction(this.moduleName, type)) {
+				throw new Error("module "
+                                + this.moduleName
+                                + " is not authorized to create action of type: "
+                                + type);
+            }
 
-			this.core.dispatcher.dispatch({type: type, data: data});
+            var action = {type: type, data: data};
+			this.core.dispatcher.dispatch(action);
 		},
 
 		/**
@@ -99,7 +103,7 @@ F.Sandbox = (function(undefined){
 		* @returns {string} the subscription dispatch token
 		*/
 		subscribe : function (channel, callback, context) {
-			return this.core.dispatcher.subscribe( channel, callback, context );
+			return this.core.dispatcher.subscribe(channel, callback, context);
 		},
 
 		/**

@@ -10,8 +10,7 @@
 /** global window, document */
 
 
-F.Router = (function(Navigo, undefined){
-	"use strict";
+F.Router = (function(Navigo, undefined){ "use strict";
 
 	var _router, _root, _useHash, _prevURL;
 

@@ -206,7 +206,6 @@ F.Dispatcher = (function(undefined){ "use strict";
 
 					for (i = 0, l = list.length; i < l; i++) {
 						var handler = list[i];
-                        console.log(handler);
 
                         if (!handler) {
                             continue;
@@ -223,7 +222,6 @@ F.Dispatcher = (function(undefined){ "use strict";
 						handler.callback.apply(handler.context || null, args);
 					}
 				} catch (error) {
-                    console.log(error);
                 } finally {
 					_stopDispatching();
 				}
@@ -259,17 +257,9 @@ F.Dispatcher = (function(undefined){ "use strict";
 		dispatch: function (payload) {
 			_throwIfDispatching('Dispatcher.dispatch(...)');
 
-            if (typeof payload != 'object') {
-                return;
-            }
-
-            if (!'type' in payload) {
-                return;
-            }
-
-            if (!'data' in payload) {
-                return;
-            }
+            F.guardThat(typeof payload === 'object', 'payload should be an object');
+            F.guardThat('type' in payload && typeof payload.type === 'string' && payload.type.length > 0, 'payload.type should be a string');
+            F.guardThat('data' in payload && typeof payload.data === 'object', 'payload.data should be an object');
 
 			this.publish(ACTION, payload);
 		},

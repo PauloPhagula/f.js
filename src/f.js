@@ -160,3 +160,27 @@
 
         element.removeEventListener(event, listener, useCapture);
     };
+
+    // Guard
+    // ---
+
+    /**
+     * Guards that the given assertion is satisfied, immediately raising an
+     * error when its not.
+     * @param {boolean} assertion the condition to be checked for truthness
+     * @param {String} message the message to be contained in the raised error
+     * @return {void}
+     */
+    F.guardThat = function(assertion, message) {
+        if (typeof assertion !== 'boolean') {
+            throw new Error('assertion must be boolean')
+        }
+
+        if (message && typeof message !== 'string') {
+            throw new Error('message must be a string')
+        }
+
+        if (!assertion) {
+            throw new Error(message || "assertion has been violated!");
+        }
+    }

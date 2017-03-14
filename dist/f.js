@@ -1,11 +1,11 @@
 /*!
- * f, v0.1.8 (2017/03/12 19:49)
+ * f, v0.1.8 (2017/03/14 01:15)
  * A JavaScript framework for modular and scalable SPAs.
  * <https://github.com/dareenzo/f.js>
  *
  * Author: Paulo Phagula <https://dareenzo.github.io/>
  * License: MIT
- * 
+ *
  */
 (function () { 'use strict';
 
@@ -173,6 +173,30 @@ var factory = function () {
         element.removeEventListener(event, listener, useCapture);
     };
 
+    // Guard
+    // ---
+
+    /**
+     * Guards that the given assertion is satisfied, immediately raising an
+     * error when its not.
+     * @param {boolean} assertion the condition to be checked for truthness
+     * @param {String} message the message to be contained in the raised error
+     * @return {void}
+     */
+    F.guardThat = function(assertion, message) {
+        if (typeof assertion !== 'boolean') {
+            throw new Error('assertion must be boolean')
+        }
+
+        if (message && typeof message !== 'string') {
+            throw new Error('message must be a string')
+        }
+
+        if (!assertion) {
+            throw new Error(message || "assertion has been violated!");
+        }
+    }
+
 	/**
  * @fileOverview contains the Dependency Injector definition
  *
@@ -182,7 +206,7 @@ var factory = function () {
  *     Merrick Christensen - http://merrickchristensen.com/articles/javascript-dependency-injection.html
  *     Yusufaytas          - http://stackoverflow.com/a/20058395
  *     Alex Rothenberg     - http://www.alexrothenberg.com/2013/02/11/the-magic-behind-angularjs-dependency-injection.html
- * 
+ *
  * @usage:
  *     var Service = function() {
  *         return { name: 'Service' };
@@ -214,8 +238,7 @@ var factory = function () {
 /**
  * @memberof F
  */
-F.injector = (function(undefined){
-    "use strict";
+F.injector = (function(undefined){ "use strict";
 
     var dependencies  = {};
 
@@ -358,7 +381,7 @@ F.injector = (function(undefined){
      * Checks if the given argument is falsy.
      * @param {*} arg object to be analysed
      * @param {string} name the argument's name
-     * @param {string} reason the reason to be used for the failure message 
+     * @param {string} reason the reason to be used for the failure message
      * @returns {*} the argument if is not falsy
      * @throws {Error} if the argument is falsy.
      */
@@ -595,7 +618,6 @@ F.Dispatcher = (function(undefined){ "use strict";
 
 					for (i = 0, l = list.length; i < l; i++) {
 						var handler = list[i];
-                        console.log(handler);
 
                         if (!handler) {
                             continue;
@@ -612,7 +634,6 @@ F.Dispatcher = (function(undefined){ "use strict";
 						handler.callback.apply(handler.context || null, args);
 					}
 				} catch (error) {
-                    console.log(error);
                 } finally {
 					_stopDispatching();
 				}
@@ -648,17 +669,9 @@ F.Dispatcher = (function(undefined){ "use strict";
 		dispatch: function (payload) {
 			_throwIfDispatching('Dispatcher.dispatch(...)');
 
-            if (typeof payload != 'object') {
-                return;
-            }
-
-            if (!'type' in payload) {
-                return;
-            }
-
-            if (!'data' in payload) {
-                return;
-            }
+            F.guardThat(typeof payload === 'object', 'payload should be an object');
+            F.guardThat('type' in payload && typeof payload.type === 'string' && payload.type.length > 0, 'payload.type should be a string');
+            F.guardThat('data' in payload && typeof payload.data === 'object', 'payload.data should be an object');
 
 			this.publish(ACTION, payload);
 		},
@@ -1187,8 +1200,7 @@ F.Core = (function(injector, undefined) {
 /**
  * @memberof F
  */
-F.Sandbox = (function(undefined){
-	"use strict";
+F.Sandbox = (function(undefined){ "use strict";
 
 	/**
 	 * @class Sandbox
@@ -1198,9 +1210,9 @@ F.Sandbox = (function(undefined){
 	 * @return {void}
 	 */
 	function Sandbox (core, moduleName, element) {
-		this.core 	  = core;
+		this.core = core;
 		this.moduleName = moduleName;
-    	this.element  = element;
+    	this.element = element;
 	}
 
 	// Attach all inheritable methods to the Sandbox prototype.
@@ -1262,10 +1274,15 @@ F.Sandbox = (function(undefined){
 		 * @return {void}
 		 */
 		dispatch: function(type, data) {
-			if (! this.moduleCanDispatchAction(this.moduleName, type))
-				throw new Error("module " + this.moduleName + " is not authorized to create action of type: " + type);
+			if (!this.moduleCanDispatchAction(this.moduleName, type)) {
+				throw new Error("module "
+                                + this.moduleName
+                                + " is not authorized to create action of type: "
+                                + type);
+            }
 
-			this.core.dispatcher.dispatch({type: type, data: data});
+            var action = {type: type, data: data};
+			this.core.dispatcher.dispatch(action);
 		},
 
 		/**
@@ -1279,7 +1296,7 @@ F.Sandbox = (function(undefined){
 		* @returns {string} the subscription dispatch token
 		*/
 		subscribe : function (channel, callback, context) {
-			return this.core.dispatcher.subscribe( channel, callback, context );
+			return this.core.dispatcher.subscribe(channel, callback, context);
 		},
 
 		/**
@@ -1371,8 +1388,7 @@ F.Sandbox = (function(undefined){
 
 /* global F */
 
-F.Module = (function(undefined){
-	"use strict";
+F.Module = (function(undefined){ "use strict";
 
 	/**
 	 * Module base class definition.
@@ -1543,10 +1559,9 @@ F.Module = (function(undefined){
 
 if (typeof define === 'function' && define.amd) {
     define(factory);
-} else if (typeof module !== 'undefined' && module.exports) { //Node
+} else if (typeof module !== 'undefined' && module.exports) { // Node
     module.exports = factory();
 } else {
-    /*jshint sub:true */
     window['F'] = factory();
 }
 

@@ -7,7 +7,7 @@
  *     Merrick Christensen - http://merrickchristensen.com/articles/javascript-dependency-injection.html
  *     Yusufaytas          - http://stackoverflow.com/a/20058395
  *     Alex Rothenberg     - http://www.alexrothenberg.com/2013/02/11/the-magic-behind-angularjs-dependency-injection.html
- * 
+ *
  * @usage:
  *     var Service = function() {
  *         return { name: 'Service' };
@@ -39,8 +39,7 @@
 /**
  * @memberof F
  */
-F.injector = (function(undefined){
-    "use strict";
+F.injector = (function(undefined){ "use strict";
 
     var dependencies  = {};
 
@@ -183,7 +182,7 @@ F.injector = (function(undefined){
      * Checks if the given argument is falsy.
      * @param {*} arg object to be analysed
      * @param {string} name the argument's name
-     * @param {string} reason the reason to be used for the failure message 
+     * @param {string} reason the reason to be used for the failure message
      * @returns {*} the argument if is not falsy
      * @throws {Error} if the argument is falsy.
      */

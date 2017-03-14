@@ -7,6 +7,7 @@ describe('Dispatcher', function(){ 'use strict';
         },
 
         CHANNEL = 'message',
+        ACTION_CHANNEL = 'ACTION',
         ACTION_PAYLOAD = {
             type : 'demo-action',
             data : {}
@@ -15,16 +16,16 @@ describe('Dispatcher', function(){ 'use strict';
 
     beforeEach(function(){
         dispatcher = new F.Dispatcher();
-        spyOn(messageHandler, 'messageCallback');
-        spyOn(messageHandler, 'actionCallback');
+        spyOn(messageHandler, 'messageCallback').and.callThrough();
+        spyOn(messageHandler, 'actionCallback').and.callThrough();
     });
 
-    it('should subscribe handler to message', function(){
+    it('should subscribe handler to channel', function(){
         expect(dispatcher.subscribe).not.toThrow();
         dispatcher.subscribe(CHANNEL, messageHandler.messageCallback);
     });
 
-    it('should publish message', function(){
+    it('should call channel subscribers when message is published on channel', function(){
         expect(dispatcher.publish).not.toThrow();
         dispatcher.subscribe(CHANNEL, messageHandler.messageCallback);
         dispatcher.publish(CHANNEL, 'payload');
@@ -33,11 +34,13 @@ describe('Dispatcher', function(){ 'use strict';
 
     it('should unsubscribe to message', function(){
         expect(dispatcher.unsubscribe).not.toThrow();
+        dispatcher.subscribe(CHANNEL, messageHandler.messageCallback);
         dispatcher.unsubscribe(CHANNEL, messageHandler.messageCallback);
     });
 
-    it('should dispatch action', function(){
-        expect(dispatcher.dispatch).not.toThrow();
-        dispatcher.dispatch(ACTION_PAYLOAD);
+    it('should dispatch action payload in action channel', function(){
+        dispatcher.subscribe(ACTION_CHANNEL, messageHandler.messageCallback);
+        expect(function(){ dispatcher.dispatch(ACTION_PAYLOAD)}).not.toThrow();
+        expect(messageHandler.messageCallback).toHaveBeenCalled();
     });
 });

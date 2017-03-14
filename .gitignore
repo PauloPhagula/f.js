@@ -5,3 +5,5 @@ docs/
 doc/
 npm-debug.log
 /nbproject/private/
+.coverage
+.idea

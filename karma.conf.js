@@ -1,7 +1,8 @@
-// Karma configuration
-// Generated on Sun Mar 12 2017 15:18:08 GMT+0200 (CAT)
+/**
+ * @fileoverview Karma configuration for f.js development.
+ */
 
-module.exports = function(config) {
+module.exports = function(config) { 'use strict';
   config.set({
 
     // base path that will be used to resolve all patterns (eg. files, exclude)

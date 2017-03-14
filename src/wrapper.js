@@ -5,7 +5,7 @@
  *
  * Author: ::AUTHOR:: <::AUTHOR_URL::>
  * License: ::LICENSE::
- * 
+ *
  */
 (function () { 'use strict';
 
@@ -21,10 +21,9 @@ var factory = function () {
 
 if (typeof define === 'function' && define.amd) {
     define(factory);
-} else if (typeof module !== 'undefined' && module.exports) { //Node
+} else if (typeof module !== 'undefined' && module.exports) { // Node
     module.exports = factory();
 } else {
-    /*jshint sub:true */
     window['F'] = factory();
 }
 
