@@ -104,7 +104,7 @@ gulp.task('lint', function(){
 gulp.task('doc', function(cb){
     gulp.src(
         [
-            './README.md',
+            './README.rst',
             DIST_PATH
         ],
         {
