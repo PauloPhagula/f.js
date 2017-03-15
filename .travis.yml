@@ -3,13 +3,24 @@ language: node_js
 node_js:
   - "0.10"
 
+addons:
+  firefox: 'latest'
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.8
+
 cache:
   directories:
   - node_modules
   - $HOME/.yarn-cache
 
+before_install:
+  - npm install -g yarn --cache-min 999999999
+
 install:
-  - npm install
+  - yarn
 
 before_script:
   - export DISPLAY=:99.0
@@ -21,11 +32,3 @@ script:
 after_script:
   - cat .coverage/karma/**/*.info > lcov.info
   - cat lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage
-
-addons:
-  firefox: 'latest'
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - g++-4.8
