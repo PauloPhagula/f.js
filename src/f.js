@@ -53,6 +53,7 @@
     // ---
 
     // Composes objects by combining them into a new one
+    // TODO: Object.assign only exists in ES6 and library is for ES5 so fix this.
     F.compose = Object.assign;
 
     /**
