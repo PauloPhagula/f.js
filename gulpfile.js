@@ -60,9 +60,9 @@ function pad(val){
     }
 }
 
-gulp.task('default', ['purge-deploy', 'build', 'lint', 'test', 'doc']);
+gulp.task('default', ['purge-build', 'build', 'lint', 'test']);
 
-gulp.task('purge-deploy', function(){
+gulp.task('purge-build', function(){
     [DIST_PATH, DIST_MIN_PATH].forEach(function(filePath){
         if( _fs.existsSync(filePath) ){
             _fs.unlinkSync(filePath);
@@ -84,10 +84,10 @@ gulp.task('build', function(){
 });
 
 gulp.task('minify', function(){
-    gulp.src([DIST_PATH])
-    .pipe(uglify({preserveComments: 'some'}))
-    .pipe(concat(DIST_MIN_NAME))
-    .pipe(gulp.dest(DIST_DIR));
+    return gulp.src([DIST_PATH])
+        .pipe(uglify({preserveComments: 'some'}))
+        .pipe(concat(DIST_MIN_NAME))
+        .pipe(gulp.dest(DIST_DIR));
 });
 
 gulp.task('watch', function(){
@@ -95,25 +95,17 @@ gulp.task('watch', function(){
 });
 
 gulp.task('lint', function(){
-    return gulp.src(['./dist/f.js', './examples/**/*.js'])
+    gulp.src(['./dist/f.js', './examples/**/*.js'])
         .pipe(eslint())
         .pipe(eslint.format())
         .pipe(eslint.failAfterError());
 });
 
 gulp.task('doc', function(cb){
-    gulp.src(
-        [
-            './README.rst',
-            DIST_PATH
-        ],
-        {
-            read: false
-        }
-    )
-    .pipe(jsdoc(cb));
+    gulp.src(['./README.rst', DIST_PATH], {read: false})
+        .pipe(jsdoc(cb));
 });
 
 gulp.task('test', function(){
-    sh.exec("./node_modules/.bin/karma start karma.conf.js --single-run");
+    return sh.exec("./node_modules/.bin/karma start karma.conf.js --single-run");
 });
