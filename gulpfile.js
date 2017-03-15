@@ -60,7 +60,7 @@ function pad(val){
     }
 }
 
-gulp.task('default', ['lint', 'purge-deploy', 'build', 'doc']);
+gulp.task('default', ['purge-deploy', 'build', 'lint', 'test', 'doc']);
 
 gulp.task('purge-deploy', function(){
     [DIST_PATH, DIST_MIN_PATH].forEach(function(filePath){
@@ -95,7 +95,7 @@ gulp.task('watch', function(){
 });
 
 gulp.task('lint', function(){
-    return gulp.src(['./src/**/*.js', './examples/**/*.js'])
+    return gulp.src(['./dist/f.js', './examples/**/*.js'])
         .pipe(eslint())
         .pipe(eslint.format())
         .pipe(eslint.failAfterError());
