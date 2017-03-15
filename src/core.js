@@ -41,7 +41,7 @@ F.Core = (function(injector, undefined) { "use strict";
 	 * @returns {void}
 	 * @private
 	 */
-    function error(exception) {
+    function signalError(exception) {
 		if (_config.debug)
 			throw exception;
 		else
@@ -64,7 +64,7 @@ F.Core = (function(injector, undefined) { "use strict";
 		if (exception === undefined)
 			exception = new Error(message, file, lineNumber);
 
-    	error(exception);
+    	signalError(exception);
     	return true;
     }
 
@@ -109,7 +109,7 @@ F.Core = (function(injector, undefined) { "use strict";
 						ex.objectName = objectName;
 						ex.name = errorPrefix + ex.name;
 						ex.message = errorPrefix + ex.message;
-						error(ex);
+						signalError(ex);
 					}
 				};
 			};
@@ -209,7 +209,7 @@ F.Core = (function(injector, undefined) { "use strict";
 		 */
 		registerService : function(serviceName, dependencies, factory, options) {
 			if (_services.hasOwnProperty(serviceName)) {
-				return error(new Error("Service '"  + serviceName + "' already registered."));
+				return signalError(new Error("Service '"  + serviceName + "' already registered."));
 			}
 
 			dependencies = dependencies || [];
@@ -236,7 +236,7 @@ F.Core = (function(injector, undefined) { "use strict";
 		 */
 		registerModule: function(moduleName, services, factory, options) {
 			if (_modules.hasOwnProperty(moduleName)) {
-				return error(new Error("Module with given name has already been registered. Mod name: " + moduleName));
+				return signalError(new Error("Module with given name has already been registered. Mod name: " + moduleName));
 			}
 
 			_modules[moduleName] = {
@@ -259,7 +259,7 @@ F.Core = (function(injector, undefined) { "use strict";
 		 */
 		start: function(moduleName, element) {
 			if (!_modules.hasOwnProperty(moduleName)) {
-				return error(new Error("Trying to start non-registered module: " + moduleName));
+				return signalError(new Error("Trying to start non-registered module: " + moduleName));
 			}
 
 			element = element || document.querySelector('[data-module="' + moduleName + '"');
@@ -278,7 +278,7 @@ F.Core = (function(injector, undefined) { "use strict";
 				if (_services.hasOwnProperty(svcName))
 					services[svcName] = _services[svcName];
 				else
-					return error(new Error("Module requires an unregistered services: " + svcName));
+					return signalError(new Error("Module requires an unregistered services: " + svcName));
 			}
 
 			// Prevent errors from showing the browser, fire event instead
@@ -299,7 +299,7 @@ F.Core = (function(injector, undefined) { "use strict";
 			var data = _modules[moduleName];
 
 			if (!(data && data.instance)) {
-				return error(new Error('Unable to stop module: ' + moduleName));
+				return signalError(new Error('Unable to stop module: ' + moduleName));
 			}
 
 			data.instance.stop();
@@ -399,7 +399,7 @@ F.Core = (function(injector, undefined) { "use strict";
 		 */
 		setConfig: function(config) {
 			if (_initialized)
-				return error(new Error('Cannot set configuration after application is initialized'));
+				return signalError(new Error('Cannot set configuration after application is initialized'));
 
 			_config = F.compose({}, _config, config);
 		},
@@ -428,7 +428,7 @@ F.Core = (function(injector, undefined) { "use strict";
 		 */
 		getService: function(serviceName) {
 			if (!_services.hasOwnProperty(serviceName))
-				return error(new Error("Extension '" + serviceName + "' Not found"));
+				return signalError(new Error("Extension '" + serviceName + "' Not found"));
 			return _services[serviceName];
 		},
 
@@ -442,7 +442,7 @@ F.Core = (function(injector, undefined) { "use strict";
 		 * @param {Error} [exception] The exception object to use.
 		 * @returns {void}
 		 */
-		reportError: error
+		reportError: signalError
 	});
 
     Core.extend = F.extend;
