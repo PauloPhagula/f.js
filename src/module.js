@@ -7,7 +7,7 @@
 
 /* global F */
 
-F.Module = (function(undefined){ "use strict";
+F.Module = (function(undefined){
 
 	/**
 	 * Module base class definition.

@@ -35,7 +35,7 @@
 /**
  * @memberOf F
  */
-F.Dispatcher = (function(undefined){ "use strict";
+F.Dispatcher = (function(undefined){
 
 	/**
 	 * @class Dispatcher

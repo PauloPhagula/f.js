@@ -7,7 +7,7 @@
 /**
  * @memberof F
  */
-F.Sandbox = (function(undefined){ "use strict";
+F.Sandbox = (function(undefined){
 
 	/**
 	 * @class Sandbox

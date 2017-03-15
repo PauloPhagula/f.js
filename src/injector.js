@@ -39,7 +39,7 @@
 /**
  * @memberof F
  */
-F.injector = (function(undefined){ "use strict";
+F.injector = (function(undefined){
 
     var dependencies  = {};
 
