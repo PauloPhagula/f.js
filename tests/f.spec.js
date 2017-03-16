@@ -1,4 +1,4 @@
-describe('f', function () {
+describe('f', function () { 'use strict';
 
     describe('noConflict', function(){
         it('should return the previous F', function(){
@@ -8,8 +8,8 @@ describe('f', function () {
 
     describe('compose', function() {
         it('should compose objects', function(){
-            obj = { a: 1, b: function(){} };
-            newObj = F.compose({}, obj);
+            var obj = { a: 1, b: function(){} };
+            var newObj = F.compose({}, obj);
             expect(newObj).toEqual(obj);
         });
     });
@@ -21,14 +21,14 @@ describe('f', function () {
             this.constructor = function(){
                 self.createTime = new Date();
             }
+        }
 
-            this.getClassName = function(){
-                return 'parent';
-            }
+        Parent.prototype.getClassName = function(){
+            return 'parent';
+        }
 
-            self.getCreateTime = function(){
-                return self.createTime;
-            }
+        Parent.prototype.getCreateTime = function(){
+            return this.createTime;
         }
 
         Parent.extend = F.extend;
