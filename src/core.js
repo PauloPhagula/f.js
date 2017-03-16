@@ -185,24 +185,26 @@ F.Core = (function(injector, undefined) {
 		 * var core = new F.Core();
 		 *
 		 * var loggerSvcFactory = function(){
-		 *	    var Logger = F.Service.extend({
+		 *	    return {
 		 *	        init: function(options) {},
-		 *	        log: function(obj) { console.log(obj);}
-		 *	    });
-		 *
-		 *	    return new Logger();
+		 *	        log: function(obj) { console.log(obj); }
+		 *	    };
 		 * };
 		 *
 		 * core.registerService("logger", [], loggerSvcFactory, {});
 		 *
 		 * var calculatorSvcFactory = function(logger) {
-		 * 		var Calculator = F.Service.extend({
+		 * 		return {
 		 * 			init: function(options) {},
-		 * 			add: function(a,b) {return a+b;},
-		 * 			subtract: function(a,b) {return a-b;}
-		 * 		});
-		 *
-		 * 		return new Calculator();
+		 * 			add: function(a, b) {
+         *              logger.log("adding ...");
+         *              return a + b;
+         *          },
+		 * 			subtract: function(a, b) {
+         *              logger.log("subtracting ...");
+         *              return a - b;
+         *          }
+		 * 		};
 		 * }
 		 *
 		 * core.registerService("calculator", ["logger"], calculatorSvcFactory, {})
@@ -313,6 +315,8 @@ F.Core = (function(injector, undefined) {
 		 * @return {void}
 		 */
 		restart: function(moduleName) {
+            F.guardThat(typeof module==='string' && moduleName.length > 0, 'moduleName should a non-zero length string.');
+
 			this.stop(moduleName);
 			this.start(moduleName);
 		},
