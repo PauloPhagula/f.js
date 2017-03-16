@@ -1,5 +1,5 @@
 /*!
- * f, v0.1.8 (2017/03/14 01:15)
+ * f, v0.1.8 (2017/03/16 01:33)
  * A JavaScript framework for modular and scalable SPAs.
  * <https://github.com/dareenzo/f.js>
  *
@@ -65,6 +65,7 @@ var factory = function () {
     // ---
 
     // Composes objects by combining them into a new one
+    // TODO: Object.assign only exists in ES6 and library is for ES5 so fix this.
     F.compose = Object.assign;
 
     /**
@@ -238,7 +239,7 @@ var factory = function () {
 /**
  * @memberof F
  */
-F.injector = (function(undefined){ "use strict";
+F.injector = (function(undefined){
 
     var dependencies  = {};
 
@@ -447,7 +448,7 @@ F.injector = (function(undefined){ "use strict";
 /**
  * @memberOf F
  */
-F.Dispatcher = (function(undefined){ "use strict";
+F.Dispatcher = (function(undefined){
 
 	/**
 	 * @class Dispatcher
@@ -748,7 +749,6 @@ F.Dispatcher = (function(undefined){ "use strict";
  * @memberof F
  */
 F.Core = (function(injector, undefined) {
-	"use strict";
 
 	// Private
 	// ---
@@ -783,7 +783,7 @@ F.Core = (function(injector, undefined) {
 	 * @returns {void}
 	 * @private
 	 */
-    function error(exception) {
+    function signalError(exception) {
 		if (_config.debug)
 			throw exception;
 		else
@@ -806,7 +806,7 @@ F.Core = (function(injector, undefined) {
 		if (exception === undefined)
 			exception = new Error(message, file, lineNumber);
 
-    	error(exception);
+    	signalError(exception);
     	return true;
     }
 
@@ -851,7 +851,7 @@ F.Core = (function(injector, undefined) {
 						ex.objectName = objectName;
 						ex.name = errorPrefix + ex.name;
 						ex.message = errorPrefix + ex.message;
-						error(ex);
+						signalError(ex);
 					}
 				};
 			};
@@ -951,7 +951,7 @@ F.Core = (function(injector, undefined) {
 		 */
 		registerService : function(serviceName, dependencies, factory, options) {
 			if (_services.hasOwnProperty(serviceName)) {
-				return error(new Error("Service '"  + serviceName + "' already registered."));
+				return signalError(new Error("Service '"  + serviceName + "' already registered."));
 			}
 
 			dependencies = dependencies || [];
@@ -978,7 +978,7 @@ F.Core = (function(injector, undefined) {
 		 */
 		registerModule: function(moduleName, services, factory, options) {
 			if (_modules.hasOwnProperty(moduleName)) {
-				return error(new Error("Module with given name has already been registered. Mod name: " + moduleName));
+				return signalError(new Error("Module with given name has already been registered. Mod name: " + moduleName));
 			}
 
 			_modules[moduleName] = {
@@ -1001,7 +1001,7 @@ F.Core = (function(injector, undefined) {
 		 */
 		start: function(moduleName, element) {
 			if (!_modules.hasOwnProperty(moduleName)) {
-				return error(new Error("Trying to start non-registered module: " + moduleName));
+				return signalError(new Error("Trying to start non-registered module: " + moduleName));
 			}
 
 			element = element || document.querySelector('[data-module="' + moduleName + '"');
@@ -1020,7 +1020,7 @@ F.Core = (function(injector, undefined) {
 				if (_services.hasOwnProperty(svcName))
 					services[svcName] = _services[svcName];
 				else
-					return error(new Error("Module requires an unregistered services: " + svcName));
+					return signalError(new Error("Module requires an unregistered services: " + svcName));
 			}
 
 			// Prevent errors from showing the browser, fire event instead
@@ -1041,7 +1041,7 @@ F.Core = (function(injector, undefined) {
 			var data = _modules[moduleName];
 
 			if (!(data && data.instance)) {
-				return error(new Error('Unable to stop module: ' + moduleName));
+				return signalError(new Error('Unable to stop module: ' + moduleName));
 			}
 
 			data.instance.stop();
@@ -1141,7 +1141,7 @@ F.Core = (function(injector, undefined) {
 		 */
 		setConfig: function(config) {
 			if (_initialized)
-				return error(new Error('Cannot set configuration after application is initialized'));
+				return signalError(new Error('Cannot set configuration after application is initialized'));
 
 			_config = F.compose({}, _config, config);
 		},
@@ -1170,7 +1170,7 @@ F.Core = (function(injector, undefined) {
 		 */
 		getService: function(serviceName) {
 			if (!_services.hasOwnProperty(serviceName))
-				return error(new Error("Extension '" + serviceName + "' Not found"));
+				return signalError(new Error("Extension '" + serviceName + "' Not found"));
 			return _services[serviceName];
 		},
 
@@ -1184,7 +1184,7 @@ F.Core = (function(injector, undefined) {
 		 * @param {Error} [exception] The exception object to use.
 		 * @returns {void}
 		 */
-		reportError: error
+		reportError: signalError
 	});
 
     Core.extend = F.extend;
@@ -1200,7 +1200,7 @@ F.Core = (function(injector, undefined) {
 /**
  * @memberof F
  */
-F.Sandbox = (function(undefined){ "use strict";
+F.Sandbox = (function(undefined){
 
 	/**
 	 * @class Sandbox
@@ -1388,7 +1388,7 @@ F.Sandbox = (function(undefined){ "use strict";
 
 /* global F */
 
-F.Module = (function(undefined){ "use strict";
+F.Module = (function(undefined){
 
 	/**
 	 * Module base class definition.
