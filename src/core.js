@@ -45,6 +45,8 @@ F.Core = (function(injector, undefined) {
 	 * @private
 	 */
     function signalError(exception) {
+        F.guardThat(Object.prototype.toString.call(exception) == '[object Error]', 'exception should be an Error');
+
 		if (_config.debug)
 			throw exception;
 		else
@@ -225,6 +227,11 @@ F.Core = (function(injector, undefined) {
 		 * core.registerService("calculator", ["logger"], calculatorSvcFactory, {})
 		 */
 		registerService : function(serviceName, dependencies, factory, options) {
+            F.guardThat(serviceName && typeof serviceName === 'string' && serviceName.length > 0, 'serviceName should be a non-zero length string');
+            F.guardThat(dependencies && Object.prototype.toString.call(dependencies) === '[object Array]', 'dependencies should be an array');
+            F.guardThat(factory && typeof factory === 'function', 'factory should be a function');
+            F.guardThat(options && typeof options === 'object', 'options should be an object');
+
 			if (_services.hasOwnProperty(serviceName)) {
 				return signalError(new Error("Service '"  + serviceName + "' already registered."));
 			}
@@ -252,6 +259,11 @@ F.Core = (function(injector, undefined) {
 		 * @return {void}
 		 */
 		registerModule: function(moduleName, services, factory, options) {
+            F.guardThat(moduleName && typeof moduleName === 'string' && moduleName.length > 0, 'moduleName should be a non-zero length string');
+            F.guardThat(services && Object.prototype.toString.call(services) === '[object Array]', 'services should be an array');
+            F.guardThat(factory && typeof factory === 'function', 'factory should be a function');
+            F.guardThat(options && typeof options === 'object', 'options should be an object');
+
 			if (_modules.hasOwnProperty(moduleName)) {
 				return signalError(new Error("Module with given name has already been registered. Mod name: " + moduleName));
 			}
@@ -275,7 +287,6 @@ F.Core = (function(injector, undefined) {
 		 * @return {void}
 		 */
 		start: function(moduleName, element) {
-
             F.guardThat(moduleName && typeof moduleName === 'string' && moduleName.length > 0, 'moduleName should be a non-zero length string');
 
 			if (!_modules.hasOwnProperty(moduleName)) {
@@ -320,6 +331,8 @@ F.Core = (function(injector, undefined) {
 		 * @return {void}
 		 */
 		stop: function(moduleName) {
+            F.guardThat(moduleName && typeof moduleName === 'string' && moduleName.length > 0, 'moduleName should be a non-zero length string');
+
 			var data = _modules[moduleName];
 
 			if (!(data && data.instance)) {
@@ -337,7 +350,7 @@ F.Core = (function(injector, undefined) {
 		 * @return {void}
 		 */
 		restart: function(moduleName) {
-            F.guardThat(typeof moduleName ==='string' && moduleName.length > 0, 'moduleName should a non-zero length string.');
+            F.guardThat(moduleName && typeof moduleName === 'string' && moduleName.length > 0, 'moduleName should be a non-zero length string.');
 
 			this.stop(moduleName);
 			this.start(moduleName);
@@ -441,6 +454,7 @@ F.Core = (function(injector, undefined) {
 		 *                               false otherwise
 		 */
 		hasService: function(serviceName) {
+            F.guardThat(serviceName && typeof serviceName === 'string' && serviceName.length > 0, 'serviceName should be a non-zero length string');
 			return _services.hasOwnProperty(serviceName);
 		},
 
@@ -453,6 +467,8 @@ F.Core = (function(injector, undefined) {
 		 * @throws {Error} If no service with given name is registed
 		 */
 		getService: function(serviceName) {
+            F.guardThat(serviceName && typeof serviceName === 'string' && serviceName.length > 0, 'serviceName should be a non-zero length string');
+
 			if (!_services.hasOwnProperty(serviceName)) {
                 return signalError(new Error("Extension '" + serviceName + "' Not found"));
             }
