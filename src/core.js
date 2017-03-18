@@ -10,16 +10,19 @@ F.Core = (function(injector, undefined) {
 
 	// Private
 	// ---
-	var _config      = { debug: false }, // Global configuration
+	var
+        // Global configuration
+        _config,
 
 		// Flag indicating if the application has been initialized.
-		_initialized = false,
+		_initialized,
 
-        _dispatcher  = new F.Dispatcher(),
+        // app wide dispatcher
+        _dispatcher,
 
 		// Information about registered services, modules and stores by name
-		_services  	 = {},
-        _modules     = {}
+		_services,
+        _modules
     ;
 
     /**
@@ -132,6 +135,18 @@ F.Core = (function(injector, undefined) {
 	 */
     function Core() {
     	F.injector.register('core', this);
+
+        // initialize private members per core
+        _config      = { debug: false }, // Global configuration
+
+		// Flag indicating if the application has been initialized.
+		_initialized = false,
+
+        _dispatcher  = new F.Dispatcher(),
+
+		// Information about registered services, modules and stores by name
+		_services  	 = {},
+        _modules     = {};
     }
 
     F.compose(Core.prototype, {
@@ -142,7 +157,7 @@ F.Core = (function(injector, undefined) {
 		/**
 		 * Initializes the application.
 		 * @memberOf Core
-		 * @param {object} options the configuration object for the core.
+		 * @param {Object} options the configuration object for the core.
 		 * @return {void}
 		 */
 		init: function(options) {
@@ -260,11 +275,18 @@ F.Core = (function(injector, undefined) {
 		 * @return {void}
 		 */
 		start: function(moduleName, element) {
+
+            F.guardThat(moduleName && typeof moduleName === 'string' && moduleName.length > 0, 'moduleName should be a non-zero length string');
+
 			if (!_modules.hasOwnProperty(moduleName)) {
 				return signalError(new Error("Trying to start non-registered module: " + moduleName));
 			}
 
 			element = element || document.querySelector('[data-module="' + moduleName + '"');
+
+            // Wish I could guard for the type of element but doing it in JS in crazy
+            // F.guardThat(element instanceof HTMLElement, 'element should be an HTMLElement');
+            F.guardThat(element !== undefined && element !== null, 'element must be given or exist in DOM with data-module="' + moduleName +'"');
 
 			var module = _modules[moduleName];
 			var sandbox = new F.Sandbox(this, moduleName, element);
@@ -315,7 +337,7 @@ F.Core = (function(injector, undefined) {
 		 * @return {void}
 		 */
 		restart: function(moduleName) {
-            F.guardThat(typeof module==='string' && moduleName.length > 0, 'moduleName should a non-zero length string.');
+            F.guardThat(typeof moduleName ==='string' && moduleName.length > 0, 'moduleName should a non-zero length string.');
 
 			this.stop(moduleName);
 			this.start(moduleName);
@@ -431,8 +453,10 @@ F.Core = (function(injector, undefined) {
 		 * @throws {Error} If no service with given name is registed
 		 */
 		getService: function(serviceName) {
-			if (!_services.hasOwnProperty(serviceName))
-				return signalError(new Error("Extension '" + serviceName + "' Not found"));
+			if (!_services.hasOwnProperty(serviceName)) {
+                return signalError(new Error("Extension '" + serviceName + "' Not found"));
+            }
+
 			return _services[serviceName];
 		},
 

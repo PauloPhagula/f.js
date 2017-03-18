@@ -154,9 +154,9 @@ F.Module = (function(undefined){
 
         /**
          * Conventioned render method.
-         * Defaults to a no-op but can be overridden with  code that
+         * Defaults to a no-op but can be overridden with code that
          * renders the `Module`s template from model data, and updates
-         * this.el with the new HTML.
+         * this.$el with the new HTML.
          *
          * @memberof Module
          * @method

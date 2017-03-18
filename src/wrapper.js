@@ -5,7 +5,6 @@
  *
  * Author: ::AUTHOR:: <::AUTHOR_URL::>
  * License: ::LICENSE::
- *
  */
 (function () { 'use strict';
 

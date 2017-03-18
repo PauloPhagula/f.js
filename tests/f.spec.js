@@ -25,11 +25,11 @@ describe('f', function () { 'use strict';
 
         Parent.prototype.getClassName = function(){
             return 'parent';
-        }
+        };
 
         Parent.prototype.getCreateTime = function(){
             return this.createTime;
-        }
+        };
 
         Parent.extend = F.extend;
 
@@ -50,7 +50,7 @@ describe('f', function () { 'use strict';
 
         beforeEach(function(){
             childInstance = new Child();
-        })
+        });
 
 
         it('child objects should inherit properties from parent class', function(){

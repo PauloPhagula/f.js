@@ -15,7 +15,7 @@ module.exports = function(config) { 'use strict';
 
 
     // list of files / patterns to load in the browser
-    files: ['dist/*.js', 'tests/*.js'],
+    files: ['dist/*.js', 'tests/shared.js', 'tests/*.spec.js'],
 
 
     // list of files to exclude
