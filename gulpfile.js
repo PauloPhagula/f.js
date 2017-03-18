@@ -31,9 +31,9 @@ var FILE_ENCODING = 'utf-8',
     DIST_DIR = 'dist',
     DIST_NAME = 'f.js',
     DIST_MIN_NAME = 'f.min.js',
-    DIST_PATH = DIST_DIR +'/'+ DIST_NAME,
-    DIST_MIN_PATH = DIST_DIR +'/'+ DIST_MIN_NAME,
-    DOC_PATH = 'docs';
+    DIST_PATH = _path.resolve(__dirname,  DIST_DIR + '/' + DIST_NAME),
+    DIST_MIN_PATH = _path.resolve(__dirname, DIST_DIR + '/' + DIST_MIN_NAME),
+    DOC_PATH = _path.resolve(__dirname, 'docs');
 
 var onError = function(error){
   	gutil.beep();
@@ -41,7 +41,8 @@ var onError = function(error){
 };
 
 function readFile(filePath) {
-    return _fs.readFileSync(filePath, FILE_ENCODING);
+    var fullFilePath = _path.resolve(__dirname, filePath);
+    return _fs.readFileSync(fullFilePath, FILE_ENCODING);
 }
 
 function tmpl(template, data, regexp){
