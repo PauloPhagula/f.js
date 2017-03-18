@@ -28,6 +28,7 @@ before_script:
   - sh -e /etc/init.d/xvfb start
 
 script:
+  - rm dist/*
   - ./node_modules/.bin/gulp
 
 after_script:
