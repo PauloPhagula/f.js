@@ -107,6 +107,6 @@ gulp.task('doc', function(cb){
         .pipe(jsdoc(cb));
 });
 
-gulp.task('test', function(){
-    return sh.exec("./node_modules/.bin/karma start karma.conf.js --single-run");
+gulp.task('test', function(done){
+    return sh.exec("./node_modules/.bin/karma start karma.conf.js --single-run", done);
 });
