@@ -31,6 +31,6 @@ script:
   - rm dist/*
   - ./node_modules/.bin/gulp
 
-after_script:
+after_success:
   - cat .coverage/karma/**/*.info > lcov.info
   - cat lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage
