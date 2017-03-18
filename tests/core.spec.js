@@ -89,15 +89,13 @@ describe('Core', function(){ 'use strict';
     });
 
     describe(' - Module lifecycle - ', function(){
-        var $moduleDiv,
-            $jasmineHTMLReporter;
+        var $moduleDiv;
 
         beforeEach(function() {
             $moduleDiv = document.createElement('div', {});
             $moduleDiv.dataset.module = 'sample';
 
-            $jasmineHTMLReporter = document.getElementsByClassName('jasmine_html-reporter')[0];
-            $jasmineHTMLReporter.parentNode.insertBefore($moduleDiv, $jasmineHTMLReporter);
+            document.body.appendChild($moduleDiv);
 
             core = new F.Core();
             core.setConfig({debug: true});

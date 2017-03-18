@@ -282,7 +282,7 @@ F.Core = (function(injector, undefined) {
 				return signalError(new Error("Trying to start non-registered module: " + moduleName));
 			}
 
-			element = element || document.querySelector('[data-module="' + moduleName + '"');
+			element = element || document.querySelector('[data-module="' + moduleName + '"]');
 
             // Wish I could guard for the type of element but doing it in JS in crazy
             // F.guardThat(element instanceof HTMLElement, 'element should be an HTMLElement');
