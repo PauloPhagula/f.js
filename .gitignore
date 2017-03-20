@@ -7,3 +7,4 @@ npm-debug.log
 /nbproject/private/
 .coverage
 .idea
+.coveralls.yml
