@@ -96,7 +96,7 @@ gulp.task('watch', function(){
 });
 
 gulp.task('lint', function(){
-    gulp.src(['./dist/f.js', './examples/**/*.js'])
+    gulp.src(['./dist/f.js'])
         .pipe(eslint())
         .pipe(eslint.format())
         .pipe(eslint.failAfterError());

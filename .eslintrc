@@ -2,24 +2,27 @@
   "env": {
     "browser": true,
     "node": true,
-    "commonjs": true
+    "commonjs": true,
+    "jasmine": true
   },
   "parserOptions": {
-    "ecmaVersion": 6,
+    "ecmaVersion": 5,
     "sourceType": "script",
-    "ecmaFeatures": {
-      "jsx": true
-    }
+    "ecmaFeatures": {}
   },
   "globals": {
     "console": true,
     "require": true,
     "define": true,
     "$": true,
-    "_": true
+    "_": true,
+    "F": true
   },
+  "extends": "eslint:recommended",
   "rules": {
     "strict": [1, "function"],
-    "valid-jsdoc": [1]
+    "valid-jsdoc": [1],
+    // disable rules from base configurations
+    "no-console": [0]
   }
 }
