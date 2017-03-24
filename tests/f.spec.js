@@ -82,7 +82,7 @@ describe('f', function () { 'use strict';
 
         it('should throw exception if condition is falsy with given message', function () {
             var errorMessage = "error message";
-            expect(function(){ F.assert(1 < 0, errorMessage); }).toThrowError(errorMessage);
+            expect(function(){ F.assert(1 < 0, errorMessage); }).toThrowError('Assertion error: ' + errorMessage);
         });
 
         it('should not throw exception if condition is truthy', function () {

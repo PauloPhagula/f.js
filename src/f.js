@@ -181,8 +181,10 @@
             throw new Error('message must be a string');
         }
 
+        message = message ? ": " + message : "";
+
         if (!condition) {
-            throw new Error(message || "assertion error!");
+            throw new Error("Assertion error" + message);
         }
     };
 
