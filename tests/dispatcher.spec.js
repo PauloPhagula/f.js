@@ -5,6 +5,7 @@ describe('Dispatcher', function(){ 'use strict';
             messageCallback: function(action) { return action; },
             actionCallback: function(action) { return action; }
         },
+        actionCallbackSpy,
 
         MESSAGE_CHANNEL = 'message',
         ACTION_CHANNEL = 'ACTION',
@@ -17,7 +18,7 @@ describe('Dispatcher', function(){ 'use strict';
     beforeEach(function(){
         dispatcher = new F.Dispatcher();
         spyOn(messageHandler, 'messageCallback').and.callThrough();
-        spyOn(messageHandler, 'actionCallback').and.callThrough();
+        actionCallbackSpy = spyOn(messageHandler, 'actionCallback').and.callThrough();
     });
 
     it('should subscribe handler to channel', function(){
@@ -46,23 +47,21 @@ describe('Dispatcher', function(){ 'use strict';
 
     it('should remain in a consistent state after a failed dispatch', function(){
 
-        var throwingCallback = function(action){
-            if (action.payload === 'explode') {
-                throw new Error();
-            }
+        function setupWeirdCondition() {
+            dispatcher.subscribe(ACTION_CHANNEL, messageHandler.actionCallback);
+            dispatcher.subscribe(ACTION_CHANNEL, function(action){
+                if (action.payload === 'explode') {
+                    throw new Error();
+                }
 
-            F.noop();
-        };
+                F.noop();
+            });
 
-        var throwingCallbackSpy = jasmine.createSpy('throwingCallback', throwingCallback);
+            dispatcher.dispatch({type: 'test', payload: 'explode'});
+        }
 
-        dispatcher.subscribe(ACTION_CHANNEL, throwingCallbackSpy);
-        dispatcher.subscribe(ACTION_CHANNEL, messageHandler.messageCallback);
-        dispatcher.dispatch({type: 'test', payload: 'explode'});
-
-        expect(throwingCallbackSpy).toThrow();
-        expect(messageHandler.messageCallback).toHaveBeenCalled();
-        expect(messageHandler.messageCallback).toHaveBeenCalledTimes(1);
+        expect(setupWeirdCondition).toThrow();
+        expect(dispatcher.isDispatching()).toBe(false);
     });
 
     it('should throw on self-circular dependencies', function(){
