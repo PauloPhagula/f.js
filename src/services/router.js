@@ -29,7 +29,7 @@ F.Router = (function(Navigo){ "use strict";
 		var url = target.getAttribute('href');
 
 		if (   url.indexOf('javascript:void(0)') > -1
-			|| url.match(/^(mailto|tel|sms|itms-apps|marked):/)
+			|| url.match(/^(mailto|tel|sms|itms-apps|market):/)
 		){
 			return true;
 		}
