@@ -377,12 +377,12 @@ F.Core = (function(injector) { 'use strict';
 		/**
 		 * Starts all registered modules.
 		 * @memberOf Core
+         * @param {Array} modules list of modules to be started
 		 * @return {void}
 		 */
-		startAll: function() {
-            var moduleName;
-			for (moduleName in _modules){
-				if(_modules.hasOwnProperty(moduleName)){
+		startAll: function(modules) {
+			for (var moduleName in (modules || _modules)) {
+				if (_modules.hasOwnProperty(moduleName)) {
 					this.start(moduleName);
 				}
 			}
@@ -393,11 +393,11 @@ F.Core = (function(injector) { 'use strict';
 		/**
 		 * Stops all registered modules.
 		 * @memberOf Core
+         * @param {Array} modules list of modules to be stopped
 		 * @return {void}
 		 */
-		stopAll: function() {
-            var moduleName;
-			for (moduleName in _modules) {
+		stopAll: function(modules) {
+			for (var moduleName in (modules || _modules)) {
 				if (_modules.hasOwnProperty(moduleName)) {
 					this.stop(moduleName);
 				}
