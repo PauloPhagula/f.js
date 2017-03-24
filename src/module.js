@@ -7,7 +7,7 @@
 
 /* global F */
 
-F.Module = (function(undefined){
+F.Module = (function(){ 'use strict';
 
 	/**
 	 * Module base class definition.
@@ -53,10 +53,10 @@ F.Module = (function(undefined){
 		*
 		* @param {Element} element - DOM element where module will be initialized
 		* @param {Object} services - services to be used by module
-		* @param {Object} stores - stores to be used by module
 		* @returns {void}
 		*/
-		start : function(element, services) {
+		start: function(element, services) {
+            F.noop(services);
 			throw new Error("Module initialization not done. Override this function");
 		},
 
@@ -94,7 +94,7 @@ F.Module = (function(undefined){
 		 * @protected
 		 * @final
 		 *
-		 * @param  {Object} events [description]
+		 * @param  {Object} events - event delegation specification.
 		 * @return {void}
 		 */
 		delegateEvents: function(events) {
@@ -126,7 +126,7 @@ F.Module = (function(undefined){
          * @protected
          * @final
          *
-         * @param  {Object} events [description]
+         * @param  {Object} events - event delegation specification
          * @return {void}
          */
         undelegateEvents: function(events) {

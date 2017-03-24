@@ -39,7 +39,7 @@
 /**
  * @memberof F
  */
-F.injector = (function(undefined){
+F.injector = (function(){ 'use strict';
 
     var dependencies  = {};
 
@@ -201,6 +201,10 @@ F.injector = (function(undefined){
         assertArg(isFunction(arg), name, 'not a function, got ' +
             (arg && typeof arg === 'object' ? arg.constructor.name || 'Object' : typeof arg));
         return arg;
+    }
+
+    function toJson(value){
+        return JSON.stringify(value);
     }
 
     // Public API

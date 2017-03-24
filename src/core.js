@@ -6,7 +6,9 @@
 /**
  * @memberof F
  */
-F.Core = (function(injector, undefined) {
+F.Core = (function(injector) { 'use strict';
+
+    F.assert(injector !== undefined);
 
 	// Private
 	// ---
@@ -22,7 +24,10 @@ F.Core = (function(injector, undefined) {
 
 		// Information about registered services, modules and stores by name
 		_services,
-        _modules
+        _modules,
+
+        // Global error handler
+        _errorHandler
     ;
 
     /**
@@ -31,10 +36,10 @@ F.Core = (function(injector, undefined) {
      * @private
      */
     function reset() {
-    	_config      = {};
-    	_services    = {};
-    	_modules     = {};
-    	_initialized = false;
+        _config      = {};
+        _services    = {};
+        _modules     = {};
+        _initialized = false;
     }
 
     /**
@@ -45,8 +50,6 @@ F.Core = (function(injector, undefined) {
 	 * @private
 	 */
     function signalError(exception) {
-        F.guardThat(Object.prototype.toString.call(exception) == '[object Error]', 'exception should be an Error');
-
 		if (_config.debug)
 			throw exception;
 		else
@@ -54,7 +57,7 @@ F.Core = (function(injector, undefined) {
 	}
 
 	/**
-	 * Global error event handler.
+	 * default global error event handler.
 	 * @param  {string} message      error message
 	 * @param  {string} file         URL of the script where the error was raised
 	 * @param  {number} lineNumber   Line number where error was raised
@@ -62,15 +65,26 @@ F.Core = (function(injector, undefined) {
 	 * @param  {Error} exception     the error object
 	 * @return {boolean}             When the function returns true, this prevents the firing of the default event handler.
 	 */
-	function onerror(message, file, lineNumber, columnNumber, exception) {
+	function defaultErrorHandler(message, file, lineNumber, columnNumber, exception) {
+         exception = exception || {};
+
 		if (_config.debug)
 			return false;
 
-		if (exception === undefined)
-			exception = new Error(message, file, lineNumber);
+		var errorData = {
+            message: message,
+            file: file,
+            line: lineNumber,
+            column: columnNumber,
+            error: {
+                name: 'name' in exception ? exception.name : '',
+                message: 'message' in exception ? exception.message : '',
+                stack: 'stack' in exception ? exception.stack: ''
+            }
+        };
 
-    	signalError(exception);
-    	return true;
+        signalError(errorData);
+        return true;
     }
 
 	/**
@@ -103,8 +117,8 @@ F.Core = (function(injector, undefined) {
 	 */
 	function productionize(object, objectName) {
 		var name,
-    		method,
-    		wrap = function(name, method){
+        method,
+		wrap = function(name, method){
 				return function(){
 					var errorPrefix = objectName + '.' + name + '() - ';
 					try {
@@ -133,27 +147,31 @@ F.Core = (function(injector, undefined) {
 
 	/**
 	 * Core class definition.
+     * @mixes F.Dispatcher
 	 * @class Core
 	 */
     function Core() {
-    	F.injector.register('core', this);
+        F.injector.register('core', this);
 
         // initialize private members per core
-        _config      = { debug: false }, // Global configuration
+        _config = { debug: false }; // Global configuration
 
 		// Flag indicating if the application has been initialized.
-		_initialized = false,
+		_initialized = false;
 
-        _dispatcher  = new F.Dispatcher(),
+        _dispatcher = new F.Dispatcher();
 
 		// Information about registered services, modules and stores by name
-		_services  	 = {},
-        _modules     = {};
+		_services = {};
+        _modules = {};
+
+        // error handler
+        _errorHandler = defaultErrorHandler;
     }
 
     F.compose(Core.prototype, {
 
-    	// App lifecycle
+        // App lifecycle
 		// ---
 
 		/**
@@ -166,7 +184,7 @@ F.Core = (function(injector, undefined) {
 			_config = F.compose({}, _config, options);
 
 			// Setup global error tracking before anything else runs.
-			window.addEventListener('error', onerror);
+			window.addEventListener('error', _errorHandler);
 
 			this.startAll(document.documentElement);
 
@@ -182,7 +200,7 @@ F.Core = (function(injector, undefined) {
 		destroy: function() {
 			this.stopAll(document.documentElement);
 
-			window.removeEventListener('error', onerror);
+			window.removeEventListener('error', _errorHandler);
 			reset();
 		},
 
@@ -203,34 +221,34 @@ F.Core = (function(injector, undefined) {
 		 *
 		 * var loggerSvcFactory = function(){
 		 *	    return {
-		 *	        init: function(options) {},
-		 *	        log: function(obj) { console.log(obj); }
+		 *		init: function(options) {},
+		 *		log: function(obj) { console.log(obj); }
 		 *	    };
 		 * };
 		 *
 		 * core.registerService("logger", [], loggerSvcFactory, {});
 		 *
 		 * var calculatorSvcFactory = function(logger) {
-		 * 		return {
-		 * 			init: function(options) {},
-		 * 			add: function(a, b) {
+		 *		return {
+		 *			init: function(options) {},
+		 *			add: function(a, b) {
          *              logger.log("adding ...");
          *              return a + b;
          *          },
-		 * 			subtract: function(a, b) {
+		 *			subtract: function(a, b) {
          *              logger.log("subtracting ...");
          *              return a - b;
          *          }
-		 * 		};
+		 *		};
 		 * }
 		 *
 		 * core.registerService("calculator", ["logger"], calculatorSvcFactory, {})
 		 */
 		registerService : function(serviceName, dependencies, factory, options) {
-            F.guardThat(serviceName && typeof serviceName === 'string' && serviceName.length > 0, 'serviceName should be a non-zero length string');
-            F.guardThat(dependencies && Object.prototype.toString.call(dependencies) === '[object Array]', 'dependencies should be an array');
-            F.guardThat(factory && typeof factory === 'function', 'factory should be a function');
-            F.guardThat(options && typeof options === 'object', 'options should be an object');
+            F.assert(serviceName && typeof serviceName === 'string' && serviceName.length > 0, 'serviceName should be a non-zero length string');
+            F.assert(dependencies && Object.prototype.toString.call(dependencies) === '[object Array]', 'dependencies should be an array');
+            F.assert(factory && typeof factory === 'function', 'factory should be a function');
+            F.assert(options && typeof options === 'object', 'options should be an object');
 
 			if (_services.hasOwnProperty(serviceName)) {
 				return signalError(new Error("Service '"  + serviceName + "' already registered."));
@@ -239,13 +257,13 @@ F.Core = (function(injector, undefined) {
 			dependencies = dependencies || [];
 			options = options || {};
 
-		    dependencies.push(factory);
+            dependencies.push(factory);
 
-		    var service = F.injector.resolve(dependencies);
-		    service.init(options);
-		    _services[serviceName] = service;
+            var service = F.injector.resolve(dependencies);
+            service.init(options);
+            _services[serviceName] = service;
 
-		    F.injector.register(serviceName, service);
+            F.injector.register(serviceName, service);
 		},
 
 		/**
@@ -259,10 +277,10 @@ F.Core = (function(injector, undefined) {
 		 * @return {void}
 		 */
 		registerModule: function(moduleName, services, factory, options) {
-            F.guardThat(moduleName && typeof moduleName === 'string' && moduleName.length > 0, 'moduleName should be a non-zero length string');
-            F.guardThat(services && Object.prototype.toString.call(services) === '[object Array]', 'services should be an array');
-            F.guardThat(factory && typeof factory === 'function', 'factory should be a function');
-            F.guardThat(options && typeof options === 'object', 'options should be an object');
+            F.assert(moduleName && typeof moduleName === 'string' && moduleName.length > 0, 'moduleName should be a non-zero length string');
+            F.assert(services && Object.prototype.toString.call(services) === '[object Array]', 'services should be an array');
+            F.assert(factory && typeof factory === 'function', 'factory should be a function');
+            F.assert(options && typeof options === 'object', 'options should be an object');
 
 			if (_modules.hasOwnProperty(moduleName)) {
 				return signalError(new Error("Module with given name has already been registered. Mod name: " + moduleName));
@@ -287,7 +305,7 @@ F.Core = (function(injector, undefined) {
 		 * @return {void}
 		 */
 		start: function(moduleName, element) {
-            F.guardThat(moduleName && typeof moduleName === 'string' && moduleName.length > 0, 'moduleName should be a non-zero length string');
+            F.assert(moduleName && typeof moduleName === 'string' && moduleName.length > 0, 'moduleName should be a non-zero length string');
 
 			if (!_modules.hasOwnProperty(moduleName)) {
 				return signalError(new Error("Trying to start non-registered module: " + moduleName));
@@ -296,8 +314,8 @@ F.Core = (function(injector, undefined) {
 			element = element || document.querySelector('[data-module="' + moduleName + '"]');
 
             // Wish I could guard for the type of element but doing it in JS in crazy
-            // F.guardThat(element instanceof HTMLElement, 'element should be an HTMLElement');
-            F.guardThat(element !== undefined && element !== null, 'element must be given or exist in DOM with data-module="' + moduleName +'"');
+            // F.assert(element instanceof HTMLElement, 'element should be an HTMLElement');
+            F.assert(element !== undefined && element !== null, 'element must be given or exist in DOM with data-module="' + moduleName +'"');
 
 			var module = _modules[moduleName];
 			var sandbox = new F.Sandbox(this, moduleName, element);
@@ -331,7 +349,7 @@ F.Core = (function(injector, undefined) {
 		 * @return {void}
 		 */
 		stop: function(moduleName) {
-            F.guardThat(moduleName && typeof moduleName === 'string' && moduleName.length > 0, 'moduleName should be a non-zero length string');
+            F.assert(moduleName && typeof moduleName === 'string' && moduleName.length > 0, 'moduleName should be a non-zero length string');
 
 			var data = _modules[moduleName];
 
@@ -350,20 +368,20 @@ F.Core = (function(injector, undefined) {
 		 * @return {void}
 		 */
 		restart: function(moduleName) {
-            F.guardThat(moduleName && typeof moduleName === 'string' && moduleName.length > 0, 'moduleName should be a non-zero length string.');
+            F.assert(moduleName && typeof moduleName === 'string' && moduleName.length > 0, 'moduleName should be a non-zero length string.');
 
 			this.stop(moduleName);
 			this.start(moduleName);
 		},
 
 		/**
-		 * Starts all registered modules within an element.
+		 * Starts all registered modules.
 		 * @memberOf Core
-		 * @param {root} root DOM Element bellow which all the modules will be started.
 		 * @return {void}
 		 */
-		startAll: function(root) {
-			for (var moduleName in _modules){
+		startAll: function() {
+            var moduleName;
+			for (moduleName in _modules){
 				if(_modules.hasOwnProperty(moduleName)){
 					this.start(moduleName);
 				}
@@ -373,14 +391,14 @@ F.Core = (function(injector, undefined) {
 		},
 
 		/**
-		 * Stops all registered modules within an element.
+		 * Stops all registered modules.
 		 * @memberOf Core
-		 * @param {root} root DOM Element bellow which all the modules will be stopped.
 		 * @return {void}
 		 */
-		stopAll: function(root) {
-			for (var moduleName in _modules){
-				if(_modules.hasOwnProperty(moduleName)){
+		stopAll: function() {
+            var moduleName;
+			for (moduleName in _modules) {
+				if (_modules.hasOwnProperty(moduleName)) {
 					this.stop(moduleName);
 				}
 			}
@@ -388,27 +406,45 @@ F.Core = (function(injector, undefined) {
 			return this;
 		},
 
-		// Messaging
-		// ---
+        // Messaging
+        // ---
 
-		/**
-		 * The dispatcher for communication
-		 * @memberOf Core
-		 * @todo don't expose the dispatcher. Proxy its methods instead.
-		 * @type {F.Dispatcher}
-		 */
-    	dispatcher: _dispatcher,
+        subscribe: function() {
+            _dispatcher.subscribe.apply(_dispatcher, arguments);
+            return this;
+        },
 
-    	// Routing
-    	// ---
+        unsubscribe: function() {
+            _dispatcher.unsubscribe.apply(_dispatcher, arguments);
+            return this;
+        },
 
-    	/**
-    	 * The router for anchor management
-    	 * @memberOf Core
-    	 * @todo  don't expose the router. Proxy its methods instead.
-    	 * @type {F.Router}
-    	 */
-    	// router: router,
+        publish: function() {
+            // F.Dispatcher.prototype.publish.apply(this, arguments);
+            _dispatcher.publish.apply(_dispatcher, arguments);
+            return this;
+        },
+
+        dispatch: function() {
+            _dispatcher.dispatch.apply(_dispatcher, arguments);
+            return this;
+        },
+
+        waitFor: function() {
+            _dispatcher.waitFor.apply(_dispatcher, arguments);
+            return this;
+        },
+
+        // Routing
+        // ---
+
+        /**
+         * The router for anchor management
+         * @memberOf Core
+         * @todo  don't expose the router. Proxy its methods instead.
+         * @type {F.Router}
+         */
+        // router: router,
 
 		// Config
 		// ---
@@ -423,6 +459,7 @@ F.Core = (function(injector, undefined) {
 		getConfig: function(name) {
 			if (typeof name === 'undefined')
 				return _config;
+
 			else if (name in _config)
 				return _config[name];
 			else
@@ -437,6 +474,9 @@ F.Core = (function(injector, undefined) {
 		 * @throws {Error} If core is already initialized.
 		 */
 		setConfig: function(config) {
+            if (typeof config !== 'object')
+                return signalError(new Error('configuration should be an object'));
+
 			if (_initialized)
 				return signalError(new Error('Cannot set configuration after application is initialized'));
 
@@ -454,7 +494,7 @@ F.Core = (function(injector, undefined) {
 		 *                               false otherwise
 		 */
 		hasService: function(serviceName) {
-            F.guardThat(serviceName && typeof serviceName === 'string' && serviceName.length > 0, 'serviceName should be a non-zero length string');
+            F.assert(serviceName && typeof serviceName === 'string' && serviceName.length > 0, 'serviceName should be a non-zero length string');
 			return _services.hasOwnProperty(serviceName);
 		},
 
@@ -467,7 +507,7 @@ F.Core = (function(injector, undefined) {
 		 * @throws {Error} If no service with given name is registed
 		 */
 		getService: function(serviceName) {
-            F.guardThat(serviceName && typeof serviceName === 'string' && serviceName.length > 0, 'serviceName should be a non-zero length string');
+            F.assert(serviceName && typeof serviceName === 'string' && serviceName.length > 0, 'serviceName should be a non-zero length string');
 
 			if (!_services.hasOwnProperty(serviceName)) {
                 return signalError(new Error("Extension '" + serviceName + "' Not found"));
@@ -478,6 +518,10 @@ F.Core = (function(injector, undefined) {
 
 		// Error reporting
 		// ---
+
+        setErrorHandler: function(errorHandler){
+            _errorHandler = errorHandler;
+        },
 
 		/**
 		 * Signals that an error has occurred. If in development mode, an error

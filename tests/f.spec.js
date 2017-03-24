@@ -67,26 +67,26 @@ describe('f', function () { 'use strict';
 
     });
 
-    describe('guardThat', function(){
+    describe('assert', function(){
         it('should throw exception if condition is not boolean', function () {
-            expect(function(){ F.guardThat(1); }).toThrow();
+            expect(function(){ F.assert(1); }).toThrow();
         });
 
         it('should throw exception if condition is not string', function () {
-            expect(function(){ F.guardThat(true, 1); }).toThrow();
+            expect(function(){ F.assert(true, 1); }).toThrow();
         });
 
         it('should throw exception if condition is falsy', function () {
-            expect(function(){ F.guardThat(1 < 0); }).toThrow();
+            expect(function(){ F.assert(1 < 0); }).toThrow();
         });
 
         it('should throw exception if condition is falsy with given message', function () {
             var errorMessage = "error message";
-            expect(function(){ F.guardThat(1 < 0, errorMessage); }).toThrowError(errorMessage);
+            expect(function(){ F.assert(1 < 0, errorMessage); }).toThrowError(errorMessage);
         });
 
         it('should not throw exception if condition is truthy', function () {
-            expect(function(){ F.guardThat(1 > 0); }).not.toThrow();
+            expect(function(){ F.assert(1 > 0); }).not.toThrow();
         });
     });
 });

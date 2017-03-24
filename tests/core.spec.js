@@ -152,4 +152,29 @@ describe('Core', function(){ 'use strict';
             expect(startAll_and_StopAll_Modules).not.toThrow();
         });
     });
+
+    describe(' - Messaging - ', function(){
+        it('core should be a working dispatcher', function(){
+
+            var messageHandler = {
+                handleMessage: function (payload){
+                    // console.log('yo just go payload:' + JSON.stringify(payload));
+                }
+            };
+
+            var payload = {yo: 'yo'};
+
+            var msgHandlerSpy = spyOn(messageHandler, 'handleMessage').and.callThrough();
+
+            core
+                .subscribe('message', messageHandler.handleMessage)
+                .publish('message', payload);
+
+            core.unsubscribe('message', messageHandler.handleMessage)
+                .publish('message', {xyz: 'xxx'});
+
+            expect(msgHandlerSpy).toHaveBeenCalledTimes(1);
+            expect(msgHandlerSpy).toHaveBeenCalledWith(payload);
+        });
+    });
 });

@@ -7,10 +7,10 @@
  *
  * A state has a name, URL pattern defining a set of required params
  */
-/** global window, document */
+/** global window, document, Navigo */
 
 
-F.Router = (function(Navigo, undefined){ "use strict";
+F.Router = (function(Navigo){ "use strict";
 
 	var _router, _root, _useHash, _prevURL;
 
@@ -39,23 +39,23 @@ F.Router = (function(Navigo, undefined){ "use strict";
 		event.stopPropagation();
 
 		// Remove leading slashes and hash bangs (backward compatablility)
-  		url = url.replace(/^\//, '')
+		url = url.replace(/^\//, '')
 				.replace('\#\!\/', '')
 				.replace('\#\/', '');
 
 		url = _sanitizeInnerUrl(url, _root);
 
-  		if (_useHash) {
-  			_prevURL = window.location.hash;
-  		} else {
-  			_prevURL = window.location.pathname + window.location.search;
-  		}
+		if (_useHash) {
+			_prevURL = window.location.hash;
+		} else {
+			_prevURL = window.location.pathname + window.location.search;
+		}
 
-  		// only navigate to proposed url if it's not equal to the previous or current
-  		if (_prevURL !== url) {
-  			_prevURL = url;
-  			_router.navigate(url);
-  		}
+		// only navigate to proposed url if it's not equal to the previous or current
+		if (_prevURL !== url) {
+			_prevURL = url;
+			_router.navigate(url);
+		}
 	};
 
 	/**
@@ -114,7 +114,7 @@ F.Router = (function(Navigo, undefined){ "use strict";
 					pattern = spec;
 				} else {
 					pattern = spec.slice(0, spec.indexOf(" "));
-                	flags = spec.slice(spec.indexOf(" ") + 1, spec.length).trim();
+                    flags = spec.slice(spec.indexOf(" ") + 1, spec.length).trim();
 				}
 
 				handler = routes[spec];
@@ -162,9 +162,9 @@ F.Router = (function(Navigo, undefined){ "use strict";
 		 * @returns {void}
 		 */
 		stop: function() {
-		    F.undelegateEvent(document, 'click', 'a[href]:not([data-external]):not(.disabled)', _handleURLClick, null);
-		    document.removeEventListener('hashchange', _handleHashChange, false);
-		    _router.destroy();
+            F.undelegateEvent(document, 'click', 'a[href]:not([data-external]):not(.disabled)', _handleURLClick, null);
+            document.removeEventListener('hashchange', _handleHashChange, false);
+            _router.destroy();
 		},
 
 		/**

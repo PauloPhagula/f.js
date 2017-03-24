@@ -1,10 +1,10 @@
 /**
  * @fileOverview Flux Store definition where the `Core` and all feature
- * 				 `Modules` access data and business logic in our SPA.
+ *				 `Modules` access data and business logic in our SPA.
  *
  */
 
-F.Store = (function(undefined){ "use strict";
+F.Store = (function(){ "use strict";
 
 	var CHANGE = 'CHANGE',
 		ACTION = 'ACTION';
@@ -12,6 +12,7 @@ F.Store = (function(undefined){ "use strict";
 	/**
 	 *
 	 * Store definition
+     * @mixes F.Dispatcher
 	 * @class Store
 	 *
 	 * @param {F.Dispatcher} core the application on which the store
@@ -43,7 +44,7 @@ F.Store = (function(undefined){ "use strict";
 		};
 
 
-		self._dispatchToken = core.dispatcher.subscribe(ACTION, this._dispatchFlow);
+		self._dispatchToken = core.subscribe(ACTION, this._dispatchFlow);
 		this.actions = {};
 		this.init.apply(this, arguments);
 	}
@@ -74,10 +75,10 @@ F.Store = (function(undefined){ "use strict";
 		 * @protected
 		 * @abstract
 		 *
-		 * @param  {Object} payload the content of the dispatch
+		 * @param  {Object} action the content of the dispatch
 		 * @return {void}
 		 */
-		_handleDispatch : function(payload) {
+		_handleDispatch : function(action) {
 			throw new Error("Store payload handling not done. Override this function");
 		},
 

@@ -1,11 +1,127 @@
 /* global F, riot */
 
+/**
+ * Flux Action constants
+ * @enum
+ */
+var ActionTypes = {
+    ALL                : '*',
+    ACTION             : 'ACTION',
+    CREATE_TODO        : 'CREATE_TODO',
+    UPDATE_TODO        : 'UPDATE_TODO',
+    DELETE_TODO        : 'DELETE_TODO',
+    CLEAR_COMPLETED    : 'CLEAR_COMPLETED',
+    MARK_ALL_COMPLETE  : 'MARK_ALL_COMPLETE',
+    MARK_ALL_INCOMPLETE: 'MARK_ALL_INCOMPLETE',
+};
+
+var todoStoreSvcFactory = function(core){
+	"use strict";
+
+	var todos = {},
+		_lastID = 1;
+
+	function add(todo) {
+		var id = "ID_" + _lastID++;
+		todos[id] = {
+			id 			: id,
+			text 		: todo,
+			completed	: false,
+			editing		: false
+		};
+		return id;
+	}
+
+	function update (id, updates) {
+		if(!todos[id]) return;
+		var updatedTodo = F.compose({}, todos[id], updates);
+		todos[id] = updatedTodo;
+	}
+
+	function remove (id) {
+		if(!todos[id]) return;
+		delete todos[id];
+	}
+
+	function clearCompleted() {
+		for (var todo in todos){
+			if(todos[todo].completed === true){
+				delete todos[todo];
+			}
+		}
+	}
+
+	function markAllComplete() {
+		for(var todo in todos){
+			if(todos[todo].completed === false){
+				todos[todo].completed = true;
+			}
+		}
+	}
+
+	function markAllIncomplete() {
+		for(var todo in todos){
+			if(todos[todo].completed === true){
+				todos[todo].completed = false;
+			}
+		}
+	}
+
+	var TodoStore = F.Store.extend({
+		init : function() {
+		},
+
+		// Override
+		_handleDispatch: function(action){
+			switch (action.type) {
+				case ActionTypes.CREATE_TODO:
+					add(action.payload.text);
+					this.emitChange();
+				break;
+				case ActionTypes.UPDATE_TODO:
+					update(action.payload.id, action.payload.updates);
+					this.emitChange();
+				break;
+				case ActionTypes.DELETE_TODO:
+					remove(action.payload.id);
+					this.emitChange();
+				break;
+				case ActionTypes.CLEAR_COMPLETED:
+					clearCompleted();
+					this.emitChange();
+				break;
+				case ActionTypes.MARK_ALL_COMPLETE:
+					markAllComplete();
+					this.emitChange();
+				break;
+				case ActionTypes.MARK_ALL_INCOMPLETE:
+					markAllIncomplete();
+					this.emitChange();
+				break;
+				default:
+				break;
+			}
+		},
+
+		getAll: function() {
+			return todos;
+		},
+
+		getTodo: function (id) {
+			return todos[id];
+		}
+	});
+
+	return new TodoStore(core);
+};
+
+
 var app = (function() {"use strict";
 
 	// override and replace default sandbox
 	F.Sandbox = F.Sandbox.extend({
 		dispatch: function(action) {
-			this.core.dispatcher.dispatch(action);
+			this.core.dispatch(action);
 		}
 	});
 
@@ -20,37 +136,37 @@ var app = (function() {"use strict";
 			createTodo: function(text) {
 				return {
 					type : ActionTypes.CREATE_TODO,
-					data : { text: text }
+					payload : { text: text }
 				};
 			},
 			updateTodo: function(id, data) {
 				return {
 					type : ActionTypes.UPDATE_TODO,
-					data : {id : id, updates: data}
+					payload : {id : id, updates: data}
 				};
 			},
 			deleteTodo: function(id) {
 				return {
 					type : ActionTypes.DELETE_TODO,
-					data : { id : id }
+					payload : { id : id }
 				};
 			},
 			clearCompletedTodos : function() {
 				return {
 					type : ActionTypes.CLEAR_COMPLETED,
-					data : null
+					payload : null
 				};
 			},
 			markAllAsComplete: function() {
 				return {
 					type : ActionTypes.CLEAR_SELECTED,
-					data : null
+					payload : null
 				};
 			},
 			markAllAsIncomplete : function(){
 				return {
 					type : ActionTypes.CLEAR_SELECTED,
-					data : null
+					payload : null
 				};
 			}
 		};
@@ -84,7 +200,7 @@ var app = (function() {"use strict";
 		clickHandler: function(event) {}
 	});
 
-	 // if the `router` also manages `views`/`modules` then the router is also the `core`
+	// if the `router` also manages `views`/`modules` then the router is also the `core`
     // and thus both should somehow be merged
     var AppRouter = F.Router.extend({
         routes: { // 'pattern flags': 'handler'
@@ -107,25 +223,25 @@ var app = (function() {"use strict";
         }
     });
 
-   	var router = new AppRouter('examples/todos/', true);
+    var router = new AppRouter('examples/todos/', true);
 
 	// Application initialization
 	// ---
-	
+
 	// Start by creating the core
 	var core = new F.Core();
 
 	// Setting configuration for the app
-	core.setConfig({debug: false}); 
+	core.setConfig({debug: false});
 
 	// Register global error handler
-	core.dispatcher.subscribe('error', function(error){
+	core.subscribe('error', function(error){
 		console.log('error: ', error); // Could be send via email
 	});
 
 	core.registerService("actionCreator", [], actionCreatorSvcFactory, {});
 	core.registerService('todoStore', ["core"], todoStoreSvcFactory, {});
-	
+
 	// notice: the second parameter stating on which ext the modules depends
 	// notice: the third parameter stating on which stores the module depens
 	core.registerModule('todomvc', ["actionCreator", "todoStore"], TodoMVC, {});

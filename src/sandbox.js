@@ -1,13 +1,13 @@
 /**
  * @fileOverview contains the Sandbox definition which is an abstraction
- * 				 into the `Core` for use by `Module`s to interact with
- * 				 the environment.
+ *				 into the `Core` for use by `Module`s to interact with
+ *				 the environment.
  */
 
 /**
  * @memberof F
  */
-F.Sandbox = (function(undefined){
+F.Sandbox = (function(){ 'use strict';
 
 	/**
 	 * @class Sandbox
@@ -19,7 +19,7 @@ F.Sandbox = (function(undefined){
 	function Sandbox (core, moduleName, element) {
 		this.core = core;
 		this.moduleName = moduleName;
-    	this.element = element;
+        this.element = element;
 	}
 
 	// Attach all inheritable methods to the Sandbox prototype.
@@ -34,6 +34,7 @@ F.Sandbox = (function(undefined){
 		* @return {Boolean} - true if module can publish. false otherwise
 		*/
 		moduleCanPublish : function (moduleName, channel) {
+            F.noop(channel);
 			return true; // no-op
 		},
 
@@ -51,7 +52,17 @@ F.Sandbox = (function(undefined){
 		*/
 		publish : function (channel, data, callback, context) {
 			if ( this.moduleCanPublish(this.moduleName, channel) ) {
-				this.core.dispatcher.publish.call(channel, data);
+				this.core.publish(channel, data);
+
+                if (typeof callback !== 'function') {
+                    return;
+                }
+
+                if (typeof context === 'object') {
+                   return  callback.call(context);
+                }
+
+                callback();
 			}
 		},
 
@@ -66,6 +77,7 @@ F.Sandbox = (function(undefined){
 		 * @return {boolean} flag indicate if the module can dispatch the given action type.
 		 */
 		moduleCanDispatchAction: function(moduleName, actionType) {
+            F.noop(actionType);
 			return true; // no-op
 		},
 
@@ -82,14 +94,11 @@ F.Sandbox = (function(undefined){
 		 */
 		dispatch: function(type, data) {
 			if (!this.moduleCanDispatchAction(this.moduleName, type)) {
-				throw new Error("module "
-                                + this.moduleName
-                                + " is not authorized to create action of type: "
-                                + type);
+				throw new Error("module " + this.moduleName + " is not authorized to create action of type: " + type);
             }
 
             var action = {type: type, data: data};
-			this.core.dispatcher.dispatch(action);
+			this.core.dispatch(action);
 		},
 
 		/**
@@ -103,7 +112,7 @@ F.Sandbox = (function(undefined){
 		* @returns {string} the subscription dispatch token
 		*/
 		subscribe : function (channel, callback, context) {
-			return this.core.dispatcher.subscribe(channel, callback, context);
+			return this.core.subscribe(channel, callback, context);
 		},
 
 		/**
@@ -117,7 +126,7 @@ F.Sandbox = (function(undefined){
 		* @returns {void}
 		*/
 		unsubscribe : function (channel, callback) {
-			this.core.dispatcher.unsubscribe(channel, callback);
+			this.core.unsubscribe(channel, callback);
 		},
 
 		/**
@@ -155,7 +164,7 @@ F.Sandbox = (function(undefined){
 		 *                               false otherwise
 		 */
 		hasService: function(serviceName) {
-			return this.core.hasService(extensionName);
+			return this.core.hasService(serviceName);
 		},
 
 		/**
@@ -167,7 +176,7 @@ F.Sandbox = (function(undefined){
 		 * @throws {Error} If no service with given name is registered
 		 */
 		getService: function (serviceName) {
-			return this.core.getService(extensionName);
+			return this.core.getService(serviceName);
 		},
 
 		/**
