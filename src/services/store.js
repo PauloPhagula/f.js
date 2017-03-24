@@ -4,6 +4,29 @@
  *
  */
 
+/**
+ * @usage:
+ *
+ * var SampleStore = F.Store.extend({
+ *     init: function(options) {
+ *     },
+ *
+ *     // must override
+ *     _handleDispatch: function(action) {
+ *         switch (action.type) {
+ *              case 'SAMPLE_ACTION':
+ *                   // handle action and change store state
+ *                   //  ...
+ *                   this.emitChange();
+ *              break;
+ *         }
+ *     },
+ *
+ *     getSomeStuffFromState: function() {
+ *          // return some stuff form state;
+ *     }
+ * });
+ */
 F.Store = (function(){ "use strict";
 
 	var CHANGE = 'CHANGE',
