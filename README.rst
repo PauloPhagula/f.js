@@ -36,12 +36,12 @@ on the subject.
     **This** begun as just an exercise of trying to take the concepts
     outlined in the talk and build something I could use on my apps.
 
-    It **has no unittests and has not been tested in the wild**, thus
-    **it should not be considered production-ready**. If you're looking
-    into something like this, that is more mature and production-ready,
-    then you should definitely check out the T3_  implementation made by
-    Box_ in collaboration with Nicholas himself, linked in the
-    `Similar Projects`_ section bellow.
+    It **has not been tested in the wild**, thus **it should not be
+    considered production-ready**.
+    If you're looking for something like this, that is more mature and
+    production-ready, then you should definitely check out the T3_
+    implementation made by Box_ in collaboration with Nicholas himself,
+    linked in the `Similar Projects`_ section bellow.
 
 
 Architecture Components
