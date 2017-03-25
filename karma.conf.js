@@ -15,7 +15,7 @@ module.exports = function(config) { 'use strict';
 
 
     // list of files / patterns to load in the browser
-    files: ['dist/*.js', 'tests/shared.js', 'tests/*.spec.js'],
+    files: ['builds/*.js', 'tests/shared.js', 'tests/*.spec.js'],
 
 
     // list of files to exclude
@@ -26,7 +26,7 @@ module.exports = function(config) { 'use strict';
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-        'dist/*.js': ['coverage']
+        'builds/*.js': ['coverage']
     },
 
 
@@ -71,4 +71,4 @@ module.exports = function(config) { 'use strict';
     // how many browser should be started simultaneous
     concurrency: Infinity
   })
-}
+};
