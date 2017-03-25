@@ -168,7 +168,7 @@ A good ``Module`` implementation should abide by these rules:
 - anything else you need ask the ``Sandbox``
 - don't create global objects
 - don't directly reference other ``Modules``
-- ``Module``s only know the ``Sandbox``, the rest of the architecture
+- ``Module`` s only know the ``Sandbox`` , the rest of the architecture
   doesn't exist to them
 - Manage data and views
 
