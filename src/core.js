@@ -186,7 +186,7 @@ F.Core = (function(injector) { 'use strict';
 			// Setup global error tracking before anything else runs.
 			window.addEventListener('error', _errorHandler);
 
-			this.startAll(document.documentElement);
+			this.startAll();
 
 			_dispatcher.publish('app init');
 			_initialized = true;
@@ -198,7 +198,7 @@ F.Core = (function(injector) { 'use strict';
 		 * @returns {void}
 		 */
 		destroy: function() {
-			this.stopAll(document.documentElement);
+			this.stopAll();
 
 			window.removeEventListener('error', _errorHandler);
 			reset();
