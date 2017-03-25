@@ -190,6 +190,8 @@ F.Core = (function(injector) { 'use strict';
 
 			_dispatcher.publish('app init');
 			_initialized = true;
+
+            return this;
 		},
 
 		/**
@@ -202,6 +204,8 @@ F.Core = (function(injector) { 'use strict';
 
 			window.removeEventListener('error', _errorHandler);
 			reset();
+
+            return this;
 		},
 
 		// Registration Hooks
@@ -264,6 +268,8 @@ F.Core = (function(injector) { 'use strict';
             _services[serviceName] = service;
 
             F.injector.register(serviceName, service);
+
+            return this;
 		},
 
 		/**
@@ -292,6 +298,8 @@ F.Core = (function(injector) { 'use strict';
 				options    : options,
 				instance   : null
 			};
+
+            return this;
 		},
 
 		// Module lifecycle
@@ -340,6 +348,8 @@ F.Core = (function(injector) { 'use strict';
 			}
 
 			module.instance.start(element, services);
+
+            return this;
 		},
 
 		/**
@@ -359,6 +369,8 @@ F.Core = (function(injector) { 'use strict';
 
 			data.instance.stop();
 			data.instance = null;
+
+            return this;
 		},
 
 		/**
@@ -372,6 +384,8 @@ F.Core = (function(injector) { 'use strict';
 
 			this.stop(moduleName);
 			this.start(moduleName);
+
+            return this;
 		},
 
 		/**
@@ -481,6 +495,8 @@ F.Core = (function(injector) { 'use strict';
 				return signalError(new Error('Cannot set configuration after application is initialized'));
 
 			_config = F.compose({}, _config, config);
+
+            return this;
 		},
 
 		// Services
@@ -527,10 +543,13 @@ F.Core = (function(injector) { 'use strict';
 		 * Signals that an error has occurred. If in development mode, an error
 		 * is thrown. If in production mode, an event is fired.
 		 * @memberOf Core
-		 * @param {Error} [exception] The exception object to use.
+		 * @param {Error} exception - The exception object to use.
 		 * @returns {void}
 		 */
-		reportError: signalError
+		reportError: function(exception) {
+            signalError(exception)
+            return this;
+        }
 	});
 
     Core.extend = F.extend;

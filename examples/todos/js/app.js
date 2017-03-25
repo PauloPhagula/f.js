@@ -231,20 +231,22 @@ var app = (function() {"use strict";
 	// Start by creating the core
 	var core = new F.Core();
 
-	// Setting configuration for the app
-	core.setConfig({debug: false});
+    core
 
-	// Register global error handler
-	core.subscribe('error', function(error){
-		console.log('error: ', error); // Could be send via email
-	});
+        // Setting configuration for the app
+        .setConfig({debug: true})
 
-	core.registerService("actionCreator", [], actionCreatorSvcFactory, {});
-	core.registerService('todoStore', ["core"], todoStoreSvcFactory, {});
+        // Register global error handler
+        .subscribe('error', function(error){
+            console.log('error: ', error); // Could be send via email
+        })
 
-	// notice: the second parameter stating on which ext the modules depends
-	// notice: the third parameter stating on which stores the module depens
-	core.registerModule('todomvc', ["actionCreator", "todoStore"], TodoMVC, {});
+        .registerService("actionCreator", [], actionCreatorSvcFactory, {})
+        .registerService('todoStore', ["core"], todoStoreSvcFactory, {})
+
+        // notice: the second parameter stating on which ext the modules depends
+        // notice: the third parameter stating on which stores the module depens
+        .registerModule('todomvc', ["actionCreator", "todoStore"], TodoMVC, {});
 
 	return {
 		boot: function() {
