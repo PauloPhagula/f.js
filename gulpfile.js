@@ -28,7 +28,7 @@ var gulp = require('gulp'),
 
 var FILE_ENCODING = 'utf-8',
     SRC_DIR = 'src',
-    DIST_DIR = 'dist',
+    DIST_DIR = 'builds',
     DIST_NAME = 'f.js',
     DIST_MIN_NAME = 'f.min.js',
     DIST_PATH = _path.resolve(__dirname,  DIST_DIR + '/' + DIST_NAME),
@@ -96,7 +96,7 @@ gulp.task('watch', function(){
 });
 
 gulp.task('lint', function(){
-    gulp.src(['./dist/f.js'])
+    gulp.src(['./builds/f.js'])
         .pipe(eslint())
         .pipe(eslint.format())
         .pipe(eslint.failAfterError());
