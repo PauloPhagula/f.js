@@ -1,10 +1,7 @@
 /**
  * @fileOverview Flux Store definition where the `Core` and all feature
- *				 `Modules` access data and business logic in our SPA.
+ * `Modules` access data and business logic in our SPA.
  *
- */
-
-/**
  * @usage:
  *
  * var SampleStore = F.Store.extend({

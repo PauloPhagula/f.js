@@ -7,8 +7,8 @@
  *
  * A state has a name, URL pattern defining a set of required params
  */
-/** global window, document, Navigo */
 
+/** global window, document, Navigo */
 
 F.Router = (function(Navigo){ "use strict";
 

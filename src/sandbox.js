@@ -1,7 +1,6 @@
 /**
  * @fileOverview contains the Sandbox definition which is an abstraction
- *				 into the `Core` for use by `Module`s to interact with
- *				 the environment.
+ * into the `Core` for use by `Module`s to interact with the environment.
  */
 
 /**
@@ -24,6 +23,10 @@ F.Sandbox = (function(){ 'use strict';
 
 	// Attach all inheritable methods to the Sandbox prototype.
 	F.compose(Sandbox.prototype, {
+
+        // Messaging
+        // ---
+
 		/**
 		* Checks if a module can publish a certain event.
 		* By default any module can publish. Override with your implementation.
@@ -129,6 +132,8 @@ F.Sandbox = (function(){ 'use strict';
 			this.core.unsubscribe(channel, callback);
 		},
 
+        // config
+
 		/**
 		* Returns global configuration data for this instance of the module.
 		*
@@ -141,6 +146,8 @@ F.Sandbox = (function(){ 'use strict';
 		getConfig : function (name) {
 			return this.core.getConfig(this.element, name);
 		},
+
+        // reporting
 
 		/**
 		* Pass-through method that signals that an error has occurred. If in development mode, an error

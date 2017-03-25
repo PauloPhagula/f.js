@@ -1,6 +1,6 @@
 /**
  * @fileOverview contains the dispatcher definition used for
- *				 communication in the application.
+ * communication in the application.
  *
  * As a flux dispatcher it is a simple mechanism for distributing the
  * actions to the stores.

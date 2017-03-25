@@ -1,6 +1,6 @@
 /**
  * @fileOverview contains the main application object that is the heart of the
- *               application architecture.
+ * application architecture.
  */
 
 /**
