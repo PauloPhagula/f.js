@@ -23,6 +23,8 @@
     "strict": [1, "function"],
     "valid-jsdoc": [1],
     // disable rules from base configurations
-    "no-console": [0]
+    "no-console": [0],
+    // We allow unused args
+    "no-unused-vars": [2, {"args": "none"}]
   }
 }

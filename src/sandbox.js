@@ -37,7 +37,6 @@ F.Sandbox = (function(){ 'use strict';
 		* @return {Boolean} - true if module can publish. false otherwise
 		*/
 		moduleCanPublish : function (moduleName, channel) {
-            F.noop(channel);
 			return true; // no-op
 		},
 
@@ -80,7 +79,6 @@ F.Sandbox = (function(){ 'use strict';
 		 * @return {boolean} flag indicate if the module can dispatch the given action type.
 		 */
 		moduleCanDispatchAction: function(moduleName, actionType) {
-            F.noop(actionType);
 			return true; // no-op
 		},
 

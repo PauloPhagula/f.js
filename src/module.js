@@ -56,7 +56,6 @@ F.Module = (function(){ 'use strict';
 		* @returns {void}
 		*/
 		start: function(element, services) {
-            F.noop(services);
 			throw new Error("Module initialization not done. Override this function");
 		},
 
