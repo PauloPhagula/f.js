@@ -2,17 +2,22 @@
  * @fileOverview contains the dispatcher definition used for
  *				 communication in the application.
  *
+ * As a flux dispatcher it is a simple mechanism for distributing the
+ * actions to the stores.
+ *
  * @see:
  * https://facebook.github.io/flux/docs/dispatcher.html
  * Alex MacCaw - JavaScript Web Applications - Pag.28
  *
- * The Flux dispatcher is different from pub-sub in two ways
+ * The Flux dispatcher is different from pub-sub in two ways:
+ *
  * 1) Callbacks are not subscribed to particular events. Every payload is
  *      dispatched to every registered callback.
  * 2) Callbacks can be deferred in whole or part until other callbacks have
  *      been executed.
+ *
  * Since we need to support both, if we're publishing actions then
- * we use the 'ACTION' channel, so all participants in Flux can listen
+ * we use the 'ACTION' channel, so all stores in Flux can listen.
  *
  * @usage:
  *
