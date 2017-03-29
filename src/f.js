@@ -194,22 +194,18 @@
     /**
      * Assert that a given condition is satisfied, immediately raising an
      * error when its not.
-     * @param {boolean} condition - the condition to be checked for truthness
+     * @param {?} expression - the expression whose result value is to be checked for truthness
      * @param {String} message - the message to be contained in the raised error
      * @return {void}
      */
-    F.assert = function(condition, message) {
-        if (typeof condition !== 'boolean') {
-            throw new Error('condition must be boolean');
-        }
-
+    F.assert = function(expression, message) {
         if (message && typeof message !== 'string') {
             throw new Error('message must be a string');
         }
 
         message = message ? ": " + message : "";
 
-        if (!condition) {
+        if (!expression) {
             throw new Error("Assertion error" + message);
         }
     };

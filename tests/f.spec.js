@@ -68,10 +68,6 @@ describe('f', function () { 'use strict';
     });
 
     describe('assert', function(){
-        it('should throw exception if condition is not boolean', function () {
-            expect(function(){ F.assert(1); }).toThrow();
-        });
-
         it('should throw exception if condition is not string', function () {
             expect(function(){ F.assert(true, 1); }).toThrow();
         });
