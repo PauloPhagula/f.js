@@ -3,17 +3,11 @@
     // -------------
 
     /**
-     * The one global object for F.
-     * @namespace F
-     */
-    var F = {};
-
-    /**
      * The previous value of the `F` variable, so that it can be
      * restored later on, if `noConflict` is used.
      * @type {F}
      */
-    var previousF = F;
+    var previousF = root.F;
 
     /**
      * Current version of the library.
@@ -34,7 +28,7 @@
      * @return {F} a reference to this F object
      */
     F.noConflict = function() {
-        F = previousF;
+        root.F = previousF;
         return this;
     };
 

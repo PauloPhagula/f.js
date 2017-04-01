@@ -2,7 +2,10 @@ describe('f', function () { 'use strict';
 
     describe('noConflict', function(){
         it('should return the previous F', function(){
-            expect(F.noConflict()).toBe(F);
+            var F1 = F.noConflict();
+            expect(F1).not.toBeUndefined();
+            expect(F).toBeUndefined();
+            window.F = F1;
         })
     });
 
