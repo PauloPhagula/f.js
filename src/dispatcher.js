@@ -155,18 +155,18 @@ F.Dispatcher = (function(){ 'use strict';
         };
 
     F.compose(Dispatcher.prototype, {
-            /**
-        * Registers a callback to be called when an event is published.
-        * returns a token that can be used with `waitfFor()`.
-        * @memberOf Dispatcher
-        * @method
-        * @public
-        *
-        * @param {String} channel - event / channel / action
-        * @param {Function} callback - the callback to be registered
-        * @param {Object} context - the object under whiches context the callback is to be called
-        * @returns {string} the subscription registration token
-        */
+        /**
+         * Registers a callback to be called when an event is published.
+         * returns a token that can be used with `waitfFor()`.
+         * @memberOf Dispatcher
+         * @method
+         * @public
+         *
+         * @param {String} channel - event / channel / action
+         * @param {Function} callback - the callback to be registered
+         * @param {Object} context - the object under whiches context the callback is to be called
+         * @returns {string} the subscription registration token
+         */
         subscribe: function (channel, callback, context) {
             _throwIfDispatching('Dispatcher.subscribe(...)');
             // Create _callbacks object, unless it already exists
@@ -184,15 +184,39 @@ F.Dispatcher = (function(){ 'use strict';
         },
 
         /**
-        * De-registers a callback for an event.
-        * @memberOf Dispatcher
-        * @method
-        * @public
-        *
-        * @param {String} channel the channel on which to subscribe
-        * @param {Function} callback the callback to be unsubscribed
-        * @returns {void}
-        */
+         * Registers a once-off callback to be called when an event is published.
+         * @memberOf Dispatcher
+         * @method
+         * @public
+         *
+         * @param {String} channel - event / channel / action
+         * @param {Function} callback - the callback to be registered
+         * @param {Object} context - the object under whiches context the callback is to be called
+         * @returns {void}
+         */
+        subscribeOnce: function(channel, callback, context) {
+            _throwIfDispatching('Dispatcher.subscribe(...)');
+            var self = this;
+
+            var handler = function() {
+                self.unsubscribe(channel, callback, context);
+                self.unsubscribe(channel, handler, context);
+            };
+
+            this.subscribe(channel, callback, context);
+            this.subscribe(channel, handler, context);
+        },
+
+        /**
+         * De-registers a callback for an event.
+         * @memberOf Dispatcher
+         * @method
+         * @public
+         *
+         * @param {String} channel the channel on which to subscribe
+         * @param {Function} callback the callback to be unsubscribed
+         * @returns {void}
+         */
         unsubscribe: function (channel, callback) {
             _throwIfDispatching('Dispatcher.subscribe(...)');
             // Return if there isn't a _callbacks object, or
@@ -212,15 +236,15 @@ F.Dispatcher = (function(){ 'use strict';
         },
 
         /**
-        * Publishes an event and calls back all subscribers to that event.
-        * @memberOf Dispatcher
-        * @method
-        * @public
-        *
-        * @param {String} eventName - the event / channel / action name
-        * @param {Object} data - the data to be published for the event / channel / action
-        * @returns {void}
-        */
+         * Publishes an event and calls back all subscribers to that event.
+         * @memberOf Dispatcher
+         * @method
+         * @public
+         *
+         * @param {String} eventName - the event / channel / action name
+         * @param {Object} data - the data to be published for the event / channel / action
+         * @returns {void}
+         */
         publish: function () {
             // Turn arguments object into a real array
             var args = Array.prototype.slice.call(arguments, 0);
@@ -281,17 +305,17 @@ F.Dispatcher = (function(){ 'use strict';
         },
 
         /**
-        * Helper method to publish an action.
-        * @memberOf Dispatcher
-        * @param {Object} action - the action to be published
-        * @param {string} action.type - the action type
-        * @param {Object} action.payload - the action data
-        * action : {
-        *   type : 'action-name',
-        *   payload : {}
-        * }
-        * @returns {void}
-        */
+         * Helper method to publish an action.
+         * @memberOf Dispatcher
+         * @param {Object} action - the action to be published
+         * @param {string} action.type - the action type
+         * @param {Object} action.payload - the action data
+         * action : {
+         *   type : 'action-name',
+         *   payload : {}
+         * }
+         * @returns {void}
+         */
         dispatch: function (action) {
             F.assert(typeof action === 'object', 'payload should be an object');
             F.assert('type' in action && typeof action.type === 'string' && action.type.length > 0, 'action.type should be a string');
@@ -301,32 +325,32 @@ F.Dispatcher = (function(){ 'use strict';
         },
 
         /**
-        * Waits for the callbacks specified to be invoked before continuing execution
-        * of the current callback. This method should only be used by a callback in
-        * response to a dispatched payload.
-        *
-        * When `waitFor()` is encountered in a callback, it tells the Dispatcher to invoke the callbacks for the required stores.
-        * After these callbacks complete, the original callback can continue to execute.
-        * Thus the store that is invoking `waitFor()` can depend on the state of another store to inform how it should update its own state.
-        *
-        * A problem arises if we create circular dependencies.
-        * If Store A waits for Store B, and B waits for A, then we could wind up in an endless loop.
-        * The Dispatcher will flag these circular dependencies with console errors.
-        *
-        * @memberOf Dispatcher
-        *
-        * @param {Array} dispatchTokens - an array of dispatcher registry indexes, which we refer to here as each store's dispatchToken
-        * @usage:
-        * case 'TODO_CREATE':
-        *   dispatcher.waitFor([
-        *     PrependedTextStore.dispatchToken,
-        *     YetAnotherStore.dispatchToken
-        *   ]);
-        *	TodoStore.create(PrependedTextStore.getText() + '' + action.text);
-        *   TodoStore.emit('change');
-        *   break;
-        * @return {void}
-        */
+         * Waits for the callbacks specified to be invoked before continuing execution
+         * of the current callback. This method should only be used by a callback in
+         * response to a dispatched payload.
+         *
+         * When `waitFor()` is encountered in a callback, it tells the Dispatcher to invoke the callbacks for the required stores.
+         * After these callbacks complete, the original callback can continue to execute.
+         * Thus the store that is invoking `waitFor()` can depend on the state of another store to inform how it should update its own state.
+         *
+         * A problem arises if we create circular dependencies.
+         * If Store A waits for Store B, and B waits for A, then we could wind up in an endless loop.
+         * The Dispatcher will flag these circular dependencies with console errors.
+         *
+         * @memberOf Dispatcher
+         *
+         * @param {Array} dispatchTokens - an array of dispatcher registry indexes, which we refer to here as each store's dispatchToken
+         * @usage:
+         * case 'TODO_CREATE':
+         *   dispatcher.waitFor([
+         *     PrependedTextStore.dispatchToken,
+         *     YetAnotherStore.dispatchToken
+         *   ]);
+         *	TodoStore.create(PrependedTextStore.getText() + '' + action.text);
+         *   TodoStore.emit('change');
+         *   break;
+         * @return {void}
+         */
         waitFor: function (dispatchTokens) {
             F.assert(F.isArray(dispatchTokens));
 

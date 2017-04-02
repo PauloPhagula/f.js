@@ -33,6 +33,14 @@ describe('Dispatcher', function(){ 'use strict';
         expect(messageHandler.messageCallback).toHaveBeenCalled();
     });
 
+    it('should call the channel subcribers when message is published on the channel only once', function(){
+        expect(dispatcher.publish).not.toThrow();
+        dispatcher.subscribeOnce(MESSAGE_CHANNEL, messageHandler.messageCallback);
+        dispatcher.publish(MESSAGE_CHANNEL, 'payload');
+        dispatcher.publish(MESSAGE_CHANNEL, 'payload');
+        expect(messageHandler.messageCallback).toHaveBeenCalledTimes(1);
+    });
+
     it('should unsubscribe to message', function(){
         expect(dispatcher.unsubscribe).not.toThrow();
         dispatcher.subscribe(MESSAGE_CHANNEL, messageHandler.messageCallback);
