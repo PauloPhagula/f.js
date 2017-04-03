@@ -195,7 +195,7 @@ F.Dispatcher = (function(){ 'use strict';
          * @returns {void}
          */
         subscribeOnce: function(channel, callback, context) {
-            _throwIfDispatching('Dispatcher.subscribe(...)');
+            _throwIfDispatching('Dispatcher.subscribeOnce(...)');
             var self = this;
 
             var handler = function() {
@@ -213,12 +213,12 @@ F.Dispatcher = (function(){ 'use strict';
          * @method
          * @public
          *
-         * @param {String} channel the channel on which to subscribe
+         * @param {String} channel the channel on which to unsubscribe
          * @param {Function} callback the callback to be unsubscribed
          * @returns {void}
          */
         unsubscribe: function (channel, callback) {
-            _throwIfDispatching('Dispatcher.subscribe(...)');
+            _throwIfDispatching('Dispatcher.unsubscribe(...)');
             // Return if there isn't a _callbacks object, or
             // if it doesn't contain an array for the given event
             var messageHandlers;
@@ -233,6 +233,25 @@ F.Dispatcher = (function(){ 'use strict';
                     messageHandlers.splice(i);
                 }
             }
+        },
+
+        /**
+         * Unsubscribes all listeners from the given channel
+         * @memberOf Dispatcher
+         * @method
+         * @public
+         *
+         * @param {String} channel the channel on which to unsubscribe
+         * @returns {void}
+         */
+        unsubscribeAll: function(channel) {
+            _throwIfDispatching('Dispatcher.unsubscribeAll(...)');
+            // Return if there isn't a _callbacks object, or
+            // if it doesn't contain an array for the given event
+            if (!(_callbacks)) return this;
+            if (!(_callbacks[channel])) return this;
+
+            delete _callbacks[channel];
         },
 
         /**

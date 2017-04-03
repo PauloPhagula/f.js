@@ -45,6 +45,17 @@ describe('Dispatcher', function(){ 'use strict';
         expect(dispatcher.unsubscribe).not.toThrow();
         dispatcher.subscribe(MESSAGE_CHANNEL, messageHandler.messageCallback);
         dispatcher.unsubscribe(MESSAGE_CHANNEL, messageHandler.messageCallback);
+        dispatcher.publish(MESSAGE_CHANNEL, 'payload');
+        expect(messageHandler.messageCallback).not.toHaveBeenCalled();
+    });
+
+    it('should unsubscribe all listeners on message', function(){
+        expect(dispatcher.unsubscribeAll).not.toThrow();
+        dispatcher.subscribe(MESSAGE_CHANNEL, messageHandler.messageCallback);
+        dispatcher.subscribe(MESSAGE_CHANNEL, function() {});
+        dispatcher.unsubscribeAll(MESSAGE_CHANNEL);
+        dispatcher.publish(MESSAGE_CHANNEL, 'payload');
+        expect(messageHandler.messageCallback).not.toHaveBeenCalled();
     });
 
     it('should dispatch action payload in action channel', function(){
