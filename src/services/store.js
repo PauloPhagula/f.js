@@ -63,7 +63,6 @@ F.Store = (function(){ "use strict";
 			}
 		};
 
-
 		self._dispatchToken = core.subscribe(ACTION, this._dispatchFlow);
 		this.actions = {};
 		this.init.apply(this, arguments);
@@ -83,7 +82,7 @@ F.Store = (function(){ "use strict";
 		 * @param {Object} options - the stores options
 		 * @returns {void}
 		 */
-		init : function(options) {
+		init: function(options) {
 			throw new Error("Store initialization not done. Override this function");
 		},
 
@@ -98,7 +97,7 @@ F.Store = (function(){ "use strict";
 		 * @param  {Object} action the content of the dispatch
 		 * @return {void}
 		 */
-		_handleDispatch : function(action) {
+		_handleDispatch: function(action) {
 			throw new Error("Store payload handling not done. Override this function");
 		},
 

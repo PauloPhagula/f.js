@@ -7,7 +7,7 @@
 
 /* global F */
 
-F.Module = (function(){ 'use strict';
+F.Module = (function(){
 
 	/**
 	 * Module base class definition.
@@ -41,13 +41,13 @@ F.Module = (function(){ 'use strict';
 	}
 
 	// Attach all inheritable methods to the Module prototype.
-	F.compose(Module.prototype, {
+	F.compose(Module.prototype,
+        /** @lends Module.prototype */
+        {
 		/**
 		* Initializes the module on the specified element with the given options
 		* Start is an empty function by default. Override it with your own implementation;
 		*
-		* @memberof Module
-		* @method
 		* @public
 		* @abstract
 		*
@@ -62,8 +62,6 @@ F.Module = (function(){ 'use strict';
 		/**
 		* Destroys the module by unsubscribing for events and removing it from the DOM
 		* Destroy is an empty function by default. Override it with your own implementation;
-		* @memberof Module
-		* @method
 		* @public
 		* @abstract
 		* @returns {void}
@@ -75,7 +73,6 @@ F.Module = (function(){ 'use strict';
 		/**
 		 * Replaces the `Module`'s DOM element with another and
 		 * redelegates the events associated with the old element to the new.
-		 * @memberof Module
 		 * @param {Element} element the new `Module`'s DOM element
 		 * @returns {void}
 		 */
@@ -88,8 +85,6 @@ F.Module = (function(){ 'use strict';
 		/**
 		 * Delegates events under the DOM element given by the `Core`
 		 * upon initialization.
-		 * @memberof Module
-		 * @method delegateEvents
 		 * @protected
 		 * @final
 		 *
@@ -120,8 +115,6 @@ F.Module = (function(){ 'use strict';
 
         /**
          * Removes the modules's delegated events.
-         * @memberof Module
-         * @method undelegateEvents
          * @protected
          * @final
          *
@@ -157,8 +150,6 @@ F.Module = (function(){ 'use strict';
          * renders the `Module`s template from model data, and updates
          * this.$el with the new HTML.
          *
-         * @memberof Module
-         * @method
          * @protected
          * @abstract
          *

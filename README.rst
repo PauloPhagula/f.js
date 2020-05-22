@@ -22,9 +22,9 @@ f.js
 .. _Box: https://github.com/box
 
 Introduction
-=============
+============
 
-F is a client-side JavaScript library, which provides a base architecture for
+F is a client-side JavaScript architecture, which provides a base structure for
 `Single-Page-Applications <https://en.wikipedia.org/wiki/Single-page_application>`_.
 It promotes modular development by providing an implementation of the
 proven `principles of Scalable JavaScript Application Architecture <https://www.youtube.com/watch?v=mKouqShWI4o>`_
@@ -43,6 +43,14 @@ on the subject.
     implementation made by Box_ in collaboration with Nicholas himself,
     linked in the `Similar Projects`_ section bellow.
 
+Benefits
+========
+
+- Decoupled application architecture
+- Divide & conquer : each module implements only a functionality or a small set of functionalities
+- Modules are independent : change/removal/failure of one does not affect the others
+- Reusability : modules can be reused across a number of different applications
+- Testing : modules can be tested individually both inside and outside of the application
 
 Architecture Components
 =======================
@@ -56,21 +64,22 @@ Core
 The ``Core`` contains the main application object that is the heart of
 the application architecture.
 
-Responsabilities:
+Responsibilities:
 
-- Manages the lifecyle of modules (registers, starts, renders and stops modules)
+- Manages the lifecycle of modules (registers, starts, renders and stops modules)
 - Manages communication between modules using the PubSub/Mediator Pattern
 - Manages the application state using `Anchor Interface Pattern <http://gorgogol.org/en/reading/the-anchor-interface-pattern>`_
 - Manages application wide features/interfaces such as URL anchor
   (hash fragment), feature containers, cookies
 - Manages Errors - Detects, traps, reports and handles errors in the system.
+- Startup, Eventing, lifecycle, Placement
 - Be extensible
 
 
 Services
 --------
 
-``Services`` (refered as ``Extensions`` in the talk) augment the
+``Services`` (referred as ``Extensions`` in the talk) augment the
 capabilities of the core to keep it relevant and useful.
 
 ``Services`` are loaded in your application when it starts. They allow
@@ -97,10 +106,10 @@ actually one of the most important concept for creating maintainable
 apps -- change plugins, implementations, etc. but keep your API stable
 for your ``Modules``.
 
-For each ``Module`` a separate ``Sandbox`` will be created, so that the
-``Module`` can interact with the ``Core``.
+For each ``Module`` a separate ``Sandbox`` instance will be created,
+so that the ``Module`` can interact with the ``Core``.
 
-Responsabilities:
+Responsibilities:
 
 - Permissions manager - acts as a security guard for the modules,
   securing what modules can/can't access meaning it knows what a module
@@ -118,7 +127,7 @@ Module
 As defined by `Nicholas Zakas <http://www.slideshare.net/nzakas/scalable-javascript-application-architecture-2012/15-Any_single_module_should_be>`_,
 a web application ``Module`` is:
 
-    an independent unit of functionallity that is part of the total
+    an independent unit of functionality that is part of the total
     structure of a web application, which consists of HTML + CSS + JavaScript
     and which should be able to live on it's own. It's each module's
     job to create a meaningful user experience.
@@ -149,7 +158,7 @@ various libraries we desire like Riot_, React_, Polymer_ or BackBoneViews_.
 other than that its opened to the user the option to implement them
 using whatever he likes.
 
-Responsabilities:
+Responsibilities:
 
 - Provides a well-scoped capability to the application.
 - Creates and manages its own content (typically HTML and SVG) in a
@@ -223,12 +232,13 @@ Similar Projects
 ================
 
 - `T3 <http://t3js.org>`_
-- `BackBone Aura <https://addyosmani.github.com/aura>`_
+- `Aura <https://github.com/addyosmani/aura>`_
 - `ScalableApp <https://github.com/legalbox/lb_js_scalableApp>`_
 - `ScaleApp <http://scaleapp.org>`_
 - `Hydra.js <http://tcorral.github.com/Hydra.js>`_
-- `Kernel.js <http://alanlindsay.me/kerneljs>`_
+- `Kernel.js <https://github.com/alindsay55661/Kernel.js>`_
 - `terrifically <http://terrifically.org>`_
+- `TinyCore <https://github.com/mawrkus/tinycore>`_
 
 
 Copyright and License

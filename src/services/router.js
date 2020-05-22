@@ -62,7 +62,7 @@ F.Router = (function(Navigo){ "use strict";
 	 * Handles the hash-change which is fired when the fragment identifier of the URL has changed
 	 * @private
 	 *
-	 * @param  {HashChangeEvent} e The hash-change event
+	 * @param {HashChangeEvent} e - The hash-change event
 	 * @returns {void}
 	 */
 	var _handleHashChange = function(e) {
@@ -163,6 +163,7 @@ F.Router = (function(Navigo){ "use strict";
 		 */
 		stop: function() {
             F.undelegateEvent(document, 'click', 'a[href]:not([data-external]):not(.disabled)', _handleURLClick, null);
+            F.undelegateEvent(document, 'hashchange', null, _handleHashChange, null, false);
             document.removeEventListener('hashchange', _handleHashChange, false);
             _router.destroy();
 		},

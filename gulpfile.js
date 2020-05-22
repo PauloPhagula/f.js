@@ -23,7 +23,7 @@ var gulp = require('gulp'),
         HOMEPAGE : _pkg.homepage,
         LICENSE : _pkg.license,
         BUILD_DATE : _now.getUTCFullYear() +'/'+ pad(_now.getUTCMonth() + 1) +'/'+ pad(_now.getUTCDate()) +' '+ pad(_now.getUTCHours()) +':'+ pad(_now.getUTCMinutes())
-    };
+    }
 ;
 
 var FILE_ENCODING = 'utf-8',
@@ -36,8 +36,8 @@ var FILE_ENCODING = 'utf-8',
     DOC_PATH = _path.resolve(__dirname, 'docs');
 
 var onError = function(error){
-  	gutil.beep();
-  	console.log(error);
+    gutil.beep();
+    console.log(error);
 };
 
 function readFile(filePath) {
@@ -61,7 +61,7 @@ function pad(val){
     }
 }
 
-gulp.task('default', ['purge-build', 'build', 'lint', 'test']);
+gulp.task('default', ['purge-build', 'build', 'lint', 'test', 'doc']);
 
 gulp.task('purge-build', function(){
     [DIST_PATH, DIST_MIN_PATH].forEach(function(filePath){
@@ -102,11 +102,13 @@ gulp.task('lint', function(){
         .pipe(eslint.failAfterError());
 });
 
-gulp.task('doc', function(cb){
-    gulp.src(['./README.rst', DIST_PATH], {read: false})
-        .pipe(jsdoc(cb));
+gulp.task('doc', function(done){
+    gulp.src(['./README.rst', 'src/*.js'], {read: false})
+        .pipe(jsdoc(done));
 });
 
 gulp.task('test', function(done){
-    return sh.exec("./node_modules/.bin/karma start karma.conf.js --single-run", done);
+    sh.exec("./node_modules/.bin/karma start karma.conf.js --single-run");
+    done();
 });
+

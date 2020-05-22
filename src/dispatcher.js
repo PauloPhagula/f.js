@@ -44,6 +44,7 @@ F.Dispatcher = (function(){ 'use strict';
 
     /**
      * @class Dispatcher
+     * @fires Dispatcher#ACTION
      */
     function Dispatcher() {}
 
@@ -70,9 +71,9 @@ F.Dispatcher = (function(){ 'use strict';
         _pendingPayload = null,
 
         /**
-         * Utility function to throw errors when attemping other operations
+         * Utility function to throw errors when attempting other operations
          * during ongoing `dispatch`.
-         * @memberOf Dispatcher
+
          *
          * @param  {String} methodName the name of the method attempted
          *                             to run
@@ -87,7 +88,7 @@ F.Dispatcher = (function(){ 'use strict';
 
         /**
          * Setup booking used for dispatching.
-         * @memberOf Dispatcher
+
          * @private
          *
          * @param {object} payload the dispatch payload
@@ -112,7 +113,7 @@ F.Dispatcher = (function(){ 'use strict';
 
         /**
          * Clear booking used for dispatching.
-         * @memberOf Dispatcher
+
          * @private
          * @returns {void}
          */
@@ -141,7 +142,7 @@ F.Dispatcher = (function(){ 'use strict';
 
         /**
          * Call the callback stored with the given id. Also do some internal
-         * bookkeping.
+         * bookkeeping.
          * @private
          * @param {String} id - the dispatch token ID
          * @returns {void}
@@ -154,17 +155,18 @@ F.Dispatcher = (function(){ 'use strict';
             _isHandled[id] = true;
         };
 
-    F.compose(Dispatcher.prototype, {
+    F.compose(Dispatcher.prototype,
+        /** @lends Dispatcher.prototype */
+        {
         /**
          * Registers a callback to be called when an event is published.
-         * returns a token that can be used with `waitfFor()`.
-         * @memberOf Dispatcher
+         * returns a token that can be used with `waitFor()`.
          * @method
          * @public
          *
          * @param {String} channel - event / channel / action
          * @param {Function} callback - the callback to be registered
-         * @param {Object} context - the object under whiches context the callback is to be called
+         * @param {Object} context - the context on which the callback is to be called
          * @returns {string} the subscription registration token
          */
         subscribe: function (channel, callback, context) {
@@ -185,13 +187,12 @@ F.Dispatcher = (function(){ 'use strict';
 
         /**
          * Registers a once-off callback to be called when an event is published.
-         * @memberOf Dispatcher
          * @method
          * @public
          *
          * @param {String} channel - event / channel / action
          * @param {Function} callback - the callback to be registered
-         * @param {Object} context - the object under whiches context the callback is to be called
+         * @param {Object} context - the context on which the callback is to be called
          * @returns {void}
          */
         subscribeOnce: function(channel, callback, context) {
@@ -209,7 +210,6 @@ F.Dispatcher = (function(){ 'use strict';
 
         /**
          * De-registers a callback for an event.
-         * @memberOf Dispatcher
          * @method
          * @public
          *
@@ -229,7 +229,7 @@ F.Dispatcher = (function(){ 'use strict';
             for (var i = 0; i < messageHandlers.length; i++) {
                 var handler = messageHandlers[i];
                 // http://stackoverflow.com/questions/9817629/how-do-i-compare-2-functions-in-javascript#9817699
-                if (''+handler.callback == ''+callback) {
+                if ('' + handler.callback === '' + callback) {
                     messageHandlers.splice(i);
                 }
             }
@@ -237,7 +237,6 @@ F.Dispatcher = (function(){ 'use strict';
 
         /**
          * Unsubscribes all listeners from the given channel
-         * @memberOf Dispatcher
          * @method
          * @public
          *
@@ -256,11 +255,10 @@ F.Dispatcher = (function(){ 'use strict';
 
         /**
          * Publishes an event and calls back all subscribers to that event.
-         * @memberOf Dispatcher
          * @method
          * @public
          *
-         * @param {String} eventName - the event / channel / action name
+         * @param {String} channel - the event / channel / action name
          * @param {Object} data - the data to be published for the event / channel / action
          * @returns {void}
          */
@@ -291,7 +289,7 @@ F.Dispatcher = (function(){ 'use strict';
                             continue;
                         }
 
-                        if (typeof handler.callback != 'function') {
+                        if (typeof handler.callback !== 'function') {
                             continue;
                         }
 
@@ -325,7 +323,6 @@ F.Dispatcher = (function(){ 'use strict';
 
         /**
          * Helper method to publish an action.
-         * @memberOf Dispatcher
          * @param {Object} action - the action to be published
          * @param {string} action.type - the action type
          * @param {Object} action.payload - the action data
@@ -356,7 +353,7 @@ F.Dispatcher = (function(){ 'use strict';
          * If Store A waits for Store B, and B waits for A, then we could wind up in an endless loop.
          * The Dispatcher will flag these circular dependencies with console errors.
          *
-         * @memberOf Dispatcher
+
          *
          * @param {Array} dispatchTokens - an array of dispatcher registry indexes, which we refer to here as each store's dispatchToken
          * @usage:
@@ -401,12 +398,24 @@ F.Dispatcher = (function(){ 'use strict';
          * Is this Dispatcher currently dispatching.
          * @returns {boolean} true if dispatching false otherwise.
          */
-        isDispatching: function(){
+        isDispatching: function() {
             return _isDispatching;
-        }
+        },
+
+        // wreqr
+        // execute(command)
+        // request(query)
     });
 
     Dispatcher.ACTION = ACTION;
 
     return Dispatcher;
 }());
+
+/**
+ * Action Event.
+ * @event Dispatcher.ACTION
+ * @type {object}
+ * @property {string} type - the action type
+ * @property {object} payload - the action data
+ */

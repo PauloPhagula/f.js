@@ -1,3 +1,4 @@
+/* global loggerSvcFactory, calculatorSvcFactory, SampleModule */
 describe('Core', function(){ 'use strict';
     var core;
 

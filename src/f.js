@@ -11,7 +11,7 @@
 
     /**
      * Current version of the library.
-     * Must be keept in sync with `package.json` and `bower.json`.
+     * Must be kept in sync with `package.json` and `bower.json`.
      * @type {String}
      */
     F.VERSION = '::VERSION_NUMBER::';
@@ -45,10 +45,9 @@
 
     // Polyfill Object.assign
     // taken from: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
-    if (typeof Object.assign != 'function') {
+    if (typeof Object.assign !== 'function') {
         Object.assign = function(target, varArgs) { // .length of function is 2
-            'use strict';
-            if (target == null) { // TypeError if undefined or null
+            if (target === null) { // TypeError if undefined or null
                 throw new TypeError('Cannot convert undefined or null to object');
             }
 
@@ -57,7 +56,7 @@
             for (var index = 1; index < arguments.length; index++) {
                 var nextSource = arguments[index];
 
-                if (nextSource != null) { // Skip over if undefined or null
+                if (nextSource !== null) { // Skip over if undefined or null
                     for (var nextKey in nextSource) {
                         // Avoid bugs when hasOwnProperty is shadowed
                         if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
@@ -74,7 +73,7 @@
     // ---
 
     // Composes objects by combining them into a new one
-    F.compose = Object.assign;
+    F.compose = F.merge = Object.assign;
 
     /**
      * Helper function to correctly set up the prototype chain for subclasses.
@@ -126,70 +125,104 @@
 
     /**
      * Performs event delegation setting.
-     * @param  {HTMLElement} element the element we want to delegate events for
-     * @param  {string} event    the type of event we want to delegate
-     * @param  {string} selector a css selector
-     * @param  {Function} handler  the handler function
-     * @param  {Object} context  the context under which the handler fn
-     *                           will be called
-     * @param {boolean} useCapture indicates that events of this type will be
-     *                           dispatched to the registered listener before
-     *                           being dispatched to any EventTarget beneath
-     *                           it in the DOM tree
+     * @param {object} spec - event delegation specification
+     * @param {EventTarget} spec.element the element we want to delegate events for
+     * @param {string} spec.event the type of event we want to delegate
+     * @param {Function} spec.handler the handler function
+     * @param {boolean} [spec.useCapture = false] indicates that events of this type will be dispatched to the registered listener before being dispatched to any EventTarget beneath it in the DOM tree
+     * @param {string} [spec.selector] a css selector
+     * @param {Object} [spec.context=null] the context under which the handler fn will be called
+     *
      * @return {void}
      */
-    F.delegateEvent = function(element, event, selector, handler, context, useCapture) {
+    F.delegateEvent = function(spec) {
 
-        var listener =  function(e){
-            if (typeof selector === "undefined" || selector === null) {
-                return handler.call(context || null, e);
-            } else if (e.target && e.target.matches(selector)) {
+        var defaults = {
+            element: document,
+            event: null,
+            selector: null,
+            handler: null,
+            context: null,
+            useCapture: false,
+        }
+
+        var options = F.compose(defaults, spec);
+
+        var listener =  function(e) {
+            if (typeof options.selector === "undefined" || options.selector === null) {
+                return options.handler.call(options.context || null, e);
+            } else if (e.target && e.target.matches(options.selector)) {
                 // console.log('event: ' + eventName + ', selector: ' + selector + ', handler: ' + handler + ', matches: ' + e.target.matches(selector));
-                return handler.call(context || null, e);
+                return options.handler.call(options.context || null, e);
             }
         };
 
-        useCapture = useCapture || false;
-        element.addEventListener(event, listener, useCapture);
+        options.useCapture = options.useCapture || false;
+
+        if (options.element.addEventListener) {
+            options.element.addEventListener(options.event, listener, options.useCapture);
+        } else {
+            if (options.element.attachEvent) {
+                options.element.attachEvent('on' + options.event, listener);
+            } else {
+                options.element[options.event] = listener;
+            }
+        }
     };
 
     /**
      * Performs event delegation unsetting.
-     * @param  {HTMLElement} element the element we want to undelegate events for
-     * @param  {string} event    the type of event we want to undelegate
-     * @param  {string} selector a css selector
-     * @param  {Function} handler  the handler function
-     * @param  {Object} context  the context under which the handler fn
-     *                           will be called
-     * @param {boolean} useCapture indicates that events of this type will be
-     *                             dispatched to the registered listener before
-     *                             being dispatched to any EventTarget beneath
-     *                             it in the DOM tree
+     * @param {object} spec - event delegation specification
+     * @param {EventTarget} spec.element the element we want to undelegate events for
+     * @param {string} spec.event the type of event we want to undelegate
+     * @param {string} [spec.selector] a css selector
+     * @param {Function} spec.handler the handler function
+     * @param {Object} [spec.context=null] the context under which the handler fn will be called
+     * @param {boolean} [spec.useCapture=false] indicates that events of this type will be dispatched to the registered listener before being dispatched to any EventTarget beneath it in the DOM tree
      * @return {void}
      */
-    F.undelegateEvent = function(element, event, selector, handler, context, useCapture) {
+    F.undelegateEvent = function(spec) {
+
+        var defaults = {
+            element: document,
+            event: null,
+            selector: null,
+            handler: null,
+            context: null,
+            useCapture: false,
+        }
+
+        var options = F.compose(defaults, spec);
 
         var listener = function(e) {
-            if (typeof selector === "undefined" || selector === null) {
-                return handler.call(context || null, e);
-            } else if (e.target && e.target.matches(selector)) {
+            if (typeof options.selector === "undefined" || options.selector === null) {
+                return options.handler.call(options.context || null, e);
+            } else if (e.target && e.target.matches(options.selector)) {
                 // console.log('event: ' + eventName + ', selector: ' + selector + ', handler: ' + handler + ', matches: ' + e.target.matches(selector));
-                return handler.call(context || null, e);
+                return options.handler.call(options.context || null, e);
             }
         };
-        useCapture = useCapture || false;
 
-        element.removeEventListener(event, listener, useCapture);
+        options.useCapture = options.useCapture || false;
+
+        if (options.element.removeEventListener) {
+            options.element.removeEventListener(options.event, listener, options.useCapture);
+        } else {
+            if (options.element.detachEvent) {
+                options.element.detachEvent('on' + options.event, listener);
+            } else {
+                if (options.element[options.event] === listener) {
+                    options.element.splice(options.event, 1);
+                }
+            }
+        }
     };
-
-    // Assert
-    // ---
 
     /**
      * Assert that a given condition is satisfied, immediately raising an
      * error when its not.
-     * @param {?} expression - the expression whose result value is to be checked for truthness
-     * @param {String} message - the message to be contained in the raised error
+     * @param {?} expression - the expression whose result value is to be checked for truthiness
+     * @param {String} [message] - the message to be contained in the raised error
      * @return {void}
      */
     F.assert = function(expression, message) {
@@ -208,14 +241,8 @@
      * Do nothing.
      * @return {void}
      */
-    F.noop = function(){
-
-    }
+    F.noop = function(){};
 
     F.isArray = function(variable) {
-        if( Object.prototype.toString.call( variable ) === '[object Array]' ) {
-           return true;
-        }
-
-        return false;
-    }
+        return Object.prototype.toString.call(variable) === '[object Array]';
+    };

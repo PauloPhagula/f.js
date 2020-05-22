@@ -3,10 +3,7 @@
  * application architecture.
  */
 
-/**
- * @memberof F
- */
-F.Core = (function(injector) { 'use strict';
+F.Core = (function(injector) {
 
     F.assert(injector !== undefined);
 
@@ -28,6 +25,11 @@ F.Core = (function(injector) { 'use strict';
 
         // Global error handler
         _errorHandler
+
+        // An array of the default events triggered by the
+        // application during its lifecycle
+        // APP_EVENTS = ['run', 'unload', 'lookup-route', 'run-route', 'route-found', 'event-context-before', 'event-context-after', 'changed', 'error', 'check-form-submission', 'redirect', 'location-changed']
+
     ;
 
     /**
@@ -58,29 +60,37 @@ F.Core = (function(injector) { 'use strict';
 
 	/**
 	 * default global error event handler.
-	 * @param  {string} message      error message
-	 * @param  {string} file         URL of the script where the error was raised
-	 * @param  {number} lineNumber   Line number where error was raised
-	 * @param  {number} columnNumber Column number for the line where the error occurred
-	 * @param  {Error} exception     the error object
-	 * @return {boolean}             When the function returns true, this prevents the firing of the default event handler.
+	 * @param {string} message error message
+	 * @param {string} file URL of the script where the error was raised
+	 * @param {number} line Line number where error was raised
+	 * @param {number} column Column number for the line where the error occurred
+	 * @param {Error} exception the error object
+	 * @return {boolean} When the function returns true, this prevents the firing of the default event handler.
 	 */
-	function defaultErrorHandler(message, file, lineNumber, columnNumber, exception) {
-         exception = exception || {};
+	function defaultErrorHandler(message, file, line, column, exception) {
+        exception = exception || {};
 
-		if (_config.debug)
-			return false;
+		if (_config.debug) {
+            return false;
+        }
 
 		var errorData = {
             message: message,
             file: file,
-            line: lineNumber,
-            column: columnNumber,
+            line: line,
+            column: column,
             error: {
                 name: 'name' in exception ? exception.name : '',
                 message: 'message' in exception ? exception.message : '',
                 stack: 'stack' in exception ? exception.stack: ''
-            }
+            },
+            // always send ISO date around. And display in local time.
+            thrown_at: (new Date()).toISOString(),
+            URL: location.href,
+            browser: navigator.userAgent,
+            // Add these on a per basis
+            // username: 'not-loggedin'
+            // app version: 'unknown'
         };
 
         signalError(errorData);
@@ -118,8 +128,8 @@ F.Core = (function(injector) { 'use strict';
 	function productionize(object, objectName) {
 		var name,
         method,
-		wrap = function(name, method){
-				return function(){
+		wrap = function(name, method) {
+				return function() {
 					var errorPrefix = objectName + '.' + name + '() - ';
 					try {
 						return method.apply(this, arguments);
@@ -133,9 +143,9 @@ F.Core = (function(injector) { 'use strict';
 				};
 			};
 
-		for (name in object){
+		for (name in object) {
 			method = object[name];
-			if (typeof method === "function"){
+			if (typeof method === "function") {
 				object[name] = wrap(name, method);
 			}
 		}
@@ -169,21 +179,21 @@ F.Core = (function(injector) { 'use strict';
         _errorHandler = defaultErrorHandler;
     }
 
-    F.compose(Core.prototype, {
+    F.compose(Core.prototype,
+        /** @lends Core.prototype */
+        {
 
         // App lifecycle
 		// ---
 
 		/**
 		 * Initializes the application.
-		 * @memberOf Core
 		 * @param {Object} options the configuration object for the core.
-		 * @return {void}
+		 * @return {Core} this core object
 		 */
 		init: function(options) {
 			_config = F.compose({}, _config, options);
 
-			// Setup global error tracking before anything else runs.
 			window.addEventListener('error', _errorHandler);
 
 			this.startAll();
@@ -196,8 +206,7 @@ F.Core = (function(injector) { 'use strict';
 
 		/**
 		 * Stops all modules and clears all saved state.
-		 * @memberOf Core
-		 * @returns {void}
+		 * @returns {Core} this core object
 		 */
 		destroy: function() {
 			this.stopAll();
@@ -213,12 +222,11 @@ F.Core = (function(injector) { 'use strict';
 
 		/**
 		 * Method used to add services on the core.
-		 * @memberOf Core
-		 * @param  {string}   serviceName  unique service name. This name will be used when injecting the service
-		 * @param  {Array}    dependencies   list of dependencies this service relies on. Generally these are other services
-		 * @param  {function} factory        the service factory function
-		 * @param  {object}   options        options for the service initialization
-		 * @return {void}
+		 * @param {string} serviceName unique service name. This name will be used when injecting the service
+		 * @param {Array} dependencies list of dependencies this service relies on. Generally these are other services
+		 * @param {function} factory the service factory function
+		 * @param {object} options options for the service initialization
+		 * @return {Core} The current core object
 		 *
 		 * @example
 		 * var core = new F.Core();
@@ -274,13 +282,11 @@ F.Core = (function(injector) { 'use strict';
 
 		/**
 		 * Method used to register modules on the core.
-		 * @memberOf Core
-		 * @param  {string}   moduleName  unique module identifier
-		 * @param  {Array}    services  List of services this module relies on.
-		 *                              These are the only services the module will be allowed to use.
-		 * @param  {function} factory     the module's factory function
-		 * @param  {object}   options     options for the module initialization
-		 * @return {void}
+		 * @param {string} moduleName unique module identifier
+		 * @param {Array} services List of services this module relies on. These are the only services the module will be allowed to use.
+		 * @param {function} factory the module's factory function
+		 * @param {object} options options for the module initialization
+		 * @return {Core} this core instance
 		 */
 		registerModule: function(moduleName, services, factory, options) {
             F.assert(moduleName && typeof moduleName === 'string' && moduleName.length > 0, 'moduleName should be a non-zero length string');
@@ -289,7 +295,8 @@ F.Core = (function(injector) { 'use strict';
             F.assert(options && typeof options === 'object', 'options should be an object');
 
 			if (_modules.hasOwnProperty(moduleName)) {
-				return signalError(new Error("Module with given name has already been registered. Mod name: " + moduleName));
+                signalError(new Error("Module with given name has already been registered. Mod name: " + moduleName));
+                return this;
 			}
 
 			_modules[moduleName] = {
@@ -307,16 +314,16 @@ F.Core = (function(injector) { 'use strict';
 
 		/**
 		 * Starts a given module on a DOM element.
-		 * @memberOf Core
-		 * @param  {string} moduleName unique module identifier
-		 * @param  {Element} element    the DOM element to which the module will be tied
-		 * @return {void}
+		 * @param {string} moduleName unique module identifier
+		 * @param {Element} element the DOM element to which the module will be tied
+		 * @return {Core} this core object
 		 */
 		start: function(moduleName, element) {
             F.assert(moduleName && typeof moduleName === 'string' && moduleName.length > 0, 'moduleName should be a non-zero length string');
 
 			if (!_modules.hasOwnProperty(moduleName)) {
-				return signalError(new Error("Trying to start non-registered module: " + moduleName));
+				signalError(new Error("Trying to start non-registered module: " + moduleName));
+                return this;
 			}
 
 			element = element || document.querySelector('[data-module="' + moduleName + '"]');
@@ -336,11 +343,14 @@ F.Core = (function(injector) { 'use strict';
 			for (i = 0; i < module.services.length; i++) {
 				var svcName = module.services[i];
 
-				if (_services.hasOwnProperty(svcName))
-					services[svcName] = _services[svcName];
-				else
-					return signalError(new Error("Module requires an unregistered services: " + svcName));
-			}
+				if (_services.hasOwnProperty(svcName)) {
+                    services[svcName] = _services[svcName];
+                }
+				else {
+                    signalError(new Error("Module requires an unregistered services: " + svcName));
+                    return this;
+                }
+            }
 
 			// Prevent errors from showing the browser, fire event instead
 			if (!_config.debug) {
@@ -354,9 +364,8 @@ F.Core = (function(injector) { 'use strict';
 
 		/**
 		 * Stops a given module.
-		 * @memberOf Core
-		 * @param  {string} moduleName unique module identifier
-		 * @return {void}
+		 * @param {string} moduleName unique module identifier
+		 * @return {Core} this core object
 		 */
 		stop: function(moduleName) {
             F.assert(moduleName && typeof moduleName === 'string' && moduleName.length > 0, 'moduleName should be a non-zero length string');
@@ -364,7 +373,8 @@ F.Core = (function(injector) { 'use strict';
 			var data = _modules[moduleName];
 
 			if (!(data && data.instance)) {
-				return signalError(new Error('Unable to stop module: ' + moduleName));
+                signalError(new Error('Unable to stop module: ' + moduleName));
+                return this;
 			}
 
 			data.instance.stop();
@@ -375,9 +385,8 @@ F.Core = (function(injector) { 'use strict';
 
 		/**
 		 * Restarts the given module.
-		 * @memberOf Core
-		 * @param  {string} moduleName unique module identifier
-		 * @return {void}
+		 * @param {string} moduleName unique module identifier
+		 * @return {Core} this core object
 		 */
 		restart: function(moduleName) {
             F.assert(moduleName && typeof moduleName === 'string' && moduleName.length > 0, 'moduleName should be a non-zero length string.');
@@ -390,9 +399,8 @@ F.Core = (function(injector) { 'use strict';
 
 		/**
 		 * Starts all registered modules.
-		 * @memberOf Core
          * @param {Array} modules list of modules to be started
-		 * @return {void}
+		 * @returns {Core} this core object
 		 */
 		startAll: function(modules) {
 			for (var moduleName in (modules || _modules)) {
@@ -406,9 +414,8 @@ F.Core = (function(injector) { 'use strict';
 
 		/**
 		 * Stops all registered modules.
-		 * @memberOf Core
          * @param {Array} modules list of modules to be stopped
-		 * @return {void}
+		 * @returns {Core} this core object
 		 */
 		stopAll: function(modules) {
 			for (var moduleName in (modules || _modules)) {
@@ -427,6 +434,12 @@ F.Core = (function(injector) { 'use strict';
             _dispatcher.subscribe.apply(_dispatcher, arguments);
             return this;
         },
+
+        subscribeOnce: function() {
+            _dispatcher.subscribeOnce.apply(_dispatcher, arguments);
+            return this;
+        },
+
 
         unsubscribe: function() {
             _dispatcher.unsubscribe.apply(_dispatcher, arguments);
@@ -454,45 +467,56 @@ F.Core = (function(injector) { 'use strict';
 
         /**
          * The router for anchor management
-         * @memberOf Core
          * @todo  don't expose the router. Proxy its methods instead.
          * @type {F.Router}
          */
         // router: router,
+
+        // AJAX
+        // ---
+
+
+        ajax: function(url, options) {
+
+        },
 
 		// Config
 		// ---
 
 		/**
 		 * Returns configuration data
-		 * @memberOf Core
-		 * @param  {string} name the desired configuration parameter
-		 * @return {*}           config value or the entire JSON config object
-		 *                       if not name is specified (null if neither is found)
+		 * @param {string} name the desired configuration parameter
+		 * @return {*} config value or the entire JSON config object if name is not specified (null if neither is found)
 		 */
 		getConfig: function(name) {
-			if (typeof name === 'undefined')
-				return _config;
+			if (typeof name === 'undefined') {
+                return _config;
+            }
 
-			else if (name in _config)
-				return _config[name];
-			else
-				return null;
+			if (name in _config) {
+                return _config[name];
+            }
+
+            return null;
 		},
 
 		/**
 		 * Sets the configuration data
-		 * @memberOf Core
 		 * @param {Object} config the configuration to merged to the existing configuration
-		 * @return {void}
+		 * @return {F.Core} this core object
 		 * @throws {Error} If core is already initialized.
+         * @returns {Core} this core object
 		 */
 		setConfig: function(config) {
-            if (typeof config !== 'object')
-                return signalError(new Error('configuration should be an object'));
+            if (typeof config !== 'object') {
+                signalError(new Error('configuration should be an object'));
+                return this;
+            }
 
-			if (_initialized)
-				return signalError(new Error('Cannot set configuration after application is initialized'));
+			if (_initialized) {
+                signalError(new Error('Cannot set configuration after application is initialized'));
+                return this;
+            }
 
 			_config = F.compose({}, _config, config);
 
@@ -504,10 +528,8 @@ F.Core = (function(injector) { 'use strict';
 
 		/**
 		 * Checks if the `Core` has a `Service` with the given name registered.
-		 * @memberOf Core
-		 * @param  {string}  serviceName the name of the service to be checked
-		 * @return {Boolean}             true if the service is registered
-		 *                               false otherwise
+		 * @param {string} serviceName the name of the service to be checked
+		 * @return {Boolean} true if the service is registered, false otherwise
 		 */
 		hasService: function(serviceName) {
             F.assert(serviceName && typeof serviceName === 'string' && serviceName.length > 0, 'serviceName should be a non-zero length string');
@@ -517,7 +539,6 @@ F.Core = (function(injector) { 'use strict';
 		/**
 		 * Convenience method used by `Module`s to get dynamically get
 		 * `Service`s during runtime, instead of using DI
-		 * @memberOf Core
 		 * @param  {string} serviceName the name of the service we want
 		 * @return {Object}             the instance of service we're trying to get.
 		 * @throws {Error} If no service with given name is registed
@@ -542,12 +563,11 @@ F.Core = (function(injector) { 'use strict';
 		/**
 		 * Signals that an error has occurred. If in development mode, an error
 		 * is thrown. If in production mode, an event is fired.
-		 * @memberOf Core
 		 * @param {Error} exception - The exception object to use.
-		 * @returns {void}
+		 * @returns {Core} this core object
 		 */
 		reportError: function(exception) {
-            signalError(exception)
+            signalError(exception);
             return this;
         }
 	});
@@ -555,3 +575,4 @@ F.Core = (function(injector) { 'use strict';
     Core.extend = F.extend;
 	return Core;
 }(F.injector));
+

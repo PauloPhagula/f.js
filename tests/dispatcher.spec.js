@@ -65,7 +65,6 @@ describe('Dispatcher', function(){ 'use strict';
     });
 
     it('should remain in a consistent state after a failed dispatch', function(){
-
         function setupWeirdCondition() {
             dispatcher.subscribe(ACTION_CHANNEL, messageHandler.actionCallback);
             dispatcher.subscribe(ACTION_CHANNEL, function(action){
@@ -84,7 +83,6 @@ describe('Dispatcher', function(){ 'use strict';
     });
 
     it('should throw on self-circular dependencies', function(){
-
         function setupSelfCircularDependencies() {
             var firstDispatchToken = dispatcher.subscribe(ACTION_CHANNEL, function(action) {
                 dispatcher.waitFor(firstDispatchToken);
@@ -97,7 +95,6 @@ describe('Dispatcher', function(){ 'use strict';
     });
 
     it('should throw on multi-circular dependencies', function(){
-
         function setupMultiCircularDependencies() {
             var firstDispatchToken = dispatcher.subscribe(ACTION_CHANNEL, function(action) {
                 dispatcher.waitFor(secondDispatchToken);
