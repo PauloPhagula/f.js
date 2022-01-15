@@ -41,7 +41,7 @@
     "karma-firefox-launcher": "^1.0.1",
     "karma-jasmine": "^1.1.0",
     "plumber": "^0.4.8",
-    "shelljs": "^0.5.3"
+    "shelljs": "^0.8.5"
   },
   "private": true
 }
